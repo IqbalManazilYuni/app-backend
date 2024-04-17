@@ -14,11 +14,11 @@ const app = express();
 
 const sequelize = new Sequelize({
   dialect: 'mysql',
-  host: 'bfrl0tflajs99qxjy82q-mysql.services.clever-cloud.com',
-  port: 3306,
-  username: 'umjokrsq2nnxdyke',
-  password: 'Fs1a3Cp6uZwinKEGLCLT',
-  database: 'bfrl0tflajs99qxjy82q'
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DBNAME
 });
 
 try {
