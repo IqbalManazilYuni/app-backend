@@ -87,13 +87,6 @@ const Users = db.define('User', {
       notEmpty: true,
     }
   },
-  token: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      notEmpty: true,
-    }
-  }
 })
 
 export default Users;
