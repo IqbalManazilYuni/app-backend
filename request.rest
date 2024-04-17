@@ -1,0 +1,19 @@
+
+POST http://10.44.11.241:3000/register
+Content-Type: application/json
+
+{
+  "nama": "Joe Doeasd",
+  "nim": "142134523",
+  "no_lab": "LBI_VI_03_SI",
+  "password": "123456",
+  "role": "asisten",
+  "nomor_hp": "0234567892",
+  "lab": "Lab Komputer",
+  "tempat_lahir": "Jakarta",
+  "tanggal_lahir": "2000-01-01",
+  "gender": "Laki-laki",
+  "alamat": "Jalan Jenderal Sudirman No. 123"
+}
+###
+GET http://10.44.11.241:3000/
