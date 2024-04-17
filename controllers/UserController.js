@@ -137,8 +137,9 @@ export const LoginUser = async (req, res) => {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: '1h' });
-        const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
-        user.token = encryptedToken.slice(0, 16);
+        const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key').slice(0, 16);
+        console.log(encryptedToken);
+        user.token = encryptedToken;
         await user.save();
 
         return res.status(200).json({ message: "Login berhasil.", token: encryptedToken });
