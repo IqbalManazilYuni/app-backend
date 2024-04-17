@@ -114,10 +114,10 @@ export const GetUserByToken = async (req, res) => {
     }
 };
 const encryptToken = (token, secretKey) => {
-    const key = Buffer.alloc(32);
+    const key = Buffer.alloc(16);
     const providedKeyBuffer = Buffer.from(secretKey, 'utf8');
     providedKeyBuffer.copy(key, 0, 0, Math.min(providedKeyBuffer.length, key.length));
-    const iv = crypto.randomBytes(16);
+    const iv = crypto.randomBytes(8);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(token, 'utf8', 'hex');
     encrypted += cipher.final('hex');
