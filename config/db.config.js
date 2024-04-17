@@ -5,7 +5,7 @@ dotenv.config(); // Memuat variabel lingkungan dari file .env
 
 const db = new Sequelize(process.env.DB_DBNAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
   host: process.env.DB_HOST,
-  dialect: 'mysql'
+  // dialect: 'mysql'
 });
 
 export default db;
