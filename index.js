@@ -11,16 +11,16 @@ const app = express();
 //   await db.sync();
 // })();
 // Menggunakan dotenv untuk konfigurasi
+
 const sequelize = new Sequelize({
   dialect: 'mysql',
   host: 'bfrl0tflajs99qxjy82q-mysql.services.clever-cloud.com',
   port: 3306,
   username: 'umjokrsq2nnxdyke',
-  password: 'Fs1a3Cp6uZwinKEGLCLT', // Ganti dengan password MySQL Anda
+  password: 'Fs1a3Cp6uZwinKEGLCLT',
   database: 'bfrl0tflajs99qxjy82q'
 });
 
-// Cek koneksi ke database
 try {
   await sequelize.authenticate();
   console.log('Connection to the database has been established successfully.');
@@ -28,11 +28,12 @@ try {
   console.error('Unable to connect to the database:', error);
 }
 
-// Definisikan model-model Sequelize di sini (jika diperlukan)
-// Contoh:
-// const User = sequelize.define('User', { /* definisi model */ });
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow access from localhost:3000
+  credentials: true, // Allow including cookies from frontend
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(UserRoutes);
 
