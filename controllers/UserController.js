@@ -114,10 +114,10 @@ export const GetUserByToken = async (req, res) => {
     }
 };
 const encryptToken = (token, secretKey) => {
-    const key = Buffer.alloc(16);
+    const key = Buffer.alloc(32);
     const providedKeyBuffer = Buffer.from(secretKey, 'utf8');
     providedKeyBuffer.copy(key, 0, 0, Math.min(providedKeyBuffer.length, key.length));
-    const iv = crypto.randomBytes(8);
+    const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(token, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -138,7 +138,7 @@ export const LoginUser = async (req, res) => {
         }
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: '1h' });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
-        user.token = encryptedToken;
+        user.token = encryptedToken.slice(0, 16);
         await user.save();
 
         return res.status(200).json({ message: "Login berhasil.", token: encryptedToken });
