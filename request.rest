@@ -1,10 +1,10 @@
 
-POST http://localhost:3001/login
+POST http://localhost:3001/add-lab
 Content-Type: application/json
 
 {
-  "nim":"2011522007",
-  "password":"Ayam"
+  "nama_Labor":"LEA",
+  "deskripsi":"Laboratorium of Enterprise Application (LEA) adalah salah satu labor yang ada pada jurusan Sistem Informasi Universtas Andalas (Unand) yang bergerak dalam bidang penelitian dan penggunaan teknologi dan layanan sistem informasi pada organisasi atau perusahaan."
 }
 ###
 GET http://10.44.11.241:3000/
@@ -16,3 +16,11 @@ Content-Type: application/json
 {
   "token":"700a95db0d7e99db45c6cb20d889c89b25153d450df11bda2949977a6686af6f19b30e01b38571013e2d7fafdc809c85b56c41340c2670ea1d82611921da8eee02479cf839fe9eb70ff6f5e1de6cd8c4b738b2d549d75c6ec716e49bd34c733c833a13d7c70fa22cb386bd3c1dc4457439b6bbeab451a9c4b277c7322b5d677c9d9745a4f1d6ba7bd7bfac37225498a2574573a1012d9d9285e88db5058e95124c045a21b00fe05eb44b7de5d45c23ce"
 }
+###
+DELETE  http://localhost:3001/delete-lab/
+Content-Type: application/json
+
+{
+  "id":"75afa762-e01f-44b5-8f97-426fa8965b3e"
+}
+
