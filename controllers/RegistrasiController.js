@@ -1,8 +1,6 @@
 import argon2 from 'argon2';
 import Pengguna from '../models/PenggunaModels.js';
 import Labor from '../models/LaborModels.js';
-import { getStorage } from 'firebase/storage';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export const RegisterUser = async (req, res) => {
     const {
@@ -133,56 +131,5 @@ export const EditUserRegistrasi = async (req, res) => {
     } catch (error) {
         console.error('Error updating user:', error);
         res.status(500).json({ message: 'Failed to update user' });
-    }
-};
-
-async function uploadImage(file, quantity) {
-    const storageFB = getStorage();
-
-    await signInWithEmailAndPassword(auth, process.env.FIREBASE_USER, process.env.FIREBASE_AUTH);
-
-    if (quantity === 'single') {
-        const dateTime = Date.now();
-        const fileName = `file/${dateTime}`;
-        const storageRef = ref(storageFB, fileName);
-        const metadata = {
-            contentType: file.type,
-        };
-        await uploadBytesResumable(storageRef, file.buffer, metadata);
-        return fileName;
-    }
-
-    // Assuming 'quantity' is either 'single' or 'multiple' based on your original code
-    for (let i = 0; i < file.file.length; i++) {
-        const dateTime = Date.now();
-        const fileName = `file/${dateTime}`;
-        const storageRef = ref(storageFB, fileName);
-        const metadata = {
-            contentType: file.file[i].mimetype,
-        };
-
-        // Assuming 'Image' is your mongoose model for saving image URLs
-        const saveImage = await Image.create({ imageUrl: fileName });
-        file.item.imageId.push({ _id: saveImage._id });
-        await file.item.save();
-
-        await uploadBytesResumable(storageRef, file.file[i].buffer, metadata);
-    }
-}
-
-export const uploadPdf = async (req, res) => {
-    const file = {
-        type: req.file.mimetype,
-        buffer: req.file.buffer,
-    };
-    try {
-        const buildFile = await uploadImage(file, 'file');
-        res.send({
-            status: "success",
-            file: buildFile,
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ error: 'Internal Server Error' });
     }
 };
