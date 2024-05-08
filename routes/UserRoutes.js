@@ -1,17 +1,15 @@
 import express from 'express';
-
-import { EditUser, GetUserByNim, RegisterUser} from '../controllers/UserController.js';
+import { EditUser, GetCvById, GetUserById, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
 
 const router = express.Router();
 
-// router.get('/', GetAllUsers)
-router.post('/register', RegisterUser);
-// router.post('/login', LoginUser);
-// router.post('/getuserbytoken', GetUserByToken)
-// router.post('/getuserbyuuid', GetUserByUUID)
-// router.post('/getuserbypengguna', GetUsersByPengguna)
-router.post('/getuserbynim', GetUserByNim)
-router.post('/edituser', EditUser)
-// router.delete('/deleteuser', DeletUser)
+router.get('/get-cv/:id', GetCvById);
+router.post('/login', LoginUser);
+router.post('/login-web', LoginWeb);
+router.post('/getuserbytoken', GetUserByToken);
+router.post('/GetUsersByPengguna', GetUsersByPengguna);
+router.post('/User/Edit-User', EditUser);
+router.post('/GetUserById', GetUserById);
+
 
 export default router;

@@ -24,3 +24,11 @@ Content-Type: application/json
   "id":"75afa762-e01f-44b5-8f97-426fa8965b3e"
 }
 
+###
+POST http://localhost:3001/login-web
+Content-Type: application/json
+
+{
+  "nim":"2011522007",
+  "password":"Ayam"
+}
