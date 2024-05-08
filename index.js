@@ -105,7 +105,13 @@ try {
 //   }
 // })();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+const corsOptions = {
+  origin: (origin, callback) => {
+    callback(null, true);
+  }
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use(LabRoutes)
