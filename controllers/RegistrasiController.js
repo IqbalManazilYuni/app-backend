@@ -2,6 +2,38 @@ import argon2 from 'argon2';
 import Pengguna from '../models/PenggunaModels.js';
 import Labor from '../models/LaborModels.js';
 
+import dotenv from 'dotenv';
+import fetch from 'node-fetch';
+
+dotenv.config();
+export const DownloadPdf = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await Pengguna.findOne({ where: { id } });
+        if (!user) {
+            return res.status(404).json({ message: "User Tidak Ditemukan" });
+        }
+        const nama_file = user.nama_file;
+
+        const response = await fetch(`https://firebasestorage.googleapis.com/v0/b/${process.env.storageBucket}/o/pdfs%2F${encodeURIComponent(nama_file)}?alt=media`);
+        if (!response.ok) {
+            throw new Error("Failed to download file from Firebase Storage");
+        }
+        const fileBuffer = await response.buffer();
+
+        // Set content-type header based on file type
+        res.set('Content-Type', 'application/pdf');
+
+        // Send the file to the client along with the filename
+        res.json({ fileBuffer, fileName: nama_file });
+    } catch (error) {
+        console.error('Error downloading PDF:', error);
+        res.status(500).json({ message: 'Failed to download PDF' });
+    }
+};
+
+
+
 export const RegisterUser = async (req, res) => {
     const {
         nama,
@@ -56,7 +88,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
     try {
         const user = await Pengguna.findOne({
             where: { nim },
-            attributes: ['nama', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim','status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "Pengguna tidak ditemukan." });
@@ -98,7 +130,6 @@ export const EditUserRegistrasi = async (req, res) => {
         tanggal_lahir,
         JenisKelamin,
         alamat,
-        password,
         status,
         file_path,
         nama_file,
@@ -115,7 +146,6 @@ export const EditUserRegistrasi = async (req, res) => {
         user.nama = nama,
             user.nim = nim,
             user.nomor_asisten = nomor_asisten,
-            user.password = password ? await argon2.hash(password) : existingUser.password, // hanya hash password baru jika diberikan,
             user.status = status,
             user.idLabor = idLabor,
             user.jenisPengguna = jenisPengguna,
@@ -133,3 +163,4 @@ export const EditUserRegistrasi = async (req, res) => {
         res.status(500).json({ message: 'Failed to update user' });
     }
 };
+
