@@ -1,15 +1,15 @@
 import argon2 from 'argon2';
-import Pengguna from '../models/PenggunaModels.js';
-import Labor from '../models/LaborModels.js';
-
+import Labor from '../models/Model_Kepengurusan/Labor.js';
+import User from '../models/Model_User/Users.js';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 
 dotenv.config();
+
 export const DownloadPdf = async (req, res) => {
     const { id } = req.params;
     try {
-        const user = await Pengguna.findOne({ where: { id } });
+        const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: "User Tidak Ditemukan" });
         }
@@ -53,12 +53,12 @@ export const RegisterUser = async (req, res) => {
         nama_file,
     } = req.body;
     try {
-        const existingUser = await Pengguna.findOne({ where: { nim } });
+        const existingUser = await User.findOne({ where: { nim } });
         if (existingUser) {
-            return res.status(400).json({ message: "Pengguna dengan NIM tersebut sudah terdaftar." });
+            return res.status(400).json({ message: "User dengan NIM tersebut sudah terdaftar." });
         }
         const hashedPassword = await argon2.hash(password);
-        await Pengguna.create({
+        await User.create({
             nama,
             nim,
             nomor_asisten,
@@ -76,7 +76,7 @@ export const RegisterUser = async (req, res) => {
             nama_file,
         });
 
-        return res.status(201).json({ message: "Pengguna berhasil didaftarkan." });
+        return res.status(201).json({ message: "User berhasil didaftarkan." });
     } catch (error) {
         console.error("Error saat mendaftarkan pengguna:", error);
         return res.status(500).json({ message: "Terjadi kesalahan saat mendaftarkan pengguna." });
@@ -86,12 +86,12 @@ export const RegisterUser = async (req, res) => {
 export const GetUserByNimRegistrasi = async (req, res) => {
     const { nim } = req.body;
     try {
-        const user = await Pengguna.findOne({
+        const user = await User.findOne({
             where: { nim },
             attributes: ['nama', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
-            return res.status(404).json({ message: "Pengguna tidak ditemukan." });
+            return res.status(404).json({ message: "User tidak ditemukan." });
         }
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
@@ -135,13 +135,13 @@ export const EditUserRegistrasi = async (req, res) => {
         nama_file,
     } = req.body;
     try {
-        const user = await Pengguna.findOne({ where: { nim } });
+        const user = await User.findOne({ where: { nim } });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const existingUserWithNim = await Pengguna.findOne({ where: { nim } });
+        const existingUserWithNim = await User.findOne({ where: { nim } });
         if (existingUserWithNim && existingUserWithNim.nim !== nim) {
-            return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh Pengguna Lain' });
+            return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
         }
         user.nama = nama,
             user.nim = nim,
@@ -149,7 +149,7 @@ export const EditUserRegistrasi = async (req, res) => {
             user.status = status,
             user.idLabor = idLabor,
             user.jenisPengguna = jenisPengguna,
-            user.nomor_hp = nomor_hp,
+            user.nomor_hp = nomor_hp,   
             user.tempat_lahir = tempat_lahir,
             user.tanggal_lahir = tanggal_lahir,
             user.JenisKelamin = JenisKelamin,

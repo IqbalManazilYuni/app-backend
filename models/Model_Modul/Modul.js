@@ -1,31 +1,29 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Labor from "./LaborModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const ProsesOr = db.define('ProsesOr', {
+const Modul = db.define('Modul', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    status: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-    },
-    limitPeserta:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    tahun:{
+    nama_modul: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    nama_proses:{
-        type: DataTypes.TEXT,
+    nama_file: {
+        type: DataTypes.STRING(500),
         allowNull: false,
+        unique: true,
+    },
+    file_path: {
+        type: DataTypes.STRING(500),
+        allowNull: false,
+        unique: true,
+        
     },
     idLabor: {
         type: DataTypes.UUID,
@@ -33,10 +31,13 @@ const ProsesOr = db.define('ProsesOr', {
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
-    },
+    },tahun: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
 },{
-    tableName:"Proses_OR"
+    tableName:"Modul"
 });
 
-export default ProsesOr;
+export default Modul;
 

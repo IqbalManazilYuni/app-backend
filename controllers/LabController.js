@@ -1,6 +1,5 @@
 
-import { UUIDV4 } from "sequelize";
-import Labor from "../models/LaborModels.js";
+import Labor from "../models/Model_Kepengurusan/Labor.js";
 
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi } = req.body;
@@ -22,7 +21,7 @@ export const GetLab = async (req, res) => {
         if (!allLab || allLab.length === 0) {
             return res.status(404).json({ status: "error", code: 404, message: "Tidak ada Laboratorium yang ditemukan." });
         }
-        return res.status(200).json(allLab);
+        return res.status(200).json({code:200,status:"success",message:"Data Laboratorium ditemukan", data:allLab});
     } catch (error) {
         console.error("Error saat mendapatkan semua Laboratorium:", error);
         return res.status(500).json({ status: "error", code: 500, message: "Terjadi kesalahan saat mendapatkan semua Laboratorium." });

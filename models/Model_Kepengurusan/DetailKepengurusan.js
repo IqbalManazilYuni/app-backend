@@ -1,38 +1,43 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Ujian from "./Ujian.js";
-import Pengguna from "./PenggunaModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const PesertaUjian = db.define('PesertaUjian', {
+const DetailKepengurusan = db.define('DetailKepengurusan', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    nilai_ujian: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    idUjian: {
+    idKepengurusan: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    idPengguna: {
+    idUsers: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
+    idDivisi: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        onDelete:'CASCADE',
+        onUpdate:'CASCADE'
+    },
+    jabatan: {
+        type: DataTypes.ENUM('Kepala Divisi','Anggota','Sekretaris','Bendahara','Koordinator Asisten'),
+        allowNull: false,
+    }
 },{
-    tableName:"PesertaUjian"
+    tableName:"DetailKepengurusan"
 });
 
-export default PesertaUjian;
+export default DetailKepengurusan;
 

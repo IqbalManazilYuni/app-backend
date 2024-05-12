@@ -1,12 +1,12 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import Pengguna from '../models/PenggunaModels.js';
-import Labor from '../models/LaborModels.js';
+import User from '../models/Model_User/Users.js';
+import Labor from '../models/Model_Kepengurusan/Labor.js';
 
 // export const GetAllUsers = async (req, res) => {
 //     try {
-//         const allUsers = await Pengguna.findAll();
+//         const allUsers = await User.findAll();
 //         if (!allUsers || allUsers.length === 0) {
 //             return res.status(404).json({ status: "error", code: 404, message: "Tidak ada pengguna yang ditemukan." });
 //         }
@@ -39,9 +39,9 @@ export const GetUserByToken = async (req, res) => {
     try {
         const decryptedToken = decryptToken(token, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
-        const user = await Pengguna.findOne({ where: { nim: decoded.nim } });
+        const user = await User.findOne({ where: { nim: decoded.nim } });
         if (!user) {
-            return res.status(404).json({ message: "Pengguna tidak ditemukan." });
+            return res.status(404).json({ message: "User tidak ditemukan." });
         }
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
@@ -72,10 +72,10 @@ export const LoginUser = async (req, res) => {
     const { nim, password } = req.body;
 
     try {
-        const user = await Pengguna.findOne({ where: { nim } });
+        const user = await User.findOne({ where: { nim } });
 
         if (!user) {
-            return res.status(404).json({ message: "Pengguna dengan NIM tersebut tidak terdaftar." });
+            return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
         }
 
         const isPasswordValid = await argon2.verify(user.password, password);
@@ -97,10 +97,10 @@ export const LoginWeb = async (req, res) => {
     const { nim, password } = req.body;
 
     try {
-        const user = await Pengguna.findOne({ where: { nim } });
+        const user = await User.findOne({ where: { nim } });
 
         if (!user) {
-            return res.status(404).json({ message: "Pengguna dengan NIM tersebut tidak terdaftar." });
+            return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
         }
 
         const isPasswordValid = await argon2.verify(user.password, password);
@@ -109,17 +109,29 @@ export const LoginWeb = async (req, res) => {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
         if (user.AksesRole === "User") {
-            return res.status(404).json({ message: "Pengguna Tidak Memiliki Akses Ke Dashboard Admin" });
+            return res.status(404).json({ message: "User Tidak Memiliki Akses Ke Dashboard Admin" });
         }
-        const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: '1h' });
+        const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
+        const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
 
-        return res.status(200).json({ message: "Login berhasil.", token: encryptedToken });
+        // Hitung waktu kedaluwarsa dalam detik
+        const expiry = Math.floor(Date.now() / 1000) + expiresIn;
+        const expiryDate = new Date(expiry * 1000); // Ubah detik ke milidetik
+
+        // Ubah expiryDate ke waktu lokal
+        const localExpiryDate = expiryDate.toLocaleString();
+
+        console.log(localExpiryDate);
+        return res.status(200).json({ message: "Login berhasil.", token: encryptedToken, expiry });
     } catch (error) {
         console.error("Error saat proses login:", error);
         return res.status(500).json({ message: "Terjadi kesalahan saat proses login." });
     }
 };
+
+
+
 
 export const RefreshToken = (req, res) => {
 
@@ -134,13 +146,13 @@ export const GetUsersByPengguna = async (req, res) => {
     }
 
     try {
-        const users = await Pengguna.findAll({
+        const users = await User.findAll({
             where: { jenisPengguna: jenisPengguna },
-            attributes: ['id','nama', 'nim', 'nomor_asisten', 'status','jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat'],
+            attributes: ['id','nama', 'nim', 'nomor_asisten', 'status','jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat','createdAt','updatedAt'],
         });
 
         if (!users || users.length === 0) {
-            return res.status(404).json({ message: "Pengguna with this jenis pengguna not found." });
+            return res.status(404).json({ message: "User with this jenis pengguna not found." });
         }
 
         const formattedUsers = [];
@@ -175,16 +187,16 @@ export const EditUser = async (req, res) => {
         status
     } = req.body;
     try {
-        const user = await Pengguna.findOne({ where: { id } });
+        const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         if (status !== "Lulus" && jenisPengguna === "Asisten") {
             return res.status(400).json({ message: 'Calon Asisten harus lulus untuk menjadi Asisten' });
         }
-        const existingUserWithNim = await Pengguna.findOne({ where: { nim } });
+        const existingUserWithNim = await User.findOne({ where: { nim } });
         if (existingUserWithNim && existingUserWithNim.nim !== nim) {
-            return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh Pengguna Lain' });
+            return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
         }
         user.nama = nama,
             user.nim = nim,
@@ -208,12 +220,12 @@ export const EditUser = async (req, res) => {
 export const GetUserById = async (req, res) => {
     const { id } = req.body;
     try {
-        const user = await Pengguna.findOne({
+        const user = await User.findOne({
             where: { id },
             attributes: ['nama', 'nim', 'status', 'file_path','status','nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
-            return res.status(404).json({ message: "Pengguna tidak ditemukan." });
+            return res.status(404).json({ message: "User tidak ditemukan." });
         }
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
@@ -246,7 +258,7 @@ export const GetCvById = async (req, res) =>{
     console.log(id)
     try {
         
-       const user = await Pengguna.findOne({ where:{id}})
+       const user = await User.findOne({ where:{id}})
        if(!user){
         res.status(404).json({ message: "User Tidak Ditemukan"});
        }
@@ -259,7 +271,7 @@ export const GetCvById = async (req, res) =>{
 // export const DeletUser = async (req, res) => {
 //     const { nim } = req.body;
 //     try {
-//         const user = await Pengguna.findOne({ where: { nim: nim } });
+//         const user = await User.findOne({ where: { nim: nim } });
 //         if (!user) {
 //             return res.status(404).json({ message: 'User not found' });
 //         }

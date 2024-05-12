@@ -1,34 +1,36 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Labor from "./LaborModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const Module = db.define('Module', {
+const RiwayatPembaca = db.define('RiwayatPembaca', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    nama_module: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    file: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-    },
-    idLabor: {
+    idUsers: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
+    idModul: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        onDelete:'CASCADE',
+        onUpdate:'CASCADE'
+    },
+    tanggal_baca: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
 },{
-    tableName:"Module"
+    tableName:"RiwayatPembaca"
 });
 
-export default Module;
+export default RiwayatPembaca;
 

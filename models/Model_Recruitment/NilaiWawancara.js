@@ -1,42 +1,41 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Labor from "./LaborModels.js";
-import Jabatan from "./JabatanModels.js";
-import Periode from "./PeriodeModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const DetailPeriode = db.define('DetailPeriode', {
+const NilaiWawancara = db.define('NilaiWawancara', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    idPengguna: {
+    idPesertaWawancara: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    idPeriode: {
+    idPewawancara: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    idJabatan: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+    nilai:{
+        type: DataTypes.INTEGER,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        defaultValue:0
+    },
+    keterangan:{
+        type: DataTypes.STRING,
+        allowNull: false,
     },
 },{
-    tableName:"Detail_Periode"
+    tableName:"NilaiWawancara"
 });
 
-export default DetailPeriode;
+export default NilaiWawancara;
 

@@ -1,17 +1,20 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Labor from "./LaborModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const Jabatan = db.define('Jabatan', {
+const Kepengurusan = db.define('Kepengurusan', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    nama_jabatan: {
+    nama_kepengurusan: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    tahun: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -23,8 +26,8 @@ const Jabatan = db.define('Jabatan', {
         onUpdate:'CASCADE'
     },
 },{
-    tableName:"Jabatan"
+    tableName:"Kepengurusan"
 });
 
-export default Jabatan;
+export default Kepengurusan;
 

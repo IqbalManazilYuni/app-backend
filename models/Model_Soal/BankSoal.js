@@ -1,23 +1,14 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Labor from "./LaborModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const Periode = db.define('Periode', {
+const BankSoal = db.define('BankSoal', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
-    },
-    nama_periode: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    jumlah_asisten: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
     },
     idLabor: {
         type: DataTypes.UUID,
@@ -26,9 +17,17 @@ const Periode = db.define('Periode', {
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
+    tipe_soal: {
+        type: DataTypes.ENUM('Essay','Multiple'),
+        allowNull: false,
+    },
+    tahun:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
 },{
-    tableName:"Periode"
+    tableName:"BankSoal"
 });
 
-export default Periode;
+export default BankSoal;
 

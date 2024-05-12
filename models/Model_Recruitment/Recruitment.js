@@ -1,35 +1,38 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Tahapan from "./TahapanModels.js";
-import Pengguna from "./PenggunaModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const Wawancara = db.define('Wawancara', {
+const Recruitment = db.define('Recruitment', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    idTahapan: {
+    idKepengurusan: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    lokasi:{
+    nama_recruitment:{
         type: DataTypes.STRING,
+        allowNull:false,
+    },
+    limit_peserta:{
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-    jadwal:{
-        type: DataTypes.DATE,
+    status:{
+        type: DataTypes.ENUM('Open','Close'),
+        defaultValue:'Open',
         allowNull: false,
     }
 },{
-    tableName:"Wawancara"
+    tableName:"Recruitment"
 });
 
-export default Wawancara;
+export default Recruitment;
 

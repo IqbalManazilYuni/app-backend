@@ -1,17 +1,21 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import ProsesOr from "./ProsesOrModule.js";
-import Ujian from "./Ujian.js";
-import BankSoal from "./BankSoalModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const SoalUjian = db.define('SoalUjian', {
+const PesertaUjian = db.define('PesertaUjian', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
+    },
+    idPendaftar: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        onDelete:'CASCADE',
+        onUpdate:'CASCADE'
     },
     idUjian: {
         type: DataTypes.UUID,
@@ -20,17 +24,14 @@ const SoalUjian = db.define('SoalUjian', {
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    idSoal: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+    nilaiUjian:{
+        type: DataTypes.INTEGER,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
-    },
-
+        defaultValue: 0,
+    }
 },{
-    tableName:"SoalUjian"
+    tableName:"PesertaUjian"
 });
 
-export default SoalUjian;
+export default PesertaUjian;
 

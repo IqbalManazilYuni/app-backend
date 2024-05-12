@@ -1,9 +1,9 @@
-import ProsesOr from "../models/ProsesOrModule";
+import Recruitment from "../models/Model_Recruitment/Recruitment.js";
 
 export const CreateProsesOr = async(req,res)=>{
     const { idLabor, limitPeserta, tahun, status, nama_proses } = req.body;
     try {
-        const newProses = await ProsesOr.create({
+        const newProses = await Recruitment.create({
             idLabor: idLabor,
             limitPeserta:limitPeserta,
             tahun:tahun,
@@ -20,7 +20,7 @@ export const CreateProsesOr = async(req,res)=>{
 export const GetProsesOrByLabor = async(req, res)=>{
     const { idLabor } = req.body;
     try {
-        const proses = await ProsesOr.findOne({ where: { idLabor: idLabor} });
+        const proses = await Recruitment.findOne({ where: { idLabor: idLabor} });
         if(!proses){
             return res.status(404).json({ status:"Not Found", code: 404, message:"Proses Labor Not Found"});
         }

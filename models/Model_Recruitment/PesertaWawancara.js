@@ -1,35 +1,44 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import ProsesOr from "./ProsesOrModule.js";
-import Pengguna from "./PenggunaModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const DetailPesertaOr = db.define('DetailPesertaOr', {
+const PesertaWawancara = db.define('PesertaWawancara', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
     },
-    idProsesOr: {
+    idWawancara: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    idPengguna:{
+    idPendaftar: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
-    }
-
+    },
+    lokasi:{
+        type: DataTypes.STRING,
+        allowNull:false,
+    },
+    jadwal_mulai:{
+        type: DataTypes.DATE,
+        allowNull:false,
+    },
+    jadwal_selesai:{
+        type: DataTypes.DATE,
+        allowNull:false,
+    },
 },{
-    tableName:"DetailPesertaOr"
+    tableName:"PesertaWawancara"
 });
 
-export default DetailPesertaOr;
+export default PesertaWawancara;
 

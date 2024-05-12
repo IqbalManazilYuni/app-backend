@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Wawancara from "./WawancaraModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
@@ -11,18 +10,10 @@ const Pewawancara = db.define('Pewawancara', {
         allowNull: false,
         primaryKey: true,
     },
-    nama_pewawancara: {
+    nama_pewawancara:{
         type: DataTypes.STRING,
         allowNull: false,
     },
-    idWawancara: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
-    },
-
 },{
     tableName:"Pewawancara"
 });

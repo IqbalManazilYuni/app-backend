@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import ProsesOr from "./ProsesOrModule.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
@@ -11,25 +10,23 @@ const Tahapan = db.define('Tahapan', {
         allowNull: false,
         primaryKey: true,
     },
-    nama_tahapan: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    jenisTahapan:{
-        type: DataTypes.ENUM('Wawancara','Ujian'),
-        allowNull: false,
-    },
-    idProsesOr: {
+    idRecruitment: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-
+    nama_tahapan:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    jenis_tahapan:{
+        type: DataTypes.ENUM('Ujian', 'Wawancara'),
+        allowNull: false,
+    }
 },{
     tableName:"Tahapan"
 });
 
 export default Tahapan;
-

@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import Tahapan from "./TahapanModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
@@ -12,7 +11,7 @@ const Ujian = db.define('Ujian', {
         primaryKey: true,
     },
     status: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.ENUM('Open','Close'),
         allowNull: false,
     },
     jadwal_mulai:{
@@ -36,7 +35,8 @@ const Ujian = db.define('Ujian', {
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onUpdate:'CASCADE',
+        unique: true,
     },
 
 },{

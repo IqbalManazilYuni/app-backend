@@ -1,24 +1,14 @@
 import { Sequelize } from "sequelize";
-import db from '../config/db.config.js';
-import PesertaUjian from "./PesertaUjianModels.js";
-import SoalUjian from "./SoalUjianModels.js";
+import db from '../../config/db.config.js';
 
 const { DataTypes } = Sequelize;
 
-const Jawaban = db.define('Jawaban', {
+const JawabanUjian = db.define('JawabanUjian', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true,
-    },
-    jawaban: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    nilai: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
     },
     idPesertaUjian: {
         type: DataTypes.UUID,
@@ -34,9 +24,17 @@ const Jawaban = db.define('Jawaban', {
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
+    Jawaban:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    nilai:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    }
 },{
-    tableName:"Jawaban"
+    tableName:"JawabanUjian"
 });
 
-export default Jawaban;
+export default JawabanUjian;
 
