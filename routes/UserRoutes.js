@@ -1,5 +1,5 @@
 import express from 'express';
-import { EditUser, GetCvById, GetUserById, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
+import { DeletUser, EditUser, GetCvById, GetUserById, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ router.post('/getuserbytoken', GetUserByToken);
 router.post('/GetUsersByPengguna', GetUsersByPengguna);
 router.post('/User/Edit-User', EditUser);
 router.post('/GetUserById', GetUserById);
+router.delete('/deleteuser/:id',DeletUser)
 
 
 export default router;

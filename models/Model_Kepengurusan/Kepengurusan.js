@@ -18,6 +18,10 @@ const Kepengurusan = db.define('Kepengurusan', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    generasi_kepengurusan: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     idLabor: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,

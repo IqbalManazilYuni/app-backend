@@ -2,7 +2,7 @@ import Kepengurusan from "../models/Model_Kepengurusan/Kepengurusan.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js";
 
 export const CreateKepengurusan = async (req, res) => {
-    const { nama_kepengurusan, tahun, idLabor } = req.body;
+    const { nama_kepengurusan, tahun, idLabor, generasi_kepengurusan } = req.body;
     try {
         console.log("ayam", tahun, idLabor)
         const labor = await Kepengurusan.findAll({ where: { idLabor } });
@@ -13,7 +13,8 @@ export const CreateKepengurusan = async (req, res) => {
         const kepengurusan = await Kepengurusan.create({
             nama_kepengurusan: nama_kepengurusan,
             tahun: tahun,
-            idLabor: idLabor
+            idLabor: idLabor,
+            generasi_kepengurusan: generasi_kepengurusan
         });
         return res.status(201).json({ code: 201, status: "success", message: "Kepengurusan Berhasil Dibuat", data: kepengurusan });
     } catch (error) {

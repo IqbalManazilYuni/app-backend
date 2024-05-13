@@ -114,15 +114,7 @@ export const LoginWeb = async (req, res) => {
         const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
-
-        // Hitung waktu kedaluwarsa dalam detik
         const expiry = Math.floor(Date.now() / 1000) + expiresIn;
-        const expiryDate = new Date(expiry * 1000); // Ubah detik ke milidetik
-
-        // Ubah expiryDate ke waktu lokal
-        const localExpiryDate = expiryDate.toLocaleString();
-
-        console.log(localExpiryDate);
         return res.status(200).json({ message: "Login berhasil.", token: encryptedToken, expiry });
     } catch (error) {
         console.error("Error saat proses login:", error);
@@ -148,7 +140,7 @@ export const GetUsersByPengguna = async (req, res) => {
     try {
         const users = await User.findAll({
             where: { jenisPengguna: jenisPengguna },
-            attributes: ['id','nama', 'nim', 'nomor_asisten', 'status','jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat','createdAt','updatedAt'],
+            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
         if (!users || users.length === 0) {
@@ -186,10 +178,17 @@ export const EditUser = async (req, res) => {
         alamat,
         status
     } = req.body;
+    let encryptedToken, expiry;
     try {
         const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
+        }
+        if (user.nim !== nim && user.AksesRole ==="Admin") {
+            const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
+            const jwtoken = jwt.sign({ nim: nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
+            encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
+            expiry = Math.floor(Date.now() / 1000) + expiresIn;
         }
         if (status !== "Lulus" && jenisPengguna === "Asisten") {
             return res.status(400).json({ message: 'Calon Asisten harus lulus untuk menjadi Asisten' });
@@ -198,31 +197,32 @@ export const EditUser = async (req, res) => {
         if (existingUserWithNim && existingUserWithNim.nim !== nim) {
             return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
         }
-        user.nama = nama,
-            user.nim = nim,
-            user.nomor_asisten = nomor_asisten,
-            user.idLabor = idLabor,
-            user.jenisPengguna = jenisPengguna,
-            user.status = status,
-            user.nomor_hp = nomor_hp,
-            user.tempat_lahir = tempat_lahir,
-            user.tanggal_lahir = tanggal_lahir,
-            user.JenisKelamin = JenisKelamin,
-            user.alamat = alamat,
-            await user.save();
-        res.status(200).json({ message: 'User updated successfully'});
+        user.nama = nama;
+        user.nim = nim;
+        user.nomor_asisten = nomor_asisten;
+        user.idLabor = idLabor;
+        user.jenisPengguna = jenisPengguna;
+        user.status = status;
+        user.nomor_hp = nomor_hp;
+        user.tempat_lahir = tempat_lahir;
+        user.tanggal_lahir = tanggal_lahir;
+        user.JenisKelamin = JenisKelamin;
+        user.alamat = alamat;
+        await user.save();
+        res.status(200).json({ message: 'User updated successfully', token: encryptedToken, expiry});
     } catch (error) {
         console.error('Error updating user:', error);
         res.status(500).json({ message: 'Failed to update user' });
     }
 }
 
+
 export const GetUserById = async (req, res) => {
     const { id } = req.body;
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'status', 'file_path','status','nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim', 'status', 'file_path', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -253,34 +253,35 @@ export const GetUserById = async (req, res) => {
     }
 };
 
-export const GetCvById = async (req, res) =>{
+export const GetCvById = async (req, res) => {
     const { id } = req.params;
-    console.log(id)
     try {
-        
-       const user = await User.findOne({ where:{id}})
-       if(!user){
-        res.status(404).json({ message: "User Tidak Ditemukan"});
-       }
-       return res.status(200).json({nama_file: user.nama_file});
+
+        const user = await User.findOne({ where: { id } })
+        if (!user) {
+            res.status(404).json({ message: "User Tidak Ditemukan" });
+        }
+        return res.status(200).json({ nama_file: user.nama_file });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan id:", error);
         return res.status(500).json({ message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }
-// export const DeletUser = async (req, res) => {
-//     const { nim } = req.body;
-//     try {
-//         const user = await User.findOne({ where: { nim: nim } });
-//         if (!user) {
-//             return res.status(404).json({ message: 'User not found' });
-//         }
-//         await user.destroy();
-//         res.status(200).json({message:"User deleted successfully"});
-//     } catch (error) {
-//         res.status(400).json({
-//             message: error.message
-//         });
-//     }
-// }
+
+export const DeletUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await User.findOne({ where: { id } });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        console.log('ayam')
+        await user.destroy();
+        res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(400).json({
+            message: error.message
+        });
+    }
+}
 

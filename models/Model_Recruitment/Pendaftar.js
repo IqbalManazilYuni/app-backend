@@ -14,6 +14,10 @@ const Pendaftar = db.define('Pendaftar', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    status:{
+        type: DataTypes.ENUM('failed','on progress'),
+        allowNull: false,
+    },
     idUsers: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
