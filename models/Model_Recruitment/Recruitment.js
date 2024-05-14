@@ -17,6 +17,13 @@ const Recruitment = db.define('Recruitment', {
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
+    idKegiatan: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        onDelete:'CASCADE',
+        onUpdate:'CASCADE'
+    },
     nama_recruitment:{
         type: DataTypes.STRING,
         allowNull:false,

@@ -108,7 +108,7 @@ export const LoginWeb = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
-        if (user.AksesRole === "User") {
+        if (user.AksesRole === "User" && user.jenisPengguna ==="Calon Asisten") {
             return res.status(404).json({ message: "User Tidak Memiliki Akses Ke Dashboard Admin" });
         }
         const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
@@ -121,14 +121,6 @@ export const LoginWeb = async (req, res) => {
         return res.status(500).json({ message: "Terjadi kesalahan saat proses login." });
     }
 };
-
-
-
-
-export const RefreshToken = (req, res) => {
-
-}
-
 
 export const GetUsersByPengguna = async (req, res) => {
     const { jenisPengguna } = req.body;
@@ -275,7 +267,6 @@ export const DeletUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        console.log('ayam')
         await user.destroy();
         res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {

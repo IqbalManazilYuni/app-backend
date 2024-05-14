@@ -30,6 +30,7 @@ import User from "./models/Model_User/Users.js";
 import { 
   RelasiBankSoal,
   RelasiDivisi,
+  RelasiKegiatan,
   RelasiKepengurusan,
   RelasiLabor, 
   RelasiModul, 
@@ -43,6 +44,7 @@ import {
   RelasiUser,
   RelasiWawancara
 } from "./models/ModelRelasi.js";
+import Kegiatan from "./models/Model_Recruitment/Kegiatan.js";
 
 
 dotenv.config();
@@ -70,6 +72,7 @@ try {
 //   Labor,
 //   User,
 //   Kepengurusan,
+//   Kegiatan,
 //   Recruitment,
 //   Divisi,
 //   DetailKepengurusan,
@@ -111,6 +114,7 @@ try {
 //     await RelasiModul();
 //     await RelasiKepengurusan();
 //     await RelasiDivisi();
+//     await RelasiKegiatan();
 //     await RelasiRecruitment();
 //     await RelasiPendaftar();
 //     await RelasiTahapan();

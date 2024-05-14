@@ -21,7 +21,7 @@ export const GetLab = async (req, res) => {
         if (!allLab || allLab.length === 0) {
             return res.status(404).json({ status: "error", code: 404, message: "Tidak ada Laboratorium yang ditemukan." });
         }
-        return res.status(200).json({code:200,status:"success",message:"Data Laboratorium ditemukan", data:allLab});
+        return res.status(200).json({ code: 200, status: "success", message: "Data Laboratorium ditemukan", data: allLab });
     } catch (error) {
         console.error("Error saat mendapatkan semua Laboratorium:", error);
         return res.status(500).json({ status: "error", code: 500, message: "Terjadi kesalahan saat mendapatkan semua Laboratorium." });
@@ -33,7 +33,7 @@ export const GetLabByID = async (req, res) => {
     try {
         const lab = await Labor.findOne({ where: { id } })
         if (!lab) {
-            return res.status(404).json({ status: "Laboratorium Not Found"});
+            return res.status(404).json({ status: "Laboratorium Not Found" });
         }
         return res.status(200).json(lab)
     } catch (error) {
@@ -45,18 +45,18 @@ export const GetLabByID = async (req, res) => {
 export const EditLab = async (req, res) => {
     const { id, nama_Labor, deskripsi } = req.body;
     try {
-        const lab = await Labor.findOne({ where: {id}})
-        if(!lab){
-            return res.status(404).json({ message: 'Laboratorium not found' });
+        const lab = await Labor.findOne({ where: { id } })
+        if (!lab) {
+            return res.status(404).json({ code: 404, status: "Not Found", message: 'Laboratorium not found' });
         }
         lab.nama_Labor = nama_Labor;
         lab.deskripsi = deskripsi;
 
         await lab.save();
-        res.status(200).json({ message: 'Laboratorium updated successfully', lab });
+        res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully', lab });
     } catch (error) {
         console.error('Error updating Laboratorium:', error);
-        res.status(500).json({ message: 'Failed to update Laboratorium' });
+        res.status(500).json({ code:500, status:"error", message: 'Failed to update Laboratorium' });
     }
 };
 
@@ -68,7 +68,7 @@ export const DeleteLab = async (req, res) => {
             return res.status(404).json({ message: 'Laboratorium not found' });
         }
         await lab.destroy();
-        res.status(200).json({message:"Laboratorium deleted successfully"});
+        res.status(200).json({ message: "Laboratorium deleted successfully" });
     } catch (error) {
         res.status(400).json({
             message: error.message

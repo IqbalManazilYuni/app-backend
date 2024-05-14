@@ -5,6 +5,7 @@ import Labor from "./Model_Kepengurusan/Labor.js"
 import Modul from "./Model_Modul/Modul.js";
 import RiwayatPembaca from "./Model_Modul/RiwayatPembaca.js";
 import JawabanUjian from "./Model_Recruitment/JawabanUjian.js";
+import Kegiatan from "./Model_Recruitment/Kegiatan.js";
 import NilaiWawancara from "./Model_Recruitment/NilaiWawancara.js";
 import Pendaftar from "./Model_Recruitment/Pendaftar.js";
 import PesertaUjian from "./Model_Recruitment/PesertaUjian.js";
@@ -70,7 +71,13 @@ export const RelasiDivisi = async ()=>{
     Divisi.hasMany(DetailKepengurusan, { foreignKey : "idDivisi"});
     DetailKepengurusan.belongsTo(Divisi, { foreignKey : "idDivisi"});
 }
+export const RelasiKegiatan = async ()=>{
+    Kegiatan.hasMany(Recruitment, { foreignKey : "idKegiatan"});
+    Recruitment.belongsTo(Kegiatan, { foreignKey: "idKegiatan"});
 
+    Kegiatan.hasMany(Pendaftar, { foreignKey: "idKegiatan"});
+    Pendaftar.belongsTo(Kegiatan, { foreignKey: "idKegiatan"});
+}
 export const RelasiRecruitment = async ()=>{
     Recruitment.hasMany(Pendaftar, { foreignKey : "idRecruitment"});
     Pendaftar.belongsTo(Recruitment, { foreignKey : "idRecruitment"});
