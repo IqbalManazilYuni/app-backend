@@ -7,6 +7,6 @@ router.get('/lab', GetLab);
 router.post('/add-lab', AddLab);
 router.post('/labById', GetLabByID);
 router.post('/edit-lab', EditLab);
-router.delete('/delete-lab', DeleteLab)
+router.delete('/delete-lab/:id', DeleteLab)
 
 export default router;

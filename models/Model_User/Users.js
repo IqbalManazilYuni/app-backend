@@ -26,9 +26,8 @@ const User = db.define('User', {
         allowNull: true,
     },
     jenisPengguna: {
-        type: DataTypes.ENUM('Asisten', 'Calon Asisten'),
+        type: DataTypes.ENUM('Asisten', 'Calon Asisten', 'Ex-Asisten'),
         allowNull: false,
-        defaultValue:"Asisten",
     },
     AksesRole: {
         type: DataTypes.ENUM('User','Admin'),

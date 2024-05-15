@@ -39,12 +39,12 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"d866367b-11f0-11ef-9200-5405db08f5fa",
-  "nim":"2011522007",
+  "idLabor":"06b9eafb-5606-46e5-a7f6-bbbab4aa645c",
+  "nim":"20115220073",
   "nomor_asisten":"LBI.V.03.SI",
-  "jenisPengguna":"Asisten",
+  "jenisPengguna":"Ex-Asisten",
   "AksesRole":"Admin",
-  "nama":"Iqbal Manazil Yuni",
+  "nama":"Iqbal",
   "password":"ayam2",
   "status":"Lulus",
   "nomor_hp":"081270403357",

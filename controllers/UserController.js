@@ -54,7 +54,7 @@ export const GetUserByToken = async (req, res) => {
         return res.status(200).json({ code: 200, message: "User found", data: payload });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan token:", error);
-        return res.status(500).json({ message: "Terjadi kesalahan saat memproses permintaan." });
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 };
 const encryptToken = (token, secretKey) => {
@@ -86,10 +86,10 @@ export const LoginUser = async (req, res) => {
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: '1h' });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
 
-        return res.status(200).json({ message: "Login berhasil.", token: encryptedToken });
+        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken });
     } catch (error) {
         console.error("Error saat proses login:", error);
-        return res.status(500).json({ message: "Terjadi kesalahan saat proses login." });
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses login." });
     }
 };
 
@@ -108,35 +108,35 @@ export const LoginWeb = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
-        if (user.AksesRole === "User" && user.jenisPengguna ==="Calon Asisten") {
+        if (user.AksesRole === "User" && user.jenisPengguna === "Calon Asisten" || user.jenisPengguna === "Ex-Asisten") {
             return res.status(404).json({ message: "User Tidak Memiliki Akses Ke Dashboard Admin" });
         }
         const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
         const expiry = Math.floor(Date.now() / 1000) + expiresIn;
-        return res.status(200).json({ message: "Login berhasil.", token: encryptedToken, expiry });
+        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry });
     } catch (error) {
         console.error("Error saat proses login:", error);
-        return res.status(500).json({ message: "Terjadi kesalahan saat proses login." });
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses login." });
     }
 };
 
 export const GetUsersByPengguna = async (req, res) => {
     const { jenisPengguna } = req.body;
 
-    if (!jenisPengguna) {
-        return res.status(400).json({ message: "Role parameter is required." });
+    if (!jenisPengguna || jenisPengguna.length === 0) {
+        return res.status(400).json({ message: "At least one jenisPengguna parameter is required." });
     }
 
     try {
         const users = await User.findAll({
-            where: { jenisPengguna: jenisPengguna },
+            where: { jenisPengguna: jenisPengguna }, // Menggunakan jenisPengguna sebagai array
             attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
         if (!users || users.length === 0) {
-            return res.status(404).json({ message: "User with this jenis pengguna not found." });
+            return res.status(404).json({ message: "Users with these jenis pengguna not found." });
         }
 
         const formattedUsers = [];
@@ -151,7 +151,7 @@ export const GetUsersByPengguna = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching users by role", error);
-        return res.status(500).json({ message: "An error occurred while processing the request." });
+        return res.status(500).json({ code: 500, status: "error", message: "An error occurred while processing the request." });
     }
 };
 
@@ -176,7 +176,7 @@ export const EditUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        if (user.nim !== nim && user.AksesRole ==="Admin") {
+        if (user.nim !== nim && user.AksesRole === "Admin") {
             const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
             const jwtoken = jwt.sign({ nim: nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
             encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
@@ -201,13 +201,12 @@ export const EditUser = async (req, res) => {
         user.JenisKelamin = JenisKelamin;
         user.alamat = alamat;
         await user.save();
-        res.status(200).json({ message: 'User updated successfully', token: encryptedToken, expiry});
+        res.status(200).json({ code: 200, status: "success", message: 'User updated successfully', token: encryptedToken, expiry });
     } catch (error) {
         console.error('Error updating user:', error);
-        res.status(500).json({ message: 'Failed to update user' });
+        res.status(500).json({ code: 500, status: "error", message: 'Failed to update user' });
     }
 }
-
 
 export const GetUserById = async (req, res) => {
     const { id } = req.body;
@@ -238,10 +237,10 @@ export const GetUserById = async (req, res) => {
             file_path: user.file_path,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
-        return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUser });
+        return res.status(200).json({ code: 200, status: "success", message: "User Ditemukan", formattedUser });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan token:", error);
-        return res.status(500).json({ message: "Terjadi kesalahan saat memproses permintaan." });
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 };
 
@@ -253,10 +252,10 @@ export const GetCvById = async (req, res) => {
         if (!user) {
             res.status(404).json({ message: "User Tidak Ditemukan" });
         }
-        return res.status(200).json({ nama_file: user.nama_file });
+        return res.status(200).json({ code: 200, status: "success", nama_file: user.nama_file });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan id:", error);
-        return res.status(500).json({ message: "Terjadi kesalahan saat memproses permintaan." });
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }
 
@@ -265,14 +264,32 @@ export const DeletUser = async (req, res) => {
     try {
         const user = await User.findOne({ where: { id } });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ code: 404, status: "Not Found", message: 'User not found' });
         }
         await user.destroy();
-        res.status(200).json({ message: "User deleted successfully" });
+        res.status(200).json({ code: 200, status: "success", message: "User deleted successfully" });
     } catch (error) {
-        res.status(400).json({
-            message: error.message
-        });
+        console.error("Error saat menghapus pengguna berdasarkan id:", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }
 
+export const GetUserByJenisPenggunaAndIdLabor = async (req, res) => {
+    const { jenisPengguna, idLabor } = req.body;
+    try {
+        const users = await User.findAll({ where: { jenisPengguna: jenisPengguna, idLabor: idLabor } });
+        if (!users || users.length === 0) {
+            return res.status(404).json({ code: 404, status: "Not Found", message: "User Tidak Ditemukan" });
+        }
+        const payload = users.map(user => ({
+            idUser: user.id,
+            nama: user.nama,
+        }));
+
+        console.log(payload);
+        return res.status(200).json({ code: 200, status: "success", message: "User Ditemukan", data: payload });
+    } catch (error) {
+        console.error("Error saat mengambil pengguna berdasarkan jenis pengguna dan ID laboratorium:", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
+    }
+}
