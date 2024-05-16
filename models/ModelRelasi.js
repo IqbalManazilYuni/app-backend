@@ -61,7 +61,7 @@ export const RelasiKepengurusan = async ()=>{
     Kepengurusan.hasMany(DetailKepengurusan, {foreignKey:"idKepengurusan"});
     DetailKepengurusan.belongsTo(Kepengurusan, { foreignKey:"idKepengurusan"});
     
-    Kepengurusan.hasOne(Recruitment, { foreignKey:"idKepengurusan"});
+    Kepengurusan.hasMany(Recruitment, { foreignKey:"idKepengurusan"});
     Recruitment.belongsTo(Kepengurusan, { foreignKey:"idKepengurusan"});
 
 

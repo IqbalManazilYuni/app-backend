@@ -123,15 +123,16 @@ export const LoginWeb = async (req, res) => {
 };
 
 export const GetUsersByPengguna = async (req, res) => {
-    const { jenisPengguna } = req.body;
-
+    const { jenisPengguna, idLabor } = req.body;
+    console.log(jenisPengguna);
+    console.log("ayam", idLabor);
     if (!jenisPengguna || jenisPengguna.length === 0) {
         return res.status(400).json({ message: "At least one jenisPengguna parameter is required." });
     }
 
     try {
         const users = await User.findAll({
-            where: { jenisPengguna: jenisPengguna }, // Menggunakan jenisPengguna sebagai array
+            where: { jenisPengguna: jenisPengguna, idLabor: idLabor },
             attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
@@ -185,9 +186,12 @@ export const EditUser = async (req, res) => {
         if (status !== "Lulus" && jenisPengguna === "Asisten") {
             return res.status(400).json({ message: 'Calon Asisten harus lulus untuk menjadi Asisten' });
         }
-        const existingUserWithNim = await User.findOne({ where: { nim } });
-        if (existingUserWithNim && existingUserWithNim.nim !== nim) {
-            return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
+        const change = user.nim !== nim;
+        if (change) {
+            const existingUserWithNim = await User.findOne({ where: { nim } });
+            if (existingUserWithNim && existingUserWithNim.nim === nim) {
+                return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
+            }
         }
         user.nama = nama;
         user.nim = nim;

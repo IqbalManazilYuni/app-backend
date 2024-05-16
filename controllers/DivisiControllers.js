@@ -56,8 +56,9 @@ export const DivisiById = async (req, res) => {
 };
 
 export const GetDivisi = async (req, res) => {
+    const { idLabor } = req.body;
     try {
-        const divisi = await Divisi.findAll();
+        const divisi = await Divisi.findAll({where:{idLabor}});
         if (!divisi) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Divisi Tidak Ditemukan" });
         }
@@ -71,6 +72,43 @@ export const GetDivisi = async (req, res) => {
         return res.status(200).json({ code: 200, status: "Ok", message: "Divisi Ditemukan", data: payload });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Membuat Divisi" })
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mendapatkan Divisi" })
+    }
+};
+
+export const GetDivisiByIdLabor = async (req, res) => {
+    const { idLabor } = req.params;
+    try {
+        const divisi = await Divisi.findAll({where:{idLabor}});
+        if (!divisi) {
+            return res.status(404).json({ code: 404, status: "Not Found", message: "Divisi Tidak Ditemukan" });
+        }
+        const payload = [];
+        for (const divisis of divisi) {
+            const labor = await Labor.findByPk(divisis.idLabor);
+            const payloads = divisis.toJSON();
+            payloads.nama_Labor = labor ? labor.nama_Labor : null;
+            payload.push(payloads);
+        }
+        return res.status(200).json({ code: 200, status: "Ok", message: "Divisi Ditemukan", data: payload });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mendapatkan Divisi" })
+    }
+};
+
+
+export const DeleteDivisi = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const divisi = await Divisi.findOne({ where: { id } });
+        if (!divisi) {
+            return res.status(404).json({ code: 404, status: "Not Found", message: "Divisi tidak ditemukan" });
+        }
+        await divisi.destroy();
+        return res.status(200).json({ code: 200, status: "OK", message: "Divisi berhasil dihapus" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Menghapus Divisi" });
     }
 };

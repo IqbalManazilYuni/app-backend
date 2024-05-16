@@ -65,10 +65,10 @@ try {
   console.log('Connection to the database has been established successfully.');
 } catch (error) {
   console.error('Unable to connect to the database:', error);
-  process.exit(1); // Keluar dari aplikasi jika gagal terhubung ke database
+  process.exit(1); 
 }
 
-// // Model tabel yang akan disinkronkan
+
 // const modelsToSync = [
 //   Labor,
 //   User,
@@ -94,7 +94,6 @@ try {
 //   SoalMultiple,
 // ];
 
-// // Sinkronkan model-model tabel dengan database
 // (async () => {
 //   for (const model of modelsToSync) {
 //     try {
@@ -102,12 +101,11 @@ try {
 //       console.log(`Model ${model.name} synchronized successfully.`);
 //     } catch (error) {
 //       console.error(`An error occurred while synchronizing ${model.name}:`, error);
-//       process.exit(1); // Keluar dari aplikasi jika gagal menyinkronkan model tabel
+//       process.exit(1); 
 //     }
 //   }
 // })();
 
-// // Konfigurasi relasi antar tabel
 // (async () => {
 //   try {
 //     await RelasiLabor();
@@ -129,7 +127,7 @@ try {
 //     console.log('Relationships setup successfully.');
 //   } catch (error) {
 //     console.error('An error occurred while setting up relationships:', error);
-//     process.exit(1); // Keluar dari aplikasi jika gagal mengatur relasi antar tabel
+//     process.exit(1); 
 //   }
 // })();
 

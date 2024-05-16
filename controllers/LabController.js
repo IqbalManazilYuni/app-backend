@@ -8,7 +8,7 @@ export const AddLab = async (req, res) => {
             nama_Labor,
             deskripsi
         });
-        return res.status(201).json({ code:201, status:"success", message: "Laboratorium berhasil didaftarkan.", data: newLab });
+        return res.status(201).json({ code: 201, status: "success", message: "Laboratorium berhasil didaftarkan." });
     } catch (error) {
         console.error("Error saat mendaftarkan Laboratorium:", error);
         return res.status(500).json({ status: "error", code: 500, message: "Terjadi kesalahan saat mendaftarkan Laboratorium." });
@@ -33,9 +33,9 @@ export const GetLabByID = async (req, res) => {
     try {
         const lab = await Labor.findOne({ where: { id } })
         if (!lab) {
-            return res.status(404).json({ code:404,status:"Not Found",message:"Laboratorium Not Found" });
+            return res.status(404).json({ code: 404, status: "Not Found", message: "Laboratorium Not Found" });
         }
-        return res.status(200).json({code:200, status:"status" , message:"Laboratorium Ditemukan", data:lab})
+        return res.status(200).json({ code: 200, status: "status", message: "Laboratorium Ditemukan", data: lab })
     } catch (error) {
         console.error("Error saat mengambil Laboratorium berdasarkan id", error);
         return res.status(500).json({ status: "error", code: 500, message: "Terjadi Kesalahan saat memproses permintaan pengambilan id." });
@@ -56,7 +56,7 @@ export const EditLab = async (req, res) => {
         res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully', lab });
     } catch (error) {
         console.error('Error updating Laboratorium:', error);
-        res.status(500).json({ code:500, status:"error", message: 'Failed to update Laboratorium' });
+        res.status(500).json({ code: 500, status: "error", message: 'Failed to update Laboratorium' });
     }
 };
 
@@ -65,12 +65,12 @@ export const DeleteLab = async (req, res) => {
     try {
         const lab = await Labor.findOne({ where: { id } });
         if (!lab) {
-            return res.status(404).json({ code:404, status:"Not Found" ,message: 'Laboratorium not found' });
+            return res.status(404).json({ code: 404, status: "Not Found", message: 'Laboratorium not found' });
         }
         await lab.destroy();
-        return res.status(200).json({ code:200, status:"success", message: "Laboratorium deleted successfully" });
+        return res.status(200).json({ code: 200, status: "success", message: "Laboratorium deleted successfully" });
     } catch (error) {
         console.error('Error Delete Laboratorium:', error);
-        res.status(500).json({ code:500, status:"error", message: 'Failed to delete Laboratorium' });
+        res.status(500).json({ code: 500, status: "error", message: 'Failed to delete Laboratorium' });
     }
 }
