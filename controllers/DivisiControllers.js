@@ -56,7 +56,7 @@ export const DivisiById = async (req, res) => {
 };
 
 export const GetDivisi = async (req, res) => {
-    const { idLabor } = req.body;
+    const { idLabor } = req.params;
     try {
         const divisi = await Divisi.findAll({where:{idLabor}});
         if (!divisi) {

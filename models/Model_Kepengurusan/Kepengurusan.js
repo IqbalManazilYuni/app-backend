@@ -18,6 +18,11 @@ const Kepengurusan = db.define('Kepengurusan', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    status:{
+        type: DataTypes.ENUM('aktif','non-aktif'),
+        defaultValue:"non-aktif",
+        allowNull: true,
+    },
     generasi_kepengurusan: {
         type: DataTypes.STRING,
         allowNull: false,

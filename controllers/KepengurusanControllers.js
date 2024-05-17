@@ -6,7 +6,7 @@ import User from "../models/Model_User/Users.js";
 import Divisi from "../models/Model_Kepengurusan/Divisi.js";
 
 export const CreateKepengurusan = async (req, res) => {
-    const { nama_kepengurusan, tahun, idLabor, generasi_kepengurusan } = req.body;
+    const { nama_kepengurusan, tahun, idLabor, generasi_kepengurusan, status } = req.body;
     try {
         const existingKepengurusan = await Kepengurusan.findOne({ where: { idLabor, generasi_kepengurusan } });
         if (existingKepengurusan) {
@@ -16,7 +16,8 @@ export const CreateKepengurusan = async (req, res) => {
             nama_kepengurusan: nama_kepengurusan,
             tahun: tahun,
             idLabor: idLabor,
-            generasi_kepengurusan: generasi_kepengurusan
+            generasi_kepengurusan: generasi_kepengurusan,
+            status: status,
         });
         return res.status(201).json({ code: 201, status: "success", message: "Kepengurusan Berhasil Dibuat", data: kepengurusan });
     } catch (error) {
@@ -26,7 +27,7 @@ export const CreateKepengurusan = async (req, res) => {
 };
 
 export const GetKepengurusan = async (req, res) => {
-    const { idLabor } = req.body
+    const { idLabor } = req.params
     try {
         const kepengurusan = await Kepengurusan.findAll({ where: { idLabor } });
         if (!kepengurusan) {
@@ -175,8 +176,6 @@ export const CreateDetailKepengurusan = async (req, res) => {
     }
 };
 
-
-
 export const DetailKepengurusanLab = async (req, res) => {
     const { idKepengurusan } = req.body;
     try {
@@ -186,12 +185,12 @@ export const DetailKepengurusanLab = async (req, res) => {
         }
 
         const payload = await Promise.all(detailkepengurusan.map(async detail => {
-            const user = await User.findByPk(detail.idUsers);
+            const detailKepengurusanLab = await User.findByPk(detail.idUsers);
             const divisi = await Divisi.findByPk(detail.idDivisi);
 
             return {
                 ...detail.toJSON(),
-                nama: user ? user.nama : null,
+                nama: detailKepengurusanLab ? detailKepengurusanLab.nama : null,
                 nama_divisi: divisi ? divisi.nama_divisi : null
             };
         }));
@@ -201,5 +200,110 @@ export const DetailKepengurusanLab = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Membuat Kepengurusan" });
+    }
+};
+
+export const GetDetailKepengurusanByID = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const detailKepengurusan = await DetailKepengurusan.findOne({ where: { id } });
+        if (!detailKepengurusan) {
+            return res.status(404).json({ code: 404, status: "Not Found", message: "Detail Kepengurusan Tidak ditemukan" });
+        }
+        const divisi = await Divisi.findByPk(detailKepengurusan.idDivisi);
+        divisi.setDataValue('divisi', divisi);
+        const detailKepengurusanLab = await User.findByPk(detailKepengurusan.idUsers);
+        detailKepengurusanLab.setDataValue('detailKepengurusanLab', detailKepengurusanLab);
+
+        const payload = {
+            idKepengurusan: detailKepengurusan.idKepengurusan,
+            idUsers: detailKepengurusan.idUsers,
+            idDivisi: detailKepengurusan.idDivisi,
+            jabatan: detailKepengurusan.jabatan,
+        }
+        return res.status(200).json({ code: 200, status: "success", message: "Detail Kepengurusan Ditemukan", data: payload });
+    } catch (error) {
+        console.error("Terjadi Kesalahan Dalam Mengambil Detail Kepengurusan:", error);
+        return res.status(500).json({
+            code: 500,
+            status: "error",
+            message: "Terjadi Kesalahan Dalam Membuat Kepengurusan"
+        });
+    }
+}
+
+export const EditDetailKepengurusan = async (req, res) => {
+    const { id, idKepengurusan, idUsers, idDivisi, jabatan } = req.body;
+    try {
+        const detailKepengurusan = await DetailKepengurusan.findOne({ where: { idKepengurusan, idUsers } });
+        const change = detailKepengurusan.idKepengurusan === idKepengurusan;
+        if (!change) {
+            if (detailKepengurusan) {
+                return res.status(400).json({
+                    code: 400,
+                    status: "error",
+                    message: "Detail Kepengurusan dengan Users dan Kepengurusan yang sama sudah ada"
+                });
+            }
+        }
+        // Cek jika sudah ada detail kepengurusan dengan idKepengurusan
+        const checkDetailKepengurusan = await DetailKepengurusan.findAll({ where: { idKepengurusan } });
+        if (checkDetailKepengurusan.length > 0) {
+            // Pengecekan untuk jabatan khusus
+            if (jabatan === "Koordinator Asisten" || jabatan === "Bendahara" || jabatan === "Sekretaris") {
+                const failedJabatan = await DetailKepengurusan.findOne({ where: { idKepengurusan, jabatan } });
+                if (failedJabatan) {
+                    return res.status(400).json({
+                        code: 400,
+                        status: "error",
+                        message: `Detail Kepengurusan dengan jabatan ${jabatan} sudah ada`
+                    });
+                }
+            }
+            // Pengecekan untuk jabatan Kepala Divisi
+            if (jabatan === "Kepala Divisi") {
+                const kepalaDivisiFailed = await DetailKepengurusan.findOne({ where: { idKepengurusan, idDivisi } });
+                if (kepalaDivisiFailed && kepalaDivisiFailed.jabatan === "Kepala Divisi") {
+                    return res.status(400).json({
+                        code: 400,
+                        status: "error",
+                        message: `Detail Kepengurusan dengan jabatan ${jabatan} sudah ada`
+                    });
+                }
+            }
+        }
+        const detailkepengurusan = await DetailKepengurusan.findOne({ where: { id } });
+        detailKepengurusan.idKepengurusan = idKepengurusan
+        detailkepengurusan.idUsers = idUsers;
+        detailkepengurusan.idDivisi = idDivisi;
+        detailkepengurusan.jabatan = jabatan;
+        await detailkepengurusan.save();
+        return res.status(201).json({
+            code: 201,
+            status: "success",
+            message: "Detail Kepengurusan Berhasil Dibuat",
+        });
+    } catch (error) {
+        console.error("Terjadi Kesalahan Dalam Membuat Kepengurusan:", error);
+        return res.status(500).json({
+            code: 500,
+            status: "error",
+            message: "Terjadi Kesalahan Dalam Membuat Kepengurusan"
+        });
+    }
+};
+
+export const DeleteDetaliKepengurusan = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const detailKepengurusanLab = await DetailKepengurusan.findOne({ where: { id } });
+        if (!detailKepengurusanLab) {
+            return res.status(404).json({ code: 404, status: "Not Found", message: 'Detail Kepengurusan not found' });
+        }
+        await detailKepengurusanLab.destroy();
+        res.status(200).json({ code: 200, status: "success", message: "Detail Kepengurusan deleted successfully" });
+    } catch (error) {
+        console.error("Error saat menghapus pengguna berdasarkan id:", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }

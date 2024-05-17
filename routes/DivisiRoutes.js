@@ -3,7 +3,7 @@ import { CreateDivisi, DeleteDivisi, DivisiById, EditDivisi, GetDivisi, GetDivis
 const router = express.Router();
 
 router.get('/getdivisibyid/:id',DivisiById)
-router.post('/getdivisi', GetDivisi);
+router.get('/getdivisi/:idLabor', GetDivisi);
 router.post('/add-divisi', CreateDivisi);
 router.post('/edit-divisi', EditDivisi);
 router.delete('/deletedivisi/:id', DeleteDivisi)

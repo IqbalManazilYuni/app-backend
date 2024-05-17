@@ -3,7 +3,7 @@ POST http://localhost:3001/add-lab
 Content-Type: application/json
 
 {
-  "nama_Labor":"LEA",
+  "nama_Labor":"Laboratorium of Enterprise Application",
   "deskripsi":"Laboratorium of Enterprise Application (LEA) adalah salah satu labor yang ada pada jurusan Sistem Informasi Universtas Andalas (Unand) yang bergerak dalam bidang penelitian dan penggunaan teknologi dan layanan sistem informasi pada organisasi atau perusahaan."
 }
 ###
@@ -39,11 +39,11 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"6fb0db6e-e4b9-48ad-807d-5d3baed3e0fe",
-  "nim":"20115220077",
+  "idLabor":"77188b3f-b9d2-483d-945c-afa6770f4439",
+  "nim":"2011522008",
   "nomor_asisten":"LBI.V.03.SI",
   "jenisPengguna":"Calon Asisten",
-  "AksesRole":"Admin",
+  "AksesRole":"User",
   "nama":"Iqbal Manazil Yuni",
   "password":"ayam2",
   "status":"Lulus",

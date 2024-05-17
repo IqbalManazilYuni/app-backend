@@ -7,6 +7,7 @@ import RegistrasiRoutes from './routes/RegistrasiRoutes.js';
 import UserRoutes from './routes/UserRoutes.js'
 import KepengurusanRoutes from './routes/KepengurusanRoutes.js'
 import DivisiRoutes from './routes/DivisiRoutes.js'
+import KegiatanRoutes from './routes/KegiatanRoutes.js'
 import DetailKepengurusan from "./models/Model_Kepengurusan/DetailKepengurusan.js";
 import Kepengurusan from "./models/Model_Kepengurusan/Kepengurusan.js";
 import Divisi from "./models/Model_Kepengurusan/Divisi.js";
@@ -145,6 +146,7 @@ app.use(RegistrasiRoutes)
 app.use(UserRoutes)
 app.use(KepengurusanRoutes)
 app.use(DivisiRoutes)
+app.use(KegiatanRoutes)
 
 app.listen(process.env.PORT, () => {
   console.log("Listening on port", process.env.PORT);

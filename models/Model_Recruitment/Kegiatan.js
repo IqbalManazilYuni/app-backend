@@ -10,7 +10,7 @@ const Kegiatan = db.define('Kegiatan', {
         allowNull: false,
         primaryKey: true,
     },
-    nama_recruitment:{
+    nama_kegiatan:{
         type: DataTypes.STRING,
         allowNull:false,
     },
