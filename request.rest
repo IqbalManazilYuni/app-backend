@@ -39,8 +39,8 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"77188b3f-b9d2-483d-945c-afa6770f4439",
-  "nim":"2011522008",
+  "idLabor":"c4cd8d29-e262-4a99-83c2-f512a7170193",
+  "nim":"2011522007",
   "nomor_asisten":"LBI.V.03.SI",
   "jenisPengguna":"Calon Asisten",
   "AksesRole":"User",

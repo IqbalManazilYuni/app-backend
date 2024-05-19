@@ -1,11 +1,11 @@
 import Kegiatan from "../models/Model_Recruitment/Kegiatan.js";
 
 export const CreateKegiatan = async (req, res) => {
-    const { nama_kegiatan, status } = req.body;
+    const { nama_kegiatan, tahun } = req.body;
     try {
         await Kegiatan.create({
             nama_kegiatan,
-            status
+            tahun,
         });
         return res.status(201).json({ code: 201, status: "success", message: "Kegiatan Berhasil Dibuat" });
     } catch (error) {
@@ -36,6 +36,7 @@ export const GetKegiatanByID = async (req, res) => {
         const payload = {
             nama_kegiatan: kegiatan.nama_kegiatan,
             status: kegiatan.status,
+            tahun: kegiatan.tahun,
         }
         return res.status(200).json({ code: 200, status: "success", message: "Kegiatan Ditemukan", data: payload });
     } catch (error) {
@@ -45,11 +46,12 @@ export const GetKegiatanByID = async (req, res) => {
 };
 
 export const EditKegiatan = async (req, res) => {
-    const { id, nama_kegiatan, status } = req.body;
+    const { id, nama_kegiatan, status, tahun } = req.body;
     try {
         const kegiatan = await Kegiatan.findOne({ where: { id } });
         kegiatan.nama_kegiatan = nama_kegiatan
-        kegiatan.status = status
+        kegiatan.status = status,
+        kegiatan.tahun = tahun,
         await kegiatan.save();
         return res.status(200).json({ code: 200, status: "success", message: "Kegiatan Berhasil Diperbarui" });
     } catch (error) {

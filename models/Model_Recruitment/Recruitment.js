@@ -10,7 +10,7 @@ const Recruitment = db.define('Recruitment', {
         allowNull: false,
         primaryKey: true,
     },
-    idKepengurusan: {
+    idLabor: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,

@@ -38,6 +38,9 @@ export const RelasiLabor = async () =>{
     Labor.hasMany(Modul, {foreignKey:"idLabor"});
     Modul.belongsTo(Labor, {foreignKey:"idLabor"});
 
+    Labor.hasMany(Recruitment, {foreignKey:"idLabor"});
+    Recruitment.belongsTo(Labor, {foreignKey:"idLabor"});
+
 }
 
 export const RelasiUser = async ()=>{
@@ -60,11 +63,6 @@ export const RelasiModul = async ()=>{
 export const RelasiKepengurusan = async ()=>{
     Kepengurusan.hasMany(DetailKepengurusan, {foreignKey:"idKepengurusan"});
     DetailKepengurusan.belongsTo(Kepengurusan, { foreignKey:"idKepengurusan"});
-    
-    Kepengurusan.hasMany(Recruitment, { foreignKey:"idKepengurusan"});
-    Recruitment.belongsTo(Kepengurusan, { foreignKey:"idKepengurusan"});
-
-
 }
 
 export const RelasiDivisi = async ()=>{
@@ -74,9 +72,6 @@ export const RelasiDivisi = async ()=>{
 export const RelasiKegiatan = async ()=>{
     Kegiatan.hasMany(Recruitment, { foreignKey : "idKegiatan"});
     Recruitment.belongsTo(Kegiatan, { foreignKey: "idKegiatan"});
-
-    Kegiatan.hasMany(Pendaftar, { foreignKey: "idKegiatan"});
-    Pendaftar.belongsTo(Kegiatan, { foreignKey: "idKegiatan"});
 }
 export const RelasiRecruitment = async ()=>{
     Recruitment.hasMany(Pendaftar, { foreignKey : "idRecruitment"});

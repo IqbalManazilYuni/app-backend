@@ -27,7 +27,7 @@ const DetailKepengurusan = db.define('DetailKepengurusan', {
     idDivisi: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
+        allowNull: true,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },

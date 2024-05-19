@@ -108,8 +108,11 @@ export const LoginWeb = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
-        if (user.AksesRole === "User" && user.jenisPengguna === "Calon Asisten" || user.jenisPengguna === "Ex-Asisten") {
-            return res.status(404).json({ message: "User Tidak Memiliki Akses Ke Dashboard Admin" });
+        if (user.AksesRole !== "Admin") {
+            return res.status(404).json({ message: `${user.AksesRole} Tidak Memiliki Akses Ke Dashboard Admin` });
+        }
+        if (user.jenisPengguna !== "Asisten") {
+            return res.status(404).json({ message: `${user.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
         }
         const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
@@ -121,6 +124,7 @@ export const LoginWeb = async (req, res) => {
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses login." });
     }
 };
+
 
 export const GetUsersByPengguna = async (req, res) => {
     const { jenisPengguna, idLabor } = req.body;
