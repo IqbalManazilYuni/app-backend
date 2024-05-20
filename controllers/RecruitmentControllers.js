@@ -3,16 +3,24 @@ import Kegiatan from "../models/Model_Recruitment/Kegiatan.js";
 import Recruitment from "../models/Model_Recruitment/Recruitment.js";
 
 export const CreateRecruitment = async (req, res) => {
-    const { idLabor, limit_peserta, idKegiatan, nama_recruitment } = req.body;
+    const { idLabor, limit_peserta, idKegiatan, nama_recruitment, tanggal_buka, tanggal_tutup } = req.body;
     try {
         const labor = await Recruitment.findOne({ where: { idLabor, idKegiatan } });
         if (labor) {
             return res.status(404).json({ code: 404, status: "Found", message: "Labor Sudah Terdaftar Pada Kegiatan Recruitment Tahun ini" })
         }
+        const tanggalbuka = new Date(tanggal_buka);
+        const tanggaltutup = new Date(tanggal_tutup);
+
+        if (tanggaltutup <= tanggalbuka) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
+        }
         const newProses = await Recruitment.create({
             idLabor,
             idKegiatan,
             limit_peserta,
+            tanggal_buka,
+            tanggal_tutup,
             nama_recruitment
         })
         return res.status(201).json({ code: 201, status: "success", message: "Recruitment Or berhasil didaftarkan.", data: newProses });
@@ -89,10 +97,14 @@ export const GetRecruitmentByID = async (req, res) => {
         if (!recruitment) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Recruitment Tidak Ditemukan" });
         }
+        const tanggalbuka = new Date(recruitment.tanggal_buka).toLocaleString();
+        const tanggaltutup = new Date(recruitment.tanggal_tutup).toLocaleString();
         const payload = {
             nama_recruitment: recruitment.nama_recruitment,
             status: recruitment.status,
             limit_peserta: recruitment.limit_peserta,
+            tanggal_buka: tanggalbuka,
+            tanggal_tutup: tanggaltutup,
         }
         return res.status(200).json({ status: "success", code: 200, message: "Recruitment Ditemukan", data: payload });
 
@@ -103,12 +115,20 @@ export const GetRecruitmentByID = async (req, res) => {
 };
 
 export const EditRecruitment = async (req, res) => {
-    const { id, status, limit_peserta } = req.body;
+    const { id, status, limit_peserta, tanggal_buka, tanggal_tutup } = req.body;
     try {
         const recruitment = await Recruitment.findOne({ where: { id } });
         if (!recruitment) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Recruitment Tidak Ditemukan" });
         }
+        const tanggalbuka = new Date(tanggal_buka);
+        const tanggaltutup = new Date(tanggal_tutup);
+        
+        if (tanggaltutup <= tanggalbuka) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
+        }
+        recruitment.tanggal_buka = tanggal_buka
+        recruitment.tanggal_tutup = tanggal_tutup
         recruitment.status = status;
         recruitment.limit_peserta = limit_peserta;
         await recruitment.save();

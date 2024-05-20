@@ -14,31 +14,39 @@ const Recruitment = db.define('Recruitment', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     idKegiatan: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
-    nama_recruitment:{
+    nama_recruitment: {
         type: DataTypes.STRING,
-        allowNull:false,
+        allowNull: false,
     },
-    limit_peserta:{
+    limit_peserta: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    status:{
-        type: DataTypes.ENUM('Open','Close'),
-        defaultValue:'Open',
+    tanggal_buka: {
+        type: DataTypes.DATE,
+        allowNull: false,
+    },
+    tanggal_tutup: {
+        type: DataTypes.DATE,
+        allowNull: false,
+    },
+    status: {
+        type: DataTypes.ENUM('Open', 'Close'),
+        defaultValue: 'Open',
         allowNull: false,
     }
-},{
-    tableName:"Recruitment"
+}, {
+    tableName: "Recruitment"
 });
 
 export default Recruitment;

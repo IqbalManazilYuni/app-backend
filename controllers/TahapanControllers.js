@@ -70,13 +70,17 @@ export const GetTahapanByID = async (req, res) => {
             return res.status(200).json({ code: 200, status: "success", message: "Tahapan Ditemukan", data: payload });
         } else if (tahapan.jenis_tahapan === "Ujian") {
             const ujian = await Ujian.findOne({ where: { idTahapan: id } });
+
+            const jadwalmulai = new Date(ujian.jadwal_mulai).toLocaleString();
+            const jadwalselesai = new Date(ujian.jadwal_selesai).toLocaleString();
+
             const payload = {
                 idRecruitment: tahapan.idRecruitment,
                 nama_tahapan: tahapan.nama_tahapan,
                 jenis_tahapan: tahapan.jenis_tahapan,
                 nama_ujian: ujian.nama_ujian,
-                jadwal_mulai: ujian.jadwal_mulai,
-                jadwal_selesai: ujian.jadwal_selesai,
+                jadwal_mulai: jadwalmulai,
+                jadwal_selesai: jadwalselesai,
                 kode_ujian: ujian.kode_ujian,
                 status: ujian.status
             };

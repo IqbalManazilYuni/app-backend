@@ -10,8 +10,8 @@ const Pendaftar = db.define('Pendaftar', {
         allowNull: false,
         primaryKey: true,
     },
-    tahun: {
-        type: DataTypes.STRING,
+    tanggal_daftar: {
+        type: DataTypes.DATE,
         allowNull: false,
     },
     idKegiatan: {
