@@ -12,6 +12,7 @@ const Ujian = db.define('Ujian', {
     },
     status: {
         type: DataTypes.ENUM('Open','Close'),
+        defaultValue:"Open",
         allowNull: false,
     },
     jadwal_mulai:{

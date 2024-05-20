@@ -40,7 +40,7 @@ export const GetKepengurusan = async (req, res) => {
             payloads.nama_Labor = labor ? labor.nama_Labor : null;
             payload.push(payloads);
         }
-        return res.status(200).json({ code: 200, status: "Ok", message: "Kepengurusan Ditemukan", data: payload });
+        return res.status(200).json({ code: 200, status: "success", message: "Kepengurusan Ditemukan", data: payload });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Membuat Kepengurusa" })
@@ -61,7 +61,7 @@ export const GetKepengurusanById = async (req, res) => {
             ...kepengurusan.dataValues,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
-        return res.status(200).json({ code: 200, status: "Ok", message: "Kepengurusan Ditemukan", data: payload });
+        return res.status(200).json({ code: 200, status: "success", message: "Kepengurusan Ditemukan", data: payload });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Kepengurusan" });

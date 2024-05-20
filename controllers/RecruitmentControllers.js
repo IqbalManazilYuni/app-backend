@@ -90,6 +90,7 @@ export const GetRecruitmentByID = async (req, res) => {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Recruitment Tidak Ditemukan" });
         }
         const payload = {
+            nama_recruitment: recruitment.nama_recruitment,
             status: recruitment.status,
             limit_peserta: recruitment.limit_peserta,
         }
