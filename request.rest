@@ -40,10 +40,10 @@ Content-Type: application/json
 
 {
   "idLabor":"c1d1098a-1674-11ef-9a50-5405db08f5fa",
-  "nim":"2011522008",
-  "nomor_asisten":"LBI.V.03.SI",
-  "jenisPengguna":"Asisten",
-  "AksesRole":"Admin",
+  "nim":"2011522009",
+  "nomor_asisten":"",
+  "jenisPengguna":"Calon Asisten",
+  "AksesRole":"User",
   "nama":"Iqbal Manazil Yuni",
   "password":"ayam2",
   "status":"Lulus",
@@ -52,4 +52,26 @@ Content-Type: application/json
   "tanggal_lahir":"03/08/2001",
   "JenisKelamin":"Pria",
   "alamat":"Kota Padang"
+}
+###
+
+POST http://localhost:3001/add-pendaftar
+Content-Type: application/json
+
+{
+  "idUsers":"419734f3-5711-45a8-bb7b-75bcd0cc334e",
+  "idKegiatan":"7675998e-f68a-4b31-b162-ad348c7ed33c",
+  "idRecruitment":"42b84e31-55cd-4cb0-ba6f-d5e55503c711",
+  "tanggal_daftar":"2024-05-22T05:12:55.000Z"
+}
+
+###
+POST http://localhost:3001/add-pendaftar
+Content-Type: application/json
+
+{
+  "idUsers":"419734f3-5711-45a8-bb7b-75bcd0cc334e",
+  "idKegiatan":"7675998e-f68a-4b31-b162-ad348c7ed33c",
+  "idRecruitment":"42b84e31-55cd-4cb0-ba6f-d5e55503c711",
+  "tanggal_daftar":"2024-05-22T05:12:55.000Z"
 }
