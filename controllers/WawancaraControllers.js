@@ -131,6 +131,7 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
         if (!wawancara) {
             return res.status(404).json({ code: 404, status: "error", message: "Wawancara tidak ditemukan" });
         }
+        console.log("Tahapan: ", wawancara)
 
         // Cari tahapan berdasarkan idTahapan dari wawancara
         const tahapan = await Tahapan.findOne({ where: { id: wawancara.idTahapan } });
@@ -138,18 +139,19 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
         if (!tahapan) {
             return res.status(404).json({ code: 404, status: "error", message: "Tahapan tidak ditemukan" });
         }
+        console.log("Tahapan: ", wawancara)
 
         // Cari pendaftar berdasarkan idRecruitment dari tahapan
         const pendaftarList = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment } });
 
-        console.log(pendaftarList)
+        console.log("Tahapan: ", pendaftarList)
 
         if (pendaftarList.length === 0) {
             return res.status(200).json({ code: 200, status: "success", message: "Tidak ada pendaftar", data: [] });
         }
         // Ambil detail user berdasarkan idUsers dari pendaftar
         const payload = await Promise.all(pendaftarList.map(async (pendaftar) => {
-            const user = await User.findOne({ where: { id: pendaftar.idUsers, status: 'Pendaftar' } });
+            const user = await User.findOne({ where: { id: pendaftar.idUsers, status: 'Tahapan1' } });
 
             if (user) {
                 return {

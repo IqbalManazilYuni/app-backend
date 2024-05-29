@@ -37,10 +37,34 @@ export const CreatePendaftar = async (req, res) => {
             idKegiatan,
             idRecruitment
         });
+
+        await User.update({ status: 'Tahapan1' }, { where: { id: idUsers } });
+
         return res.status(201).json({ status: "success", code: 201, message: "Pendaftaraan Berhasil" });
 
     } catch (error) {
         console.error("Error saat mendaftarkan pendaftar:", error);
         return res.status(500).json({ message: "Terjadi kesalahan saat mendaftarkan pendaftar." });
+    }
+};
+
+export const GetPendaftarByIdRecruitment = async (req, res) => {
+    const { idRecruitment } = req.body;
+    try {
+        const recruitment = await Pendaftar.findAll({ where: { idRecruitment: idRecruitment } });
+        if (!recruitment.length > 0) {
+            return res.status(200).json({ status: "success", code: 200, message: "Tidak Terdapat Pendaftar" });
+        }
+        const payload = await Promise.all(recruitment.map(async peserta => {
+            const pendaftar = await User.findByPk(peserta.idUsers);
+            return {
+                nama: pendaftar ? pendaftar.nama : null,
+                nim: pendaftar ? pendaftar.nim : null
+            }
+        }));
+
+        return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: payload })
+    } catch (error) {
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Menggambil Pendaftar", error });
     }
 }

@@ -36,6 +36,7 @@ const decryptToken = (encryptedToken, secretKey) => {
 
 export const GetUserByToken = async (req, res) => {
     const { token } = req.body;
+    console.log("ayam: ",token);
     try {
         const decryptedToken = decryptToken(token, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
@@ -50,7 +51,9 @@ export const GetUserByToken = async (req, res) => {
             nim: user.nim,
             idLabor: user.idLabor,
             nama_Labor: labor ? labor.nama_Labor : null,
+            jenisPengguna: user.jenisPengguna,
         }
+        console.log(payload);
         return res.status(200).json({ code: 200, message: "User found", data: payload });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan token:", error);
@@ -83,10 +86,12 @@ export const LoginUser = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
-        const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: '1h' });
+        const expiresIn = 10600; // Waktu kedaluwarsa token dalam detik
+        const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
-
-        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken });
+        const expiry = Math.floor(Date.now() / 1000) + expiresIn;
+        console.log(encryptedToken)
+        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry });
     } catch (error) {
         console.error("Error saat proses login:", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses login." });

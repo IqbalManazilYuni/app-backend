@@ -88,7 +88,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { nim },
-            attributes: ['nama', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['id','nama', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -96,6 +96,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
         const formattedUser = {
+            id: user.id,
             nama: user.nama,
             nim: user.nim,
             nomor_asisten: user.nomor_asisten,
