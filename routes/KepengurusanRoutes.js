@@ -4,7 +4,7 @@ import { CreateDetailKepengurusan, CreateKepengurusan, DeleteDetaliKepengurusan,
 const router = express.Router();
 
 router.get('/getkepengurusanbyid/:id',GetKepengurusanById)
-router.post('/getdetailkepengurusan', DetailKepengurusanLab)
+router.get('/getdetailkepengurusan/:idKepengurusan', DetailKepengurusanLab)
 router.get('/getkepengurusan/:idLabor', GetKepengurusan);
 router.post('/add-detailkepengurusan', CreateDetailKepengurusan);
 router.get('/getdetailkepengurusan/:id', GetDetailKepengurusanByID);

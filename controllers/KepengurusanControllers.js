@@ -112,7 +112,6 @@ export const DeleteKepengurusan = async (req, res) => {
 export const CreateDetailKepengurusan = async (req, res) => {
     const { idKepengurusan, idUsers, idDivisi, jabatan } = req.body;
     try {
-        console.log("ayam: ", jabatan);
 
         // Cek jika detail kepengurusan dengan idKepengurusan dan idUsers sudah ada
         const detailKepengurusan = await DetailKepengurusan.findOne({ where: { idKepengurusan, idUsers } });
@@ -177,11 +176,11 @@ export const CreateDetailKepengurusan = async (req, res) => {
 };
 
 export const DetailKepengurusanLab = async (req, res) => {
-    const { idKepengurusan } = req.body;
+    const { idKepengurusan } = req.params;
     try {
         const detailkepengurusan = await DetailKepengurusan.findAll({ where: { idKepengurusan } });
         if (!detailkepengurusan.length) {
-            return res.status(404).json({ code: 404, status: "Not Found", message: "Detail Kepengurusan Tidak ditemukan" });
+            return res.status(200).json({ code: 200, status: "Found", message: "Detail Kepengurusan Tidak ditemukan" });
         }
 
         const payload = await Promise.all(detailkepengurusan.map(async detail => {
