@@ -37,6 +37,7 @@ export const DownloadPdf = async (req, res) => {
 export const RegisterUser = async (req, res) => {
     const {
         nama,
+        email,
         nim,
         nomor_asisten,
         password,
@@ -57,10 +58,15 @@ export const RegisterUser = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: "User dengan NIM tersebut sudah terdaftar." });
         }
+        const existtingEmail = await User.findOne({ where: { email } });
+        if (existtingEmail) {
+            return res.status(400).json({ message: "User dengan Email tersebut sudah terdaftar." });
+        }
         const hashedPassword = await argon2.hash(password);
         await User.create({
             nama,
             nim,
+            email,
             nomor_asisten,
             password: hashedPassword,
             status,
@@ -88,7 +94,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { nim },
-            attributes: ['id','nama', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['id', 'nama', 'email','nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -99,6 +105,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             id: user.id,
             nama: user.nama,
             nim: user.nim,
+            email: user.email,
             nomor_asisten: user.nomor_asisten,
             jenisPengguna: user.jenisPengguna,
             nomor_hp: user.nomor_hp,
@@ -123,6 +130,7 @@ export const EditUserRegistrasi = async (req, res) => {
     const {
         nama,
         nim,
+        email,
         nomor_asisten,
         idLabor,
         jenisPengguna,
@@ -144,13 +152,18 @@ export const EditUserRegistrasi = async (req, res) => {
         if (existingUserWithNim && existingUserWithNim.nim !== nim) {
             return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
         }
+        const existingUserWithEmail = await User.findOne({ where: { email } });
+        if (existingUserWithEmail && existingUserWithEmail.email !== email) {
+            return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
+        }
         user.nama = nama,
             user.nim = nim,
+            user.email = email,
             user.nomor_asisten = nomor_asisten,
             user.status = status,
             user.idLabor = idLabor,
             user.jenisPengguna = jenisPengguna,
-            user.nomor_hp = nomor_hp,   
+            user.nomor_hp = nomor_hp,
             user.tempat_lahir = tempat_lahir,
             user.tanggal_lahir = tanggal_lahir,
             user.JenisKelamin = JenisKelamin,

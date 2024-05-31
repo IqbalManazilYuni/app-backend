@@ -39,14 +39,15 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"c1d1098a-1674-11ef-9a50-5405db08f5fa",
+  "idLabor":"8d876502-8a12-41d5-a20c-5463a1b15b89",
   "nim":"2011522009",
+  "email":"icyscrub53@gmail.com",
   "nomor_asisten":"",
   "jenisPengguna":"Calon Asisten",
   "AksesRole":"User",
-  "nama":"Iqbal Manazil Yuni",
+  "nama":"Kemal",
   "password":"ayam2",
-  "status":"Lulus",
+  "status":"Pendaftar",
   "nomor_hp":"081270403357",
   "tempat_lahir":"Lubuk Basung",
   "tanggal_lahir":"03/08/2001",

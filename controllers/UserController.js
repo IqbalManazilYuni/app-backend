@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/Model_User/Users.js';
 import Labor from '../models/Model_Kepengurusan/Labor.js';
-
+import nodemailer from 'nodemailer';
 // export const GetAllUsers = async (req, res) => {
 //     try {
 //         const allUsers = await User.findAll();
@@ -36,7 +36,7 @@ const decryptToken = (encryptedToken, secretKey) => {
 
 export const GetUserByToken = async (req, res) => {
     const { token } = req.body;
-    console.log("ayam: ",token);
+    console.log("ayam: ", token);
     try {
         const decryptedToken = decryptToken(token, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
@@ -170,6 +170,7 @@ export const EditUser = async (req, res) => {
         id,
         nama,
         nim,
+        email,
         nomor_asisten,
         idLabor,
         jenisPengguna,
@@ -202,8 +203,17 @@ export const EditUser = async (req, res) => {
                 return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
             }
         }
+        const change1 = user.email !== email;
+
+        if (change1) {
+            const existingUserWithEmail = await User.findOne({ where: { email } });
+            if (existingUserWithEmail && existingUserWithEmail.email === email) {
+                return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
+            }
+        }
         user.nama = nama;
         user.nim = nim;
+        user.email = email;
         user.nomor_asisten = nomor_asisten;
         user.idLabor = idLabor;
         user.jenisPengguna = jenisPengguna;
@@ -226,7 +236,7 @@ export const GetUserById = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'status', 'file_path', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim', 'email','status', 'file_path', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -236,6 +246,7 @@ export const GetUserById = async (req, res) => {
         const formattedUser = {
             nama: user.nama,
             nim: user.nim,
+            email: user.email,
             nomor_asisten: user.nomor_asisten,
             jenisPengguna: user.jenisPengguna,
             nomor_hp: user.nomor_hp,
@@ -303,6 +314,52 @@ export const GetUserByJenisPenggunaAndIdLabor = async (req, res) => {
         return res.status(200).json({ code: 200, status: "success", message: "User Ditemukan", data: payload });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan jenis pengguna dan ID laboratorium:", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
+    }
+};
+
+export const GetUserByNIM = async (req, res) => {
+    const { nim, email } = req.body;
+    try {
+        const user = await User.findOne({ where: { nim, email } });
+
+        if (!user) {
+            return res.status(404).json({ code: 404, status: "error", message: "Pengguna tidak ditemukan." });
+        }
+
+        // Generate 4-digit code
+        const code = Math.floor(100000 + Math.random() * 900000);
+
+        user.kode_verifikasi = code;
+        await user.save();
+        // Configure nodemailer
+        let transporter = nodemailer.createTransport({
+            service: 'gmail', // or use your email service provider
+            auth: {
+                user: 'recruitlabdsi@gmail.com', // replace with your email
+                pass: 'wooc oawu kbxg lopy' // replace with your email password
+            }
+        });
+
+        // Set up email data
+        let mailOptions = {
+            from: 'recruitlabdsi@gmail.com', // sender address
+            to: email, // list of receivers
+            subject: 'Kode Verifikasi Anda', // Subject line
+            text: `Kode verifikasi Anda adalah ${code}` // plain text body
+        };
+
+        // Send mail with defined transport object
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error("Error saat mengirim email: ", error);
+                return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat mengirim email." });
+            }
+            return res.status(200).json({ code: 200, status: "success", message: "Kode verifikasi telah dikirim ke email Anda." });
+        });
+
+    } catch (error) {
+        console.error("Error saat mengambil pengguna berdasarkan nim: ", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }

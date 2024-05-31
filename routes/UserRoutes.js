@@ -1,5 +1,5 @@
 import express from 'express';
-import { DeletUser, EditUser, GetCvById, GetUserById, GetUserByJenisPenggunaAndIdLabor, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
+import { DeletUser, EditUser, GetCvById, GetUserById, GetUserByJenisPenggunaAndIdLabor, GetUserByNIM, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
 
 const router = express.Router();
 
@@ -12,6 +12,6 @@ router.post('/User/Edit-User', EditUser);
 router.post('/GetUserById', GetUserById);
 router.post('/GetUserByJenisPenggunaAndIdLabor', GetUserByJenisPenggunaAndIdLabor);
 router.delete('/deleteuser/:id',DeletUser)
-
+router.post('/getuserbyNIM', GetUserByNIM);
 
 export default router;

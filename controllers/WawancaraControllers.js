@@ -173,12 +173,27 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
     }
 };
 
-export const GetPesertaWawancaraByID = async (req, res) => {
+export const GetPesertaByID = async (req, res) => {
     const { id } = req.params;
     try {
-        
+        const peserta = await PesertaWawancara.findOne({ where: { id } });
+        const payload = {
+            
+        }
     } catch (error) {
-        
+
+    }
+}
+
+export const DeletePesertaWawancara = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const peserta = await PesertaWawancara.findOne({ where: { id } });
+        await peserta.destroy();
+        return res.status(200).json({ status: "success", code: 200, message: "Peserta Wawancara Berhasil Dihapus" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Menghapus Peserta Wawancara" })
     }
 }
 
