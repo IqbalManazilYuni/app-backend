@@ -36,7 +36,6 @@ const decryptToken = (encryptedToken, secretKey) => {
 
 export const GetUserByToken = async (req, res) => {
     const { token } = req.body;
-    console.log("ayam: ", token);
     try {
         const decryptedToken = decryptToken(token, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
@@ -53,7 +52,6 @@ export const GetUserByToken = async (req, res) => {
             nama_Labor: labor ? labor.nama_Labor : null,
             jenisPengguna: user.jenisPengguna,
         }
-        console.log(payload);
         return res.status(200).json({ code: 200, message: "User found", data: payload });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan token:", error);
@@ -90,7 +88,6 @@ export const LoginUser = async (req, res) => {
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
         const expiry = Math.floor(Date.now() / 1000) + expiresIn;
-        console.log(encryptedToken)
         return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry });
     } catch (error) {
         console.error("Error saat proses login:", error);
@@ -133,8 +130,6 @@ export const LoginWeb = async (req, res) => {
 
 export const GetUsersByPengguna = async (req, res) => {
     const { jenisPengguna, idLabor } = req.body;
-    console.log(jenisPengguna);
-    console.log("ayam", idLabor);
     if (!jenisPengguna || jenisPengguna.length === 0) {
         return res.status(400).json({ message: "At least one jenisPengguna parameter is required." });
     }
@@ -236,7 +231,7 @@ export const GetUserById = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'email','status', 'file_path', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim', 'email', 'status', 'file_path', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -360,6 +355,43 @@ export const GetUserByNIM = async (req, res) => {
 
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan nim: ", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
+    }
+};
+
+export const GetUserByKode = async (req, res) => {
+    const { kode_verifikasi } = req.body;
+    try {
+        const user = await User.findOne({ where: { kode_verifikasi } });
+
+        if (!user) {
+            return res.status(404).json({ code: 404, status: "error", message: "Kode Verifikasi Anda Salah" });
+        }
+
+        const payload = {
+            id: user.id,
+        };
+
+        user.kode_verifikasi = "";
+        await user.save();
+
+        return res.status(200).json({ code: 200, status: "success", message: "Kode Verifikasi Anda Benar", data: payload })
+    } catch (error) {
+        console.error("Error saat mengambil pengguna berdasarkan Kode Verifikasi: ", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
+    }
+};
+
+export const ChangePassword = async (req, res) => {
+    const { id, password } = req.body;
+    try {
+        const user = await User.findOne({ where: { id } });
+        const hashPassword = await argon2.hash(password);
+        user.password = hashPassword
+        await user.save();
+        return res.status(200).json({ code: 200, status: "success", message: "Password Berhasi Diubah, Silahkan Login Kembali" })
+    } catch (error) {
+        console.error("Error saat mengupdate password: ", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }
