@@ -18,7 +18,7 @@ const Labor = db.define('Labor',{
         allowNull: false,
     }
 },{
-    tableName:"labor"
+    tableName:"Labor"
 });
 
 export default Labor;
