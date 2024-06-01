@@ -5,7 +5,7 @@ import Tahapan from "../models/Model_Recruitment/Tahapan.js";
 import Wawancara from "../models/Model_Recruitment/Wawancara.js";
 import User from "../models/Model_User/Users.js";
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
-
+import NilaiWawancara from "../models/Model_Recruitment/NilaiWawancara.js"
 export const GetWawancaraByIdLabor = async (req, res) => {
     const { idLabor } = req.params;
     try {
@@ -107,6 +107,12 @@ export const CreatePesertaWawancara = async (req, res) => {
         if (pendaftar) {
             return res.status(404).json({ code: 404, status: "Found", message: "Pendaftar Sudah Terdaftar pada Peserta Wawancara" });
         }
+        const mulai = new Date(jadwal_mulai);
+        const selesai = new Date(jadwal_selesai);
+
+        if (selesai <= mulai) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
+        }
         await PesertaWawancara.create({
             idWawancara,
             idPendaftar,
@@ -177,11 +183,50 @@ export const GetPesertaByID = async (req, res) => {
     const { id } = req.params;
     try {
         const peserta = await PesertaWawancara.findOne({ where: { id } });
-        const payload = {
-            
-        }
-    } catch (error) {
 
+        const pendaftar = await Pendaftar.findOne({ where: { id: peserta.idPendaftar } });
+
+        const DetailUser = await User.findOne({ where: { id: pendaftar.idUsers } });
+
+        const jadwalmulai = new Date(peserta.jadwal_mulai).toLocaleString();
+        const jadwalselesai = new Date(peserta.jadwal_selesai).toLocaleString();
+
+        const payload = {
+            nama: DetailUser.nama,
+            lokasi: peserta.lokasi,
+            jadwal_mulai: jadwalmulai,
+            jadwal_selesai: jadwalselesai,
+        }
+        return res.status(200).json({ code: 200, status: "success", message: "Peserta Ditemukan", data: payload })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Peserta Wawancara" })
+    }
+}
+
+export const EditPesertaWawancara = async (req, res) => {
+    const { id, jadwal_mulai, jadwal_selesai, lokasi } = req.body
+    try {
+        const Pesertawawancara = await PesertaWawancara.findOne({ where: { id } });
+
+        const mulai = new Date(jadwal_mulai);
+        const selesai = new Date(jadwal_selesai);
+
+        if (selesai <= mulai) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
+        }
+
+        Pesertawawancara.lokasi = lokasi
+        Pesertawawancara.jadwal_mulai = jadwal_mulai
+        Pesertawawancara.jadwal_selesai = jadwal_selesai
+
+        await Pesertawawancara.save();
+
+        return res.status(200).json({ code: 200, status: "success", message: "Peserta Wawancara Berhasil Diperbarui" });
+
+    } catch (error) {
+        console.error("Error saat proses update tahapan:", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses memperabui Peserta Wawancara." });
     }
 }
 
@@ -194,6 +239,22 @@ export const DeletePesertaWawancara = async (req, res) => {
     } catch (error) {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Menghapus Peserta Wawancara" })
+    }
+};
+
+export const GetNilaiPewawancara = async (req, res) => {
+    const { id } = req.params
+    try {
+        const nilai_wawancara = await NilaiWawancara.findAll({ where: { idPesertaWawancara: id } });
+        const payload = [];
+        for (const nilai_wawancaras of nilai_wawancara) {
+            const payloads = nilai_wawancaras.toJSON();
+            payload.push(payloads);
+        }
+        return res.status(200).json({ code: 200, status: "success", message: "Nilai Peserta Wawancara Ditemukan", data: payload });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Nilai Peserta Wawancara" })
     }
 }
 
