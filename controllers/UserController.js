@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import User from '../models/Model_User/Users.js';
 import Labor from '../models/Model_Kepengurusan/Labor.js';
 import nodemailer from 'nodemailer';
+import 'dotenv/config';
+
 // export const GetAllUsers = async (req, res) => {
 //     try {
 //         const allUsers = await User.findAll();
@@ -137,7 +139,7 @@ export const GetUsersByPengguna = async (req, res) => {
     try {
         const users = await User.findAll({
             where: { jenisPengguna: jenisPengguna, idLabor: idLabor },
-            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
+            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'nama_file','status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
         if (!users || users.length === 0) {
@@ -321,30 +323,22 @@ export const GetUserByNIM = async (req, res) => {
         if (!user) {
             return res.status(404).json({ code: 404, status: "error", message: "Pengguna tidak ditemukan." });
         }
-
-        // Generate 4-digit code
         const code = Math.floor(100000 + Math.random() * 900000);
-
         user.kode_verifikasi = code;
         await user.save();
-        // Configure nodemailer
         let transporter = nodemailer.createTransport({
-            service: 'gmail', // or use your email service provider
+            service: 'gmail',
             auth: {
-                user: 'recruitlabdsi@gmail.com', // replace with your email
-                pass: 'wooc oawu kbxg lopy' // replace with your email password
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         });
-
-        // Set up email data
         let mailOptions = {
-            from: 'recruitlabdsi@gmail.com', // sender address
-            to: email, // list of receivers
-            subject: 'Kode Verifikasi Anda', // Subject line
-            text: `Kode verifikasi Anda adalah ${code}` // plain text body
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Kode Verifikasi Anda',
+            text: `Kode verifikasi Anda adalah ${code}`
         };
-
-        // Send mail with defined transport object
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error("Error saat mengirim email: ", error);
