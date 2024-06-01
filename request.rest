@@ -39,7 +39,7 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"8d876502-8a12-41d5-a20c-5463a1b15b89",
+  "idLabor":"580a335f-003e-4236-b5f3-0e975596e754",
   "nim":"2011522009",
   "email":"icyscrub53@gmail.com",
   "nomor_asisten":"",
