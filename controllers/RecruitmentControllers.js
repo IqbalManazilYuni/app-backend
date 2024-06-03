@@ -11,9 +11,13 @@ export const CreateRecruitment = async (req, res) => {
         }
         const tanggalbuka = new Date(tanggal_buka);
         const tanggaltutup = new Date(tanggal_tutup);
+        const tanggalSekarang = new Date();
 
         if (tanggaltutup <= tanggalbuka) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
+        }
+        if (tanggalbuka < tanggalSekarang) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena mendahului tanggal sekarang" });
         }
         const newProses = await Recruitment.create({
             idLabor,
@@ -123,7 +127,7 @@ export const EditRecruitment = async (req, res) => {
         }
         const tanggalbuka = new Date(tanggal_buka);
         const tanggaltutup = new Date(tanggal_tutup);
-        
+
         if (tanggaltutup <= tanggalbuka) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
         }

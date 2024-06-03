@@ -25,7 +25,7 @@ const PesertaWawancara = db.define('PesertaWawancara', {
         onUpdate:'CASCADE'
     },
     lokasi:{
-        type: DataTypes.ENUM('Laboratorium LBI','Laboratorium LABGIS','Laboratorium LEA','Laboratorium LDKOM','Ruang Seminar'),
+        type: DataTypes.TEXT,
         allowNull:false,
     },
     jadwal_mulai:{

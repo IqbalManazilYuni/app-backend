@@ -12,6 +12,7 @@ import RecruitmentRoutes from './routes/RecruitmentRoutes.js';
 import TahapanRoutes from './routes/TahapanRoutes.js'
 import WawancaraRoutes from './routes/WawancaraRoutes.js'
 import PendaftarRoutes from './routes/PendaftarRoutes.js'
+import UjianRoutes from './routes/UjianRoutes.js'
 import DetailKepengurusan from "./models/Model_Kepengurusan/DetailKepengurusan.js";
 import Kepengurusan from "./models/Model_Kepengurusan/Kepengurusan.js";
 import Divisi from "./models/Model_Kepengurusan/Divisi.js";
@@ -155,6 +156,7 @@ app.use(RecruitmentRoutes);
 app.use(TahapanRoutes);
 app.use(WawancaraRoutes);
 app.use(PendaftarRoutes);
+app.use(UjianRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening on port", process.env.PORT);

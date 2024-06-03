@@ -107,9 +107,14 @@ export const CreatePesertaWawancara = async (req, res) => {
         if (pendaftar) {
             return res.status(404).json({ code: 404, status: "Found", message: "Pendaftar Sudah Terdaftar pada Peserta Wawancara" });
         }
+
         const mulai = new Date(jadwal_mulai);
         const selesai = new Date(jadwal_selesai);
+        const tanggalSekarang = new Date();
 
+        if (tanggalSekarang > mulai) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Invalid" });
+        }
         if (selesai <= mulai) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
         }
@@ -179,6 +184,27 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
     }
 };
 
+export const GetJadwalWawancara = async (req, res) => {
+    const { idWawancara, lokasi } = req.body
+    try {
+        const jadwal = await PesertaWawancara.findAll({
+            where: { idWawancara, lokasi },
+            order: [['jadwal_mulai', 'DESC']],
+            limit: 1
+        });
+
+        const payloadJadwal = jadwal.map(jadwals => ({
+            jadwal_mulai: new Date(jadwals.jadwal_mulai).toLocaleString(),
+            jadwal_selesai: new Date(jadwals.jadwal_selesai).toLocaleString(),
+        }));
+
+        return res.status(200).json({ code: 200, status: "success", message: "Jadwal ditemukan", data: payloadJadwal })
+    } catch (error) {
+        console.error("Error saat proses mengambil jadwal:", error);
+        res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil jadwal." });
+    }
+}
+
 export const GetPesertaByID = async (req, res) => {
     const { id } = req.params;
     try {
@@ -202,12 +228,13 @@ export const GetPesertaByID = async (req, res) => {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Peserta Wawancara" })
     }
-}
+};
 
 export const EditPesertaWawancara = async (req, res) => {
-    const { id, jadwal_mulai, jadwal_selesai, lokasi } = req.body
+    const { id, jadwal_mulai, jadwal_selesai, lokasi } = req.body;
     try {
-        const Pesertawawancara = await PesertaWawancara.findOne({ where: { id } });
+
+        const pesertaWawancara = await PesertaWawancara.findOne({ where: { id } });
 
         const mulai = new Date(jadwal_mulai);
         const selesai = new Date(jadwal_selesai);
@@ -216,19 +243,47 @@ export const EditPesertaWawancara = async (req, res) => {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
         }
 
-        Pesertawawancara.lokasi = lokasi
-        Pesertawawancara.jadwal_mulai = jadwal_mulai
-        Pesertawawancara.jadwal_selesai = jadwal_selesai
+        const existingJadwal = await PesertaWawancara.findAll({
+            where: { idWawancara: pesertaWawancara.idWawancara, lokasi: pesertaWawancara.lokasi },
+            order: [['jadwal_mulai', 'DESC']],
+        });
 
-        await Pesertawawancara.save();
+        // Array to store conflicting time slots
+        const conflictingSlots = [];
+
+        // Check if new start time falls within existing schedule
+        existingJadwal.forEach(jadwal => {
+            const existingStart = new Date(jadwal.jadwal_mulai);
+            const existingEnd = new Date(jadwal.jadwal_selesai);
+
+            if ((mulai >= existingStart && mulai <= existingEnd) || (selesai >= existingStart && selesai <= existingEnd)) {
+                conflictingSlots.push({
+                    start: existingStart.toLocaleString(),
+                    end: existingEnd.toLocaleString()
+                });
+            }
+        });
+
+        if (conflictingSlots.length > 0) {
+            const conflictingMessage = conflictingSlots.map(slot => `${slot.start} - ${slot.end}`).join(", ");
+            return res.status(400).json({ code: 400, status: "error", message: `Jadwal bentrok dengan jadwal yang sudah ada: ${conflictingMessage}` });
+        }
+
+        pesertaWawancara.lokasi = lokasi;
+        pesertaWawancara.jadwal_mulai = jadwal_mulai;
+        pesertaWawancara.jadwal_selesai = jadwal_selesai;
+
+        await pesertaWawancara.save();
 
         return res.status(200).json({ code: 200, status: "success", message: "Peserta Wawancara Berhasil Diperbarui" });
 
     } catch (error) {
         console.error("Error saat proses update tahapan:", error);
-        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses memperabui Peserta Wawancara." });
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses memperbarui Peserta Wawancara." });
     }
-}
+};
+
+
 
 export const DeletePesertaWawancara = async (req, res) => {
     const { id } = req.params;
@@ -256,7 +311,10 @@ export const GetNilaiPewawancara = async (req, res) => {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Nilai Peserta Wawancara" })
     }
-}
+};
+
+
+
 
 
 
