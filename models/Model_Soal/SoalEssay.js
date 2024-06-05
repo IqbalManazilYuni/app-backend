@@ -18,9 +18,9 @@ const SoalEssay = db.define('SoalEssay', {
         onUpdate:'CASCADE'
     },
     soal:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
         allowNull:false,
-    }
+    },
 },{
     tableName:"SoalEssay"
 });

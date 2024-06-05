@@ -18,27 +18,27 @@ const SoalMultiple = db.define('SoalMultiple', {
         onUpdate:'CASCADE'
     },
     soal:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
         allowNull:false,
     },
     pilihan1:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull:false,
     },
     pilihan2:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull:false,
     },
     pilihan3:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull:false,
     },
     pilihan4:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull:false,
     },
     kunci:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull:false,
     }
 

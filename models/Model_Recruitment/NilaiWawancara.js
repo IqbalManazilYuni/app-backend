@@ -17,7 +17,7 @@ const NilaiWawancara = db.define('NilaiWawancara', {
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
-    idPewawancara: {
+    idUsers: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,

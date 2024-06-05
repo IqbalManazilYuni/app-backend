@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from 'dotenv';
 import { Sequelize } from "sequelize";
+import bodyParser from 'body-parser'; // Import body-parser
 import LabRoutes from './routes/LabRoutes.js'
 import RegistrasiRoutes from './routes/RegistrasiRoutes.js';
 import UserRoutes from './routes/UserRoutes.js'
@@ -13,6 +14,7 @@ import TahapanRoutes from './routes/TahapanRoutes.js'
 import WawancaraRoutes from './routes/WawancaraRoutes.js'
 import PendaftarRoutes from './routes/PendaftarRoutes.js'
 import UjianRoutes from './routes/UjianRoutes.js'
+import SoalRoutes from './routes/SoalRoutes.js'
 import DetailKepengurusan from "./models/Model_Kepengurusan/DetailKepengurusan.js";
 import Kepengurusan from "./models/Model_Kepengurusan/Kepengurusan.js";
 import Divisi from "./models/Model_Kepengurusan/Divisi.js";
@@ -24,7 +26,6 @@ import NilaiWawancara from "./models/Model_Recruitment/NilaiWawancara.js";
 import Pendaftar from "./models/Model_Recruitment/Pendaftar.js";
 import PesertaUjian from "./models/Model_Recruitment/PesertaUjian.js";
 import PesertaWawancara from "./models/Model_Recruitment/PesertaWawancara.js";
-import Pewawacara from "./models/Model_Recruitment/Pewawancara.js";
 import Recruitment from "./models/Model_Recruitment/Recruitment.js";
 import SoalUjian from "./models/Model_Recruitment/SoalUjian.js";
 import Tahapan from "./models/Model_Recruitment/Tahapan.js";
@@ -74,7 +75,6 @@ try {
   process.exit(1); 
 }
 
-
 // const modelsToSync = [
 //   Labor,
 //   User,
@@ -91,7 +91,6 @@ try {
 //   Ujian,
 //   Wawancara,
 //   PesertaWawancara,
-//   Pewawacara,
 //   NilaiWawancara,
 //   PesertaUjian,
 //   SoalUjian,
@@ -144,7 +143,10 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+
+// Increase the body size limit
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(LabRoutes)
 app.use(RegistrasiRoutes)
@@ -157,6 +159,7 @@ app.use(TahapanRoutes);
 app.use(WawancaraRoutes);
 app.use(PendaftarRoutes);
 app.use(UjianRoutes);
+app.use(SoalRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening on port", process.env.PORT);

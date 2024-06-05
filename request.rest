@@ -39,18 +39,18 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"580a335f-003e-4236-b5f3-0e975596e754",
+  "idLabor":"126353f5-fbd5-44e0-9431-f60b1f1dd793",
   "nim":"2011522009",
-  "email":"icyscrub53@gmail.com",
+  "email":"ayam@gmail.com",
   "nomor_asisten":"",
-  "jenisPengguna":"Calon Asisten",
+  "jenisPengguna":"Asisten",
   "AksesRole":"User",
-  "nama":"Kemal",
+  "nama":"Budi",
   "password":"ayam2",
-  "status":"Pendaftar",
+  "status":"Lulus",
   "nomor_hp":"081270403357",
   "tempat_lahir":"Lubuk Basung",
-  "tanggal_lahir":"03/08/2001",
+  "tanggal_lahir":"01/08/2001",
   "JenisKelamin":"Pria",
   "alamat":"Kota Padang"
 }

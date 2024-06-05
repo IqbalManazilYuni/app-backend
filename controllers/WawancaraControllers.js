@@ -283,8 +283,6 @@ export const EditPesertaWawancara = async (req, res) => {
     }
 };
 
-
-
 export const DeletePesertaWawancara = async (req, res) => {
     const { id } = req.params;
     try {
@@ -297,13 +295,27 @@ export const DeletePesertaWawancara = async (req, res) => {
     }
 };
 
+export const DeletePewawancara = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const pewawancara = await NilaiWawancara.findOne({ where: { id } });
+        await pewawancara.destroy();
+        return res.status(200).json({ status: "success", code: 200, message: "Pewawancara Berhasil Dihapus" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Menghapus Pewawancara" })
+    }
+};
+
 export const GetNilaiPewawancara = async (req, res) => {
     const { id } = req.params
     try {
         const nilai_wawancara = await NilaiWawancara.findAll({ where: { idPesertaWawancara: id } });
         const payload = [];
         for (const nilai_wawancaras of nilai_wawancara) {
+            const pewawancara = await User.findByPk(nilai_wawancaras.idUsers);
             const payloads = nilai_wawancaras.toJSON();
+            payloads.nama = pewawancara ? pewawancara.nama : null;
             payload.push(payloads);
         }
         return res.status(200).json({ code: 200, status: "success", message: "Nilai Peserta Wawancara Ditemukan", data: payload });
@@ -312,6 +324,55 @@ export const GetNilaiPewawancara = async (req, res) => {
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Nilai Peserta Wawancara" })
     }
 };
+
+export const GetAsistePewawancara = async (req, res) => {
+    const { idLabor } = req.params
+    try {
+        const PewawancaraAsisten = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" } });
+
+        const payload = PewawancaraAsisten.map(asistens => ({
+            id: asistens.id,
+            nama: asistens.nama,
+        }));
+
+        // console.log(payload);
+        return res.status(200).json({ code: 200, status: "success", data: payload });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Asisten Pewawancara" })
+    }
+};
+
+export const CreateNilaiWawancara = async (req, res) => {
+    const { idPesertaWawancara, idUsers, nilai, keterangan } = req.body;
+    try {
+        for (const pewawancaraId of idUsers) {
+            const existingRecord = await NilaiWawancara.findOne({
+                where: {
+                    idPesertaWawancara,
+                    idUsers: pewawancaraId
+                }
+            });
+            if (existingRecord) {
+                return res.status(400).json({ message: "Sudah Terdapat Pewawancara yang sama sudah anda inputkan" });
+            }
+        }
+
+        for (const pewawancaraId of idUsers) {
+            await NilaiWawancara.create({
+                idPesertaWawancara,
+                idUsers: pewawancaraId,
+                nilai,
+                keterangan
+            });
+        }
+
+        return res.status(201).json({ code: 201, status: "success", message: 'Pewawancara created successfully' });
+    } catch (error) {
+        console.error("Error creating nilai wawancara:", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Internal server error' });
+    }
+}
 
 
 

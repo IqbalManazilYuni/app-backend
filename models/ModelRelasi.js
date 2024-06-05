@@ -10,7 +10,6 @@ import NilaiWawancara from "./Model_Recruitment/NilaiWawancara.js";
 import Pendaftar from "./Model_Recruitment/Pendaftar.js";
 import PesertaUjian from "./Model_Recruitment/PesertaUjian.js";
 import PesertaWawancara from "./Model_Recruitment/PesertaWawancara.js";
-import Pewawancara from "./Model_Recruitment/Pewawancara.js";
 import Recruitment from "./Model_Recruitment/Recruitment.js";
 import SoalUjian from "./Model_Recruitment/SoalUjian.js";
 import Tahapan from "./Model_Recruitment/Tahapan.js";
@@ -128,8 +127,8 @@ export const RelasiPesertaWawancara = async ()=>{
 }
 
 export const RelasiPewawancara = async()=>{
-    Pewawancara.hasMany(NilaiWawancara, { foreignKey:"idPewawancara"});
-    NilaiWawancara.belongsTo(Pewawancara,{ foreignKey:"idPewawancara"});
+    User.hasMany(NilaiWawancara, { foreignKey:"idUsers"});
+    NilaiWawancara.belongsTo(User,{ foreignKey:"idUsers"});
 }
 
 export const RelasiPesertaUjian = async ()=>{
