@@ -5,6 +5,7 @@ import User from '../models/Model_User/Users.js';
 import Labor from '../models/Model_Kepengurusan/Labor.js';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
+import db from '../config/db.config.js';
 
 // export const GetAllUsers = async (req, res) => {
 //     try {
@@ -139,13 +140,12 @@ export const GetUsersByPengguna = async (req, res) => {
     try {
         const users = await User.findAll({
             where: { jenisPengguna: jenisPengguna, idLabor: idLabor },
-            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'nama_file','status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
+            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'nama_file', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
         if (!users || users.length === 0) {
             return res.status(404).json({ message: "Users with these jenis pengguna not found." });
         }
-
         const formattedUsers = [];
         for (const user of users) {
             const labor = await Labor.findByPk(user.idLabor);
@@ -153,7 +153,6 @@ export const GetUsersByPengguna = async (req, res) => {
             formattedUser.nama_Labor = labor ? labor.nama_Labor : null;
             formattedUsers.push(formattedUser);
         }
-
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUsers });
 
     } catch (error) {
