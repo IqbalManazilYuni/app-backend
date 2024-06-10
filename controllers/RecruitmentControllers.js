@@ -1,6 +1,7 @@
 import Labor from "../models/Model_Kepengurusan/Labor.js";
 import Kegiatan from "../models/Model_Recruitment/Kegiatan.js";
 import Recruitment from "../models/Model_Recruitment/Recruitment.js";
+import Pendaftar from "../models/Model_Recruitment/Pendaftar.js"
 
 export const CreateRecruitment = async (req, res) => {
     const { idLabor, limit_peserta, idKegiatan, nama_recruitment, tanggal_buka, tanggal_tutup } = req.body;
@@ -38,26 +39,29 @@ export const GetRecruitmentByLabor = async (req, res) => {
     const { idLabor } = req.params;
     try {
         const proses = await Recruitment.findAll({ where: { idLabor: idLabor } });
-        if (!proses) {
+        if (!proses || proses.length === 0) {
             return res.status(404).json({ status: "Not Found", code: 404, message: "Recruitment Labor Not Found" });
         }
+
         const payload = await Promise.all(proses.map(async recruitment => {
             const kegiatan = await Kegiatan.findByPk(recruitment.idKegiatan);
+            const jumlahPendaftar = await Pendaftar.count({ where: { idRecruitment: recruitment.id } }); // Count based on recruitment ID
             const labor = await Labor.findByPk(recruitment.idLabor);
-
             return {
                 ...recruitment.toJSON(),
                 nama_kegiatan: kegiatan ? kegiatan.nama_kegiatan : null,
                 tahun: kegiatan ? kegiatan.tahun : null,
                 nama_Labor: labor ? labor.nama_Labor : null,
+                jumlahPendaftar,
             };
-        }))
-
-        return res.status(200).json({ status: "success", code: 200, message: "Labor Recruitment Or Found", data: payload });
+        }));
+        console.log(payload)
+        return res.status(200).json({ status: "success", code: 200, message: "Labor Recruitment Found", data: payload });
     } catch (error) {
-        return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Menggambil Labor Recruitment Or", error });
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Mengambil Labor Recruitment", error });
     }
 }
+
 export const GetRecruitment = async (req, res) => {
     const { idKegiatan } = req.params;
     try {
@@ -142,4 +146,33 @@ export const EditRecruitment = async (req, res) => {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Recruitment" })
     }
+};
+
+export const UpdateStatusRecruitment = async (req, res) => {
+    const { date } = req.body;
+    try {
+        const recruitmentList = await Recruitment.findAll();
+        const updatedRecruitmentList = recruitmentList.map(async (recruitment) => {
+            const jadwal_tutup = new Date(recruitment.tanggal_tutup);
+            const jadwal = new Date(date);
+            const status = jadwal < jadwal_tutup ? "Open" : "Close";
+
+            // Memeriksa apakah status berubah
+            if (status !== recruitment.status) {
+                // Jika status berubah, lakukan update pada tabel Recruitment
+                await Recruitment.update({ status }, { where: { id: recruitment.id } });
+            }
+
+            return {
+                ...recruitment,
+                jadwal_tutup,
+                status
+            };
+        });
+        return res.status(200).json({ code: 200, status: "success", message: "Recruitment telah diperbarui" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Recruitment" });
+    }
 }
+

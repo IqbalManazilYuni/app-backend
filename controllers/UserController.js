@@ -54,6 +54,7 @@ export const GetUserByToken = async (req, res) => {
             idLabor: user.idLabor,
             nama_Labor: labor ? labor.nama_Labor : null,
             jenisPengguna: user.jenisPengguna,
+            JenisKelamin: user.JenisKelamin,
         }
         return res.status(200).json({ code: 200, message: "User found", data: payload });
     } catch (error) {

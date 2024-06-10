@@ -2,37 +2,27 @@ import argon2 from 'argon2';
 import Labor from '../models/Model_Kepengurusan/Labor.js';
 import User from '../models/Model_User/Users.js';
 import dotenv from 'dotenv';
-import fetch from 'node-fetch';
+import storage from '../config/firebase.config.js';
+import { ref,getDownloadURL } from 'firebase/storage';
 
 dotenv.config();
 
-export const DownloadPdf = async (req, res) => {
+export const PreviewPDF = async (req, res) => {
     const { id } = req.params;
     try {
-        const user = await User.findOne({ where: { id } });
+        const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: "User Tidak Ditemukan" });
         }
         const nama_file = user.nama_file;
-
-        const response = await fetch(`https://firebasestorage.googleapis.com/v0/b/${process.env.storageBucket}/o/pdfs%2F${encodeURIComponent(nama_file)}?alt=media`);
-        if (!response.ok) {
-            throw new Error("Failed to download file from Firebase Storage");
-        }
-        const fileBuffer = await response.buffer();
-
-        // Set content-type header based on file type
-        res.set('Content-Type', 'application/pdf');
-
-        // Send the file to the client along with the filename
-        res.json({ fileBuffer, fileName: nama_file });
+        const fileRef = ref(storage, `pdfs/${nama_file}`);
+        const url = await getDownloadURL(fileRef);
+        return res.status(200).json({ code:200, status:"success", URL: url });
     } catch (error) {
         console.error('Error downloading PDF:', error);
-        res.status(500).json({ message: 'Failed to download PDF' });
+        return res.status(500).json({ message: 'Failed to download PDF' });
     }
 };
-
-
 
 export const RegisterUser = async (req, res) => {
     const {
@@ -82,7 +72,7 @@ export const RegisterUser = async (req, res) => {
             nama_file,
         });
 
-        return res.status(201).json({ message: "User berhasil didaftarkan." });
+        return res.status(201).json({ code:201, status:"success",message: "User berhasil didaftarkan." });
     } catch (error) {
         console.error("Error saat mendaftarkan pengguna:", error);
         return res.status(500).json({ message: "Terjadi kesalahan saat mendaftarkan pengguna." });
@@ -94,7 +84,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { nim },
-            attributes: ['id', 'nama', 'email','nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['id', 'nama', 'email', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -128,6 +118,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
 
 export const EditUserRegistrasi = async (req, res) => {
     const {
+        id,
         nama,
         nim,
         email,
@@ -144,7 +135,7 @@ export const EditUserRegistrasi = async (req, res) => {
         nama_file,
     } = req.body;
     try {
-        const user = await User.findOne({ where: { nim } });
+        const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -171,7 +162,7 @@ export const EditUserRegistrasi = async (req, res) => {
             user.file_path = file_path,
             user.nama_file = nama_file,
             await user.save();
-        res.status(200).json({ message: 'User updated successfully', user });
+        res.status(200).json({ code:200, status:"success",message: 'Berhasil Memperbarui Data Pengguna' });
     } catch (error) {
         console.error('Error updating user:', error);
         res.status(500).json({ message: 'Failed to update user' });
