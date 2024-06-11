@@ -20,11 +20,30 @@ const User = db.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+            isNumeric: true,
+            customValidator(value) {
+                const regex = /^[0-9]+$/;
+                if (!regex.test(value)) {
+                    throw new Error('NIM Harus Numerik.');
+                }
+            }
+        }
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+            isEmail: {
+                msg: "Perbaiki Penulisan Email Anda"
+            },
+            customValidator(value) {
+                if (!value) {
+                    throw new Error("Perbaiki Penulisan Email Anda");
+                }
+            }
+        }
     },
     nomor_asisten: {
         type: DataTypes.STRING,
@@ -63,6 +82,15 @@ const User = db.define('User', {
     nomor_hp: {
         type: DataTypes.STRING,
         allowNull: true,
+        validate: {
+            isNumeric: true,
+            customValidator(value) {
+                const regex = /^[0-9]+$/;
+                if (!regex.test(value)) {
+                    throw new Error('Format Number harus 08xxxx');
+                }
+            }
+        }
     },
     tempat_lahir: {
         type: DataTypes.STRING,

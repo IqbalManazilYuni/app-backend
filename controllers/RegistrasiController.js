@@ -3,7 +3,7 @@ import Labor from '../models/Model_Kepengurusan/Labor.js';
 import User from '../models/Model_User/Users.js';
 import dotenv from 'dotenv';
 import storage from '../config/firebase.config.js';
-import { ref,getDownloadURL } from 'firebase/storage';
+import { ref, getDownloadURL } from 'firebase/storage';
 
 dotenv.config();
 
@@ -17,7 +17,7 @@ export const PreviewPDF = async (req, res) => {
         const nama_file = user.nama_file;
         const fileRef = ref(storage, `pdfs/${nama_file}`);
         const url = await getDownloadURL(fileRef);
-        return res.status(200).json({ code:200, status:"success", URL: url });
+        return res.status(200).json({ code: 200, status: "success", URL: url });
     } catch (error) {
         console.error('Error downloading PDF:', error);
         return res.status(500).json({ message: 'Failed to download PDF' });
@@ -43,6 +43,10 @@ export const RegisterUser = async (req, res) => {
         file_path,
         nama_file,
     } = req.body;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({ message: "Password harus terdiri dari setidaknya 8 karakter dan mengandung setidaknya satu huruf besar, satu angka, dan satu karakter khusus." });
+    }
     try {
         const existingUser = await User.findOne({ where: { nim } });
         if (existingUser) {
@@ -51,6 +55,11 @@ export const RegisterUser = async (req, res) => {
         const existtingEmail = await User.findOne({ where: { email } });
         if (existtingEmail) {
             return res.status(400).json({ message: "User dengan Email tersebut sudah terdaftar." });
+        }
+        const tanggalLahir = new Date(tanggal_lahir);
+        const tanggalSekarang = new Date();
+        if (tanggalSekarang < tanggalLahir) {
+            return res.status(400).json({ code: 400, status: "error", message: "Tanggal Lahir Tidak Benar" });
         }
         const hashedPassword = await argon2.hash(password);
         await User.create({
@@ -72,10 +81,9 @@ export const RegisterUser = async (req, res) => {
             nama_file,
         });
 
-        return res.status(201).json({ code:201, status:"success",message: "User berhasil didaftarkan." });
+        return res.status(201).json({ code: 201, status: "success", message: "User berhasil didaftarkan." });
     } catch (error) {
-        console.error("Error saat mendaftarkan pengguna:", error);
-        return res.status(500).json({ message: "Terjadi kesalahan saat mendaftarkan pengguna." });
+        return res.status(500).json({ code: 500, message: error.errors[0].message });
     }
 };
 
@@ -140,12 +148,16 @@ export const EditUserRegistrasi = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         const existingUserWithNim = await User.findOne({ where: { nim } });
-        if (existingUserWithNim && existingUserWithNim.nim !== nim) {
-            return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
+        if (user.nim !== nim) {
+            if (existingUserWithNim && existingUserWithNim.nim === nim) {
+                return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
+            }
         }
         const existingUserWithEmail = await User.findOne({ where: { email } });
-        if (existingUserWithEmail && existingUserWithEmail.email !== email) {
-            return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
+        if (user.email !== email) {
+            if (existingUserWithEmail && existingUserWithEmail.email === email) {
+                return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
+            }
         }
         user.nama = nama,
             user.nim = nim,
@@ -162,7 +174,7 @@ export const EditUserRegistrasi = async (req, res) => {
             user.file_path = file_path,
             user.nama_file = nama_file,
             await user.save();
-        res.status(200).json({ code:200, status:"success",message: 'Berhasil Memperbarui Data Pengguna' });
+        res.status(200).json({ code: 200, status: "success", message: 'Berhasil Memperbarui Data Pengguna' });
     } catch (error) {
         console.error('Error updating user:', error);
         res.status(500).json({ message: 'Failed to update user' });

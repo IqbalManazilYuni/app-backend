@@ -35,7 +35,6 @@ export const GetWawancaraByIdLabor = async (req, res) => {
             };
         }));
 
-        // Mengembalikan payload ke client
         res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         console.error("Error saat proses mengambil wawancara:", error);
@@ -61,24 +60,14 @@ export const GetWawancaraById = async (req, res) => {
 export const GetPesertaWawancara = async (req, res) => {
     const { idWawancara } = req.params;
     try {
-        // Find all peserta wawancara by idWawancara
         const peserta = await PesertaWawancara.findAll({ where: { idWawancara: idWawancara } });
-
-        // If no peserta wawancara found, return a message indicating the list is empty
         if (peserta.length === 0) {
             return res.status(200).json({ code: 200, status: "success", message: "Peserta wawancara kosong", data: [] });
         }
-
-        // Process each peserta wawancara
         const payload = await Promise.all(peserta.map(async (pesertas) => {
-            // Find the pendaftar by idPendaftar
             const pendaftar = await Pendaftar.findOne({ where: { id: pesertas.idPendaftar } });
-
-            // If pendaftar is found, find the user by idUsers
             if (pendaftar) {
                 const user = await User.findOne({ where: { id: pendaftar.idUsers } });
-
-                // If user is found, return the user's details
                 if (user) {
                     return {
                         ...pesertas.toJSON(),
@@ -88,12 +77,8 @@ export const GetPesertaWawancara = async (req, res) => {
             }
             return null;
         }));
-
-        // Filter out any null values in the payload
         const filteredPayload = payload.filter(item => item !== null);
-
         res.status(200).json({ code: 200, status: "success", message: "Peserta Wawancara Ditemukan", data: filteredPayload });
-
     } catch (error) {
         console.error("Error saat proses mengambil peserta wawancara:", error);
         res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil peserta wawancara." });
