@@ -16,6 +16,10 @@ const Labor = db.define('Labor',{
     deskripsi:{
         type: DataTypes.TEXT,
         allowNull: false,
+    },
+    logo:{
+        type: DataTypes.TEXT,
+        allowNull:true,
     }
 },{
     tableName:"labor"

@@ -1,10 +1,23 @@
 
+import storage from "../config/firebase.config.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi } = req.body;
+    const file = req.file;
+
     try {
+        let logoFileName = null;
+        if (file) {
+            const storageRef = ref(storage, `logo/${file.originalname}`);
+            const snapshot = await uploadBytes(storageRef, file.buffer);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            logoFileName = file.originalname;
+        }
+
         const newLab = await Labor.create({
+            logo: logoFileName,
             nama_Labor,
             deskripsi
         });
@@ -44,13 +57,25 @@ export const GetLabByID = async (req, res) => {
 
 export const EditLab = async (req, res) => {
     const { id, nama_Labor, deskripsi } = req.body;
+    const file = req.file;
+
     try {
-        const lab = await Labor.findOne({ where: { id } })
+        const lab = await Labor.findOne({ where: { id } });
         if (!lab) {
             return res.status(404).json({ code: 404, status: "Not Found", message: 'Laboratorium not found' });
         }
+
+        let logoFileName = lab.logo;
+        if (file) {
+            const storageRef = ref(storage, `logo/${file.originalname}`);
+            const snapshot = await uploadBytes(storageRef, file.buffer);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            logoFileName = file.originalname;
+        }
+
         lab.nama_Labor = nama_Labor;
         lab.deskripsi = deskripsi;
+        lab.logo = logoFileName;
 
         await lab.save();
         res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully', lab });

@@ -153,6 +153,11 @@ export const EditUserRegistrasi = async (req, res) => {
                 return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
             }
         }
+        const tanggalLahir = new Date(tanggal_lahir);
+        const tanggalSekarang = new Date();
+        if (tanggalSekarang < tanggalLahir) {
+            return res.status(400).json({ code: 400, status: "error", message: "Tanggal Lahir Tidak Benar" });
+        }
         const existingUserWithEmail = await User.findOne({ where: { email } });
         if (user.email !== email) {
             if (existingUserWithEmail && existingUserWithEmail.email === email) {
@@ -176,8 +181,7 @@ export const EditUserRegistrasi = async (req, res) => {
             await user.save();
         res.status(200).json({ code: 200, status: "success", message: 'Berhasil Memperbarui Data Pengguna' });
     } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ message: 'Failed to update user' });
+        return res.status(500).json({ code: 500, message: error.errors[0].message });
     }
 };
 
