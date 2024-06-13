@@ -7,7 +7,7 @@ router.get('/getkepengurusanbyid/:id',GetKepengurusanById)
 router.get('/getdetailkepengurusan/:idKepengurusan', DetailKepengurusanLab)
 router.get('/getkepengurusan/:idLabor', GetKepengurusan);
 router.post('/add-detailkepengurusan', CreateDetailKepengurusan);
-router.get('/getdetailkepengurusan/:id', GetDetailKepengurusanByID);
+router.get('/getdetailkepengurusanbyid/:id', GetDetailKepengurusanByID);
 router.post('/edit-detailkepengurusan', EditDetailKepengurusan);
 router.post('/add-kepengurusan', CreateKepengurusan);
 router.post('/edit-kepengurusan', EditKepengurusan);

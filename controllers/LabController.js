@@ -1,7 +1,11 @@
 
 import storage from "../config/firebase.config.js";
+import DetailKepengurusan from "../models/Model_Kepengurusan/DetailKepengurusan.js";
+import Divisi from "../models/Model_Kepengurusan/Divisi.js";
+import Kepengurusan from "../models/Model_Kepengurusan/Kepengurusan.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import User from "../models/Model_User/Users.js";
 
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi } = req.body;
@@ -78,7 +82,7 @@ export const EditLab = async (req, res) => {
         lab.logo = logoFileName;
 
         await lab.save();
-        res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully', lab });
+        res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully'});
     } catch (error) {
         console.error('Error updating Laboratorium:', error);
         res.status(500).json({ code: 500, status: "error", message: 'Failed to update Laboratorium' });
@@ -98,4 +102,48 @@ export const DeleteLab = async (req, res) => {
         console.error('Error Delete Laboratorium:', error);
         res.status(500).json({ code: 500, status: "error", message: 'Failed to delete Laboratorium' });
     }
+};
+export const GetKepengurusanByIDLabor = async (req, res) => {
+    const { idLabor } = req.params;
+    try {
+        // Ambil data semua kepengurusan berdasarkan idLabor
+        const kepengurusanLabor = await Kepengurusan.findAll({ where: { idLabor } });
+
+        // Siapkan array untuk menyimpan semua promises
+        const detailKepengurusanPromises = kepengurusanLabor.map(async (kepengurusan) => {
+            const detailKepengurusanList = await DetailKepengurusan.findAll({ where: { idKepengurusan: kepengurusan.id } });
+            const payloads = kepengurusan.toJSON();
+            payloads.details = [];
+
+            if (detailKepengurusanList.length > 0) {
+                // Ambil detail divisi dan user untuk setiap detail kepengurusan
+                for (const detailKepengurusan of detailKepengurusanList) {
+                    const divisi = await Divisi.findOne({ where: { id: detailKepengurusan.idDivisi } });
+                    const user = await User.findOne({ where: { id: detailKepengurusan.idUsers } });
+
+                    const detailPayload = {
+                        idUsers: detailKepengurusan.idUsers,
+                        idDivisi: detailKepengurusan.idDivisi,
+                        jabatan: detailKepengurusan.jabatan,
+                        idDetail: detailKepengurusan.id,
+                        nama_divisi: divisi ? divisi.nama_divisi : null,
+                        deskripsi: divisi ? divisi.deskripsi : null,
+                        nama: user ? user.nama : null,
+                        nomor_asisten: user ? user.nomor_asisten : null,
+                        JenisKelamin: user ? user.JenisKelamin : null
+                    };
+
+                    payloads.details.push(detailPayload);
+                }
+            }
+            return payloads;
+        });
+        const detailKepengurusanLabor = await Promise.all(detailKepengurusanPromises);
+        return res.status(200).json({ code: 200, status: "success", data: detailKepengurusanLabor });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
+    }
 }
+
+

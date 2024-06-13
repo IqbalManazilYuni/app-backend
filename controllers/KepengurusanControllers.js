@@ -122,8 +122,6 @@ export const CreateDetailKepengurusan = async (req, res) => {
                 message: "Detail Kepengurusan dengan Users dan Kepengurusan yang sama sudah ada"
             });
         }
-
-        // Cek jika sudah ada detail kepengurusan dengan idKepengurusan
         const checkDetailKepengurusan = await DetailKepengurusan.findAll({ where: { idKepengurusan } });
         if (checkDetailKepengurusan.length > 0) {
             // Pengecekan untuk jabatan khusus
@@ -137,8 +135,6 @@ export const CreateDetailKepengurusan = async (req, res) => {
                     });
                 }
             }
-
-            // Pengecekan untuk jabatan Kepala Divisi
             if (jabatan === "Kepala Divisi") {
                 const kepalaDivisiFailed = await DetailKepengurusan.findOne({ where: { idKepengurusan, idDivisi } });
                 if (kepalaDivisiFailed && kepalaDivisiFailed.jabatan === "Kepala Divisi") {
@@ -150,8 +146,6 @@ export const CreateDetailKepengurusan = async (req, res) => {
                 }
             }
         }
-
-        // Membuat detail kepengurusan baru
         const kepengurusan = await DetailKepengurusan.create({
             idKepengurusan,
             idUsers,
@@ -205,6 +199,7 @@ export const DetailKepengurusanLab = async (req, res) => {
 export const GetDetailKepengurusanByID = async (req, res) => {
     const { id } = req.params;
     try {
+        console.log("ayam:",id);
         const detailKepengurusan = await DetailKepengurusan.findOne({ where: { id } });
         if (!detailKepengurusan) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Detail Kepengurusan Tidak ditemukan" });

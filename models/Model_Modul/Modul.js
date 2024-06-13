@@ -15,28 +15,22 @@ const Modul = db.define('Modul', {
         allowNull: false,
     },
     nama_file: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.TEXT,
         allowNull: false,
-        unique: true,
-    },
-    file_path: {
-        type: DataTypes.STRING(500),
-        allowNull: false,
-        unique: true,
-        
     },
     idLabor: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
-    },tahun: {
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    },
+    tahun: {
         type: DataTypes.STRING,
         allowNull: false,
     }
-},{
-    tableName:"Modul"
+}, {
+    tableName: "Modul"
 });
 
 export default Modul;

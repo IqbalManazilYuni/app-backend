@@ -14,22 +14,26 @@ const RiwayatPembaca = db.define('RiwayatPembaca', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     idModul: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     tanggal_baca: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    durasi_baca: {
+        type: DataTypes.STRING,
+        allowNull: false,
     }
-},{
-    tableName:"RiwayatPembaca"
+}, {
+    tableName: "RiwayatPembaca"
 });
 
 export default RiwayatPembaca;

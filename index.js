@@ -16,6 +16,7 @@ import PendaftarRoutes from './routes/PendaftarRoutes.js'
 import UjianRoutes from './routes/UjianRoutes.js'
 import BankSoalRoutes from './routes/BankSoalRoutes.js'
 import SoalUjianRoutes from './routes/SoalUjianRoutes.js'
+import ModulRoutes from './routes/ModulRoutes.js'
 import DetailKepengurusan from "./models/Model_Kepengurusan/DetailKepengurusan.js";
 import Kepengurusan from "./models/Model_Kepengurusan/Kepengurusan.js";
 import Divisi from "./models/Model_Kepengurusan/Divisi.js";
@@ -162,6 +163,7 @@ app.use(PendaftarRoutes);
 app.use(UjianRoutes);
 app.use(BankSoalRoutes);
 app.use(SoalUjianRoutes);
+app.use(ModulRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening on port", process.env.PORT);

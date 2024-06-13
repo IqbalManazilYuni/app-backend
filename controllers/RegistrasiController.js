@@ -10,12 +10,12 @@ dotenv.config();
 export const PreviewPDF = async (req, res) => {
     const { id } = req.params;
     try {
-        const user = await User.findByPk(id);
+        const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: "User Tidak Ditemukan" });
         }
         const nama_file = user.nama_file;
-        const fileRef = ref(storage, `pdfs/${nama_file}`);
+        const fileRef = ref(storage, `/cv/${nama_file}`);
         const url = await getDownloadURL(fileRef);
         return res.status(200).json({ code: 200, status: "success", URL: url });
     } catch (error) {
