@@ -42,7 +42,7 @@ const Recruitment = db.define('Recruitment', {
     },
     status: {
         type: DataTypes.ENUM('Open', 'Close'),
-        defaultValue: 'Open',
+        defaultValue: 'Close',
         allowNull: false,
     }
 }, {

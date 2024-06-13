@@ -153,10 +153,16 @@ export const UpdateStatusRecruitment = async (req, res) => {
     try {
         const recruitmentList = await Recruitment.findAll();
         const updatedRecruitmentList = recruitmentList.map(async (recruitment) => {
+            const jadwal_buka = new Date(recruitment.jadwal_buka);
             const jadwal_tutup = new Date(recruitment.tanggal_tutup);
             const jadwal = new Date(date);
-            const status = jadwal < jadwal_tutup ? "Open" : "Close";
-
+            let status = recruitment.status
+            if (jadwal_buka < jadwal) {
+                status = "Open"
+            }
+            else if (jadwal > jadwal_tutup) {
+                status = "Close"
+            }
             // Memeriksa apakah status berubah
             if (status !== recruitment.status) {
                 // Jika status berubah, lakukan update pada tabel Recruitment

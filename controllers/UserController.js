@@ -224,7 +224,7 @@ export const EditUser = async (req, res) => {
         res.status(200).json({ code: 200, status: "success", message: 'User updated successfully', token: encryptedToken, expiry });
     } catch (error) {
         console.error('Error updating user:', error);
-        res.status(500).json({ code: 500, status: "error", message: 'Failed to update user' });
+        return res.status(500).json({ code: 500, message: error.errors[0].message });
     }
 }
 
