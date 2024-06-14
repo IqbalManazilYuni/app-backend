@@ -49,6 +49,19 @@ const User = db.define('User', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    angkatan: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            len: [4, 4],
+            customValidator(value) {
+                const regex = /^[0-9]+$/;
+                if (!regex.test(value)) {
+                    throw new Error('Format Angkatan tidak benar');
+                }
+            }
+        }
+    },
     jenisPengguna: {
         type: DataTypes.ENUM('Asisten', 'Calon Asisten', 'Ex-Asisten'),
         allowNull: false,
@@ -72,10 +85,6 @@ const User = db.define('User', {
         defaultValue: 'Pendaftar',
     },
     nama_file: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-    file_path: {
         type: DataTypes.TEXT,
         allowNull: true,
     },

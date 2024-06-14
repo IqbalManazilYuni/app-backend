@@ -39,8 +39,8 @@ export const RegisterUser = async (req, res) => {
         JenisKelamin,
         alamat,
         AksesRole,
+        angkatan,
         status,
-        file_path,
         nama_file,
     } = req.body;
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -70,6 +70,7 @@ export const RegisterUser = async (req, res) => {
             password: hashedPassword,
             status,
             idLabor,
+            angkatan,
             jenisPengguna,
             nomor_hp,
             tempat_lahir,
@@ -77,22 +78,23 @@ export const RegisterUser = async (req, res) => {
             JenisKelamin,
             alamat,
             AksesRole,
-            file_path,
             nama_file,
         });
 
         return res.status(201).json({ code: 201, status: "success", message: "User berhasil didaftarkan." });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ code: 500, message: error.errors[0].message });
     }
 };
 
 export const GetUserByNimRegistrasi = async (req, res) => {
     const { nim } = req.body;
+    console.log(nim)
     try {
         const user = await User.findOne({
             where: { nim },
-            attributes: ['id', 'nama', 'email', 'nim', 'status', 'file_path', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['id', 'nama', 'email', 'nim', 'status', 'angkatan', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -114,12 +116,13 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             JenisKelamin: user.JenisKelamin,
             alamat: user.alamat,
             nama_file: user.nama_file,
-            file_path: user.file_path,
+            angkatan: user.angkatan,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
+        console.log(formattedUser);
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUser });
     } catch (error) {
-        console.error("Error saat mengambil pengguna berdasarkan token:", error);
+        console.error("Error saat mengambil pengguna berdasarkan nim:", error);
         return res.status(500).json({ message: "Terjadi kesalahan saat memproses permintaan." });
     }
 };
@@ -134,12 +137,12 @@ export const EditUserRegistrasi = async (req, res) => {
         idLabor,
         jenisPengguna,
         nomor_hp,
+        angkatan,
         tempat_lahir,
         tanggal_lahir,
         JenisKelamin,
         alamat,
         status,
-        file_path,
         nama_file,
     } = req.body;
     try {
@@ -167,6 +170,7 @@ export const EditUserRegistrasi = async (req, res) => {
         user.nama = nama,
             user.nim = nim,
             user.email = email,
+            user.angkatan = angkatan,
             user.nomor_asisten = nomor_asisten,
             user.status = status,
             user.idLabor = idLabor,
@@ -176,7 +180,6 @@ export const EditUserRegistrasi = async (req, res) => {
             user.tanggal_lahir = tanggal_lahir,
             user.JenisKelamin = JenisKelamin,
             user.alamat = alamat,
-            user.file_path = file_path,
             user.nama_file = nama_file,
             await user.save();
         res.status(200).json({ code: 200, status: "success", message: 'Berhasil Memperbarui Data Pengguna' });

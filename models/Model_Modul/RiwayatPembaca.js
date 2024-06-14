@@ -29,7 +29,7 @@ const RiwayatPembaca = db.define('RiwayatPembaca', {
         allowNull: false,
     },
     durasi_baca: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
     }
 }, {

@@ -6,6 +6,7 @@ import Labor from '../models/Model_Kepengurusan/Labor.js';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
 import db from '../config/db.config.js';
+import { stat } from 'fs';
 
 // export const GetAllUsers = async (req, res) => {
 //     try {
@@ -141,7 +142,7 @@ export const GetUsersByPengguna = async (req, res) => {
     try {
         const users = await User.findAll({
             where: { jenisPengguna: jenisPengguna, idLabor: idLabor },
-            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'nama_file', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
+            attributes: ['id', 'nama', 'nim', 'angkatan', 'nomor_asisten', 'nama_file', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
         if (!users || users.length === 0) {
@@ -174,6 +175,7 @@ export const EditUser = async (req, res) => {
         nomor_hp,
         tempat_lahir,
         tanggal_lahir,
+        angkatan,
         JenisKelamin,
         alamat,
         status
@@ -200,6 +202,11 @@ export const EditUser = async (req, res) => {
                 return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
             }
         }
+        const tanggalSekarang = new Date();
+        const tanggalLahir = new Date(tanggal_lahir);
+        if (tanggalSekarang < tanggalLahir) {
+            return res.status(400).json({ code: 400, status: "error", message: "Tanggal Lahir Tidak Benar" });
+        }
         const change1 = user.email !== email;
 
         if (change1) {
@@ -210,6 +217,7 @@ export const EditUser = async (req, res) => {
         }
         user.nama = nama;
         user.nim = nim;
+        user.angkatan = angkatan
         user.email = email;
         user.nomor_asisten = nomor_asisten;
         user.idLabor = idLabor;
@@ -233,7 +241,7 @@ export const GetUserById = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'email', 'status', 'file_path', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -244,6 +252,7 @@ export const GetUserById = async (req, res) => {
             nama: user.nama,
             nim: user.nim,
             email: user.email,
+            angkatan: user.angkatan,
             nomor_asisten: user.nomor_asisten,
             jenisPengguna: user.jenisPengguna,
             nomor_hp: user.nomor_hp,
@@ -255,7 +264,6 @@ export const GetUserById = async (req, res) => {
             alamat: user.alamat,
             status: user.status,
             nama_file: user.nama_file,
-            file_path: user.file_path,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
         return res.status(200).json({ code: 200, status: "success", message: "User Ditemukan", formattedUser });

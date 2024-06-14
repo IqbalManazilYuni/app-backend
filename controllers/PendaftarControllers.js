@@ -2,6 +2,7 @@ import Recruitment from "../models/Model_Recruitment/Recruitment.js";
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js"
 import User from "../models/Model_User/Users.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js"
+import Kegiatan from "../models/Model_Recruitment/Kegiatan.js"
 
 export const CreatePendaftar = async (req, res) => {
     const { idUsers, tanggal_daftar, idKegiatan, idRecruitment } = req.body;
@@ -44,7 +45,18 @@ export const CreatePendaftar = async (req, res) => {
             await transaction.rollback();
             return res.status(202).json({ status: "accept", code: 202, message: "Jenis Pengguna Selain Calon Asisten Tidak diperbolehkan" });
         }
-
+        const kegiatanOr = await Kegiatan.findOne({ id: { idKegiatan }, transaction });
+        const tahunkegiatan = Number(kegiatanOr.tahun);
+        const angkatanUser = Number(user.angkatan);
+        const limitDaftar = tahunkegiatan - angkatanUser
+        if (limitDaftar > 1) {
+            await transaction.rollback();
+            return res.status(400).json({ message: "Angkatan Anda Tidak Bisa Mendaftar Pada Tahun ini", code: 400, status: "error" });
+        }
+        else if (limitDaftar < 0) {
+            await transaction.rollback();
+            return res.status(400).json({ message: "Angkatan Anda Tidak Bisa Mendaftar Pada Tahun ini", code: 400, status: "error" });
+        }
         await Pendaftar.create({
             idUsers,
             tanggal_daftar,
@@ -143,11 +155,69 @@ export const DeletePendaftar = async (req, res) => {
     try {
         const pendaftar = await Pendaftar.findOne({ where: { id } });
         const user = await User.findOne({ where: { id: pendaftar.idUsers } });
-        user.status = 'Pendaftar';
-        await user.save();
+        if (user.status === "Tahapan1") {
+            user.status = 'Pendaftar';
+            await user.save();
+        }
         await pendaftar.destroy();
         return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Berhasi Dihapus" });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Menghapus Pendaftar", error });
     }
+};
+
+export const GetPendaftarLabByID = async (req, res) => {
+    const { idLabor } = req.params;
+    try {
+        // Fetch all recruitments for the given idLabor
+        const recruitmentLab = await Recruitment.findAll({
+            where: { idLabor },
+            attributes: ['id', 'nama_recruitment']
+        });
+
+        // Initialize an array to hold the result
+        const result = [];
+
+        // Loop through each recruitment to fetch the pendaftar details
+        for (const recruitment of recruitmentLab) {
+            // Fetch all pendaftar for the current recruitment
+            const pendaftarList = await Pendaftar.findAll({
+                where: { idRecruitment: recruitment.id },
+                attributes: ['idRecruitment', 'idUsers', 'tanggal_daftar']
+            });
+
+            // Initialize an array to hold the pendaftar details for the current recruitment
+            const pendaftar = [];
+
+            // Loop through each pendaftar to fetch the user details
+            for (const pend of pendaftarList) {
+                // Fetch the user details for the current pendaftar
+                const user = await User.findOne({
+                    where: { id: pend.idUsers },
+                    attributes: ['nama', 'nim']
+                });
+
+                // Add the formatted pendaftar details to the array
+                pendaftar.push({
+                    idUsers: pend.idUsers,
+                    nama: user.nama,
+                    nim: user.nim,
+                    tanggal_daftar: pend.tanggal_daftar
+                });
+            }
+
+            // Push the formatted recruitment and pendaftar details to the result array
+            result.push({
+                idRecruitment: recruitment.id,
+                nama_recruitment: recruitment.nama_recruitment,
+                pendaftar: pendaftar
+            });
+        }
+
+        return res.status(200).json({ code: 200, status: "success", data: result });
+    } catch (error) {
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });
+    }
 }
+
+
