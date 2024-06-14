@@ -241,7 +241,7 @@ export const GetUserById = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -257,7 +257,6 @@ export const GetUserById = async (req, res) => {
             jenisPengguna: user.jenisPengguna,
             nomor_hp: user.nomor_hp,
             idLabor: user.idLabor,
-            status: user.status,
             tempat_lahir: user.tempat_lahir,
             tanggal_lahir: user.tanggal_lahir,
             JenisKelamin: user.JenisKelamin,

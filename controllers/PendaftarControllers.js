@@ -194,14 +194,13 @@ export const GetPendaftarLabByID = async (req, res) => {
                 // Fetch the user details for the current pendaftar
                 const user = await User.findOne({
                     where: { id: pend.idUsers },
-                    attributes: ['nama', 'nim']
+                    attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp','tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat'],
                 });
 
                 // Add the formatted pendaftar details to the array
                 pendaftar.push({
                     idUsers: pend.idUsers,
-                    nama: user.nama,
-                    nim: user.nim,
+                    ...user.toJSON(),
                     tanggal_daftar: pend.tanggal_daftar
                 });
             }
