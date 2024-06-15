@@ -50,6 +50,7 @@ export const GetUserByToken = async (req, res) => {
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
         const payload = {
+            id: user.id,
             nama: user.nama,
             nim: user.nim,
             idLabor: user.idLabor,

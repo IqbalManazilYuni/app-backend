@@ -1,10 +1,13 @@
 import express from 'express';
-import { CreateNilaiWawancara, CreatePesertaWawancara, DeletePesertaWawancara, DeletePewawancara, EditPesertaWawancara, GetAsistePewawancara, GetJadwalWawancara, GetNilaiPewawancara, GetPendaftarByIDWawancara, GetPesertaByID, GetPesertaWawancara, GetWawancaraByIDLaborMobile, GetWawancaraById, GetWawancaraByIdLabor } from '../controllers/WawancaraControllers.js';
+import { CreateNilaiWawancara, CreatePesertaWawancara, DeletePesertaWawancara, DeletePewawancara, EditPesertaWawancara, GetAsistePewawancara, GetJadwalWawancara, GetListPesertaWawancaraByIDMobile, GetNilaiPewawancara, GetNilaiWawancaraByID, GetPendaftarByIDWawancara, GetPesertaByID, GetPesertaWawancara, GetWawancaraByIDLaborMobile, GetWawancaraById, GetWawancaraByIdLabor, UpdateNilaiWawancaraPeserta } from '../controllers/WawancaraControllers.js';
 
 const router = express.Router();
 
 router.get('/getwawancarabyidlabor/:idLabor', GetWawancaraByIdLabor)
 router.get('/getwawancarabyidlabormobile/:idLabor', GetWawancaraByIDLaborMobile)
+router.get('/getpesertawwcbyidmobile/:id', GetListPesertaWawancaraByIDMobile)
+router.get('/getnilaiwawancarabyid/:id', GetNilaiWawancaraByID)
+router.post('/edit-nilaiwawancara', UpdateNilaiWawancaraPeserta)
 router.get('/getpesertawawancarabyid/:id', GetPesertaByID)
 router.get('/getwawancarabyid/:id', GetWawancaraById);
 router.get('/getpesertawawancara/:idWawancara', GetPesertaWawancara)
