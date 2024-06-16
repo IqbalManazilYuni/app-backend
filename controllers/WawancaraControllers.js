@@ -475,11 +475,7 @@ export const GetNilaiWawancaraByID = async (req, res) => {
 export const UpdateNilaiWawancaraPeserta = async (req, res) => {
     const { id, nilai, keterangan } = req.body
     try {
-        console.log(id)
-        console.log(keterangan)
-        console.log(nilai)
         const CariNilaiWawancara = await NilaiWawancara.findOne({ where: { id } });
-        console.log(JSON.stringify(CariNilaiWawancara))
         const change = Number(nilai);
         if (change > 100) {
             return res.status(400).json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" })
@@ -497,7 +493,60 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
         console.error("Terjadi Kesalahan saat Mengupdate Nilai Wawancara", error.message);
         return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' });
     }
+};
+
+export const GetWawancaraTimeByNIM = async (req, res) => {
+    const { nim } = req.params;
+    try {
+        // Mendapatkan user berdasarkan nim
+        const userbynim = await User.findOne({ where: { nim } });
+        if (!userbynim) {
+            return res.status(404).json({ code: 404, status: "error", message: "User tidak ditemukan" });
+        }
+
+        // Mendapatkan IdPendaftar berdasarkan idUsers
+        const pendaftarList = await Pendaftar.findAll({ where: { idUsers: userbynim.id } });
+        if (pendaftarList.length === 0) {
+            return res.status(404).json({ code: 404, status: "error", message: "Pendaftar tidak ditemukan" });
+        }
+
+        // Mengambil data wawancara berdasarkan IdPendaftar
+        const wawancaraPromises = pendaftarList.map(async (pendaftar) => {
+            const pesertaWawancaraList = await PesertaWawancara.findAll({
+                where: { idPendaftar: pendaftar.id }
+            });
+
+            const tahapanPromises = pesertaWawancaraList.map(async (pesertaWawancara) => {
+                const wawancara = await Wawancara.findOne({ where: { id: pesertaWawancara.idWawancara } });
+
+                if (wawancara) {
+                    const tahapan = await Tahapan.findOne({ where: { id: wawancara.idTahapan } });
+                    if (tahapan) {
+                        const recruitment = await Recruitment.findOne({ where: { id: tahapan.idRecruitment } });
+                        return {
+                            lokasi: pesertaWawancara.lokasi,
+                            jadwal_mulai: pesertaWawancara.jadwal_mulai,
+                            jadwal_selesai: pesertaWawancara.jadwal_selesai,
+                            idTahapan: tahapan.id,
+                            idRecruitment: tahapan.idRecruitment,
+                            nama_recruitment: recruitment ? recruitment.nama_recruitment : null
+                        };
+                    }
+                }
+            });
+
+            return Promise.all(tahapanPromises);
+        });
+
+        const wawancaraData = await Promise.all(wawancaraPromises);
+
+        return res.status(200).json({ code: 200, status: "success", data: wawancaraData.flat().filter(item => item !== undefined) });
+    } catch (error) {
+        console.error("Terjadi Kesalahan saat Mengambil Jadwal Wawancara", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' });
+    }
 }
+
 
 
 
