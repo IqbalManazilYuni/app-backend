@@ -5,7 +5,7 @@ import Labor from "../models/Model_Kepengurusan/Labor.js"
 import Kegiatan from "../models/Model_Recruitment/Kegiatan.js"
 
 export const CreatePendaftar = async (req, res) => {
-    const { idUsers, tanggal_daftar, idKegiatan, idRecruitment } = req.body;
+    const { idUsers, tanggal_daftar, idKegiatan, idRecruitment, alasan, file_permohonan, file_krs } = req.body;
     const transaction = await Pendaftar.sequelize.transaction();
 
     try {
@@ -61,7 +61,10 @@ export const CreatePendaftar = async (req, res) => {
             idUsers,
             tanggal_daftar,
             idKegiatan,
-            idRecruitment
+            idRecruitment,
+            alasan,
+            file_permohonan,
+            file_krs
         }, { transaction });
 
         await User.update({ status: 'Tahapan1' }, { where: { id: idUsers }, transaction });
@@ -106,7 +109,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
 
         const pendaftar = await Pendaftar.findAll({
             where: { idRecruitment: idRecruitments },
-            attributes: ['id', 'idUsers', 'idRecruitment']
+            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs','file_permohonan']
         });
         const idUsers = pendaftar.map(pend => pend.idUsers);
 
@@ -141,7 +144,9 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
                 nama_recruitment: recruitmentMap[pend.idRecruitment],
                 nama_Labor: laborMap[userWithoutPassword.idLabor],
                 id: pend.id,
-                idUsers: pend.idUsers
+                idUsers: pend.idUsers,
+                file_krs: pend.file_krs,
+                file_permohonan: pend.file_permohonan
             };
         });
         return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: payload })
@@ -194,7 +199,7 @@ export const GetPendaftarLabByID = async (req, res) => {
                 // Fetch the user details for the current pendaftar
                 const user = await User.findOne({
                     where: { id: pend.idUsers },
-                    attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp','tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat'],
+                    attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat'],
                 });
 
                 // Add the formatted pendaftar details to the array
@@ -216,6 +221,38 @@ export const GetPendaftarLabByID = async (req, res) => {
         return res.status(200).json({ code: 200, status: "success", data: result });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });
+    }
+};
+
+export const GetPendaftarByNIM = async (req, res) => {
+    const { nim, idRecruitment } = req.body;
+    try {
+        const idUser = await User.findOne({ where: { nim } });
+        const pendaftar = await Pendaftar.findOne({ where: { idUsers: idUser.id, idRecruitment: idRecruitment } });
+        const payload = {
+            id: pendaftar.id,
+            file_krs: pendaftar.file_krs,
+            file_permohonan: pendaftar.file_permohonan,
+            alasan: pendaftar.alasan,
+        };
+        return res.status(200).json({ code: 200, status: "success", data: payload })
+    } catch (error) {
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });
+    }
+};
+
+export const EditPendaftarDokumen = async (req, res) => {
+    const { id, file_krs, file_permohonan, alasan } = req.body;
+    try {
+        const pendaftar = await Pendaftar.findOne({ where: { id } });
+        pendaftar.file_krs = file_krs,
+        pendaftar.file_permohonan = file_permohonan,
+        pendaftar.alasan = alasan,
+        await pendaftar.save();
+        return res.status(200).json({ code: 200, message:"Berhasil Memperbarui File Dokumen dan Asalan Mendaftar"})
+    } catch (error) {
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Memperbarui Pendaftar", error });
+
     }
 }
 

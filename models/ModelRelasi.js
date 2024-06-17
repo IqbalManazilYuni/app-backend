@@ -20,121 +20,123 @@ import SoalEssay from "./Model_Soal/SoalEssay.js";
 import SoalMultiple from "./Model_Soal/SoalMultple.js";
 import User from "./Model_User/Users.js"
 
-export const RelasiLabor = async () =>{
+export const RelasiLabor = async () => {
 
-    Labor.hasMany(User,{foreignKey:"idLabor"});
-    User.belongsTo(Labor, {foreignKey:"idLabor"});
+    Labor.hasMany(User, { foreignKey: "idLabor" });
+    User.belongsTo(Labor, { foreignKey: "idLabor" });
 
-    Labor.hasMany(Kepengurusan, { foreignKey:"idLabor"});
-    Kepengurusan.belongsTo(Labor, { foreignKey:"idLabor"});
+    Labor.hasMany(Kepengurusan, { foreignKey: "idLabor" });
+    Kepengurusan.belongsTo(Labor, { foreignKey: "idLabor" });
 
-    Labor.hasMany(Divisi, { foreignKey:"idLabor"});
-    Divisi.belongsTo(Labor, { foreignKey:"idLabor"});
+    Labor.hasMany(Divisi, { foreignKey: "idLabor" });
+    Divisi.belongsTo(Labor, { foreignKey: "idLabor" });
 
-    Labor.hasMany(BankSoal, { foreignKey:"idLabor"});
-    BankSoal.belongsTo(Labor, {foreignKey:"idLabor"});
+    Labor.hasMany(BankSoal, { foreignKey: "idLabor" });
+    BankSoal.belongsTo(Labor, { foreignKey: "idLabor" });
 
-    Labor.hasMany(Modul, {foreignKey:"idLabor"});
-    Modul.belongsTo(Labor, {foreignKey:"idLabor"});
+    Labor.hasMany(Modul, { foreignKey: "idLabor" });
+    Modul.belongsTo(Labor, { foreignKey: "idLabor" });
 
-    Labor.hasMany(Recruitment, {foreignKey:"idLabor"});
-    Recruitment.belongsTo(Labor, {foreignKey:"idLabor"});
-
-}
-
-export const RelasiUser = async ()=>{
-    User.hasMany(RiwayatPembaca, {foreignKey:"idUsers"});
-    RiwayatPembaca.belongsTo(User, { foreignKey:"idUsers"});
-
-    User.hasMany(DetailKepengurusan, {foreignKey:"idUsers"});
-    DetailKepengurusan.belongsTo(User, { foreignKey:"idUsers"});
-
-    User.hasMany(Pendaftar, {foreignKey:"idUsers"});
-    Pendaftar.belongsTo(User, { foreignKey:"idUsers"});
+    Labor.hasMany(Recruitment, { foreignKey: "idLabor" });
+    Recruitment.belongsTo(Labor, { foreignKey: "idLabor" });
 
 }
 
-export const RelasiModul = async ()=>{
-    Modul.hasMany(RiwayatPembaca, {foreignKey:"idModul"});
-    RiwayatPembaca.belongsTo(Modul, { foreignKey: "idModul"});
+export const RelasiUser = async () => {
+    User.hasMany(RiwayatPembaca, { foreignKey: "idUsers" });
+    RiwayatPembaca.belongsTo(User, { foreignKey: "idUsers" });
+
+    User.hasMany(DetailKepengurusan, { foreignKey: "idUsers" });
+    DetailKepengurusan.belongsTo(User, { foreignKey: "idUsers" });
+
+    User.hasMany(Pendaftar, { foreignKey: "idUsers" });
+    Pendaftar.belongsTo(User, { foreignKey: "idUsers" });
 }
 
-export const RelasiKepengurusan = async ()=>{
-    Kepengurusan.hasMany(DetailKepengurusan, {foreignKey:"idKepengurusan"});
-    DetailKepengurusan.belongsTo(Kepengurusan, { foreignKey:"idKepengurusan"});
+export const RelasiModul = async () => {
+    Modul.hasMany(RiwayatPembaca, { foreignKey: "idModul" });
+    RiwayatPembaca.belongsTo(Modul, { foreignKey: "idModul" });
 }
 
-export const RelasiDivisi = async ()=>{
-    Divisi.hasMany(DetailKepengurusan, { foreignKey : "idDivisi"});
-    DetailKepengurusan.belongsTo(Divisi, { foreignKey : "idDivisi"});
-}
-export const RelasiKegiatan = async ()=>{
-    Kegiatan.hasMany(Recruitment, { foreignKey : "idKegiatan"});
-    Recruitment.belongsTo(Kegiatan, { foreignKey: "idKegiatan"});
-}
-export const RelasiRecruitment = async ()=>{
-    Recruitment.hasMany(Pendaftar, { foreignKey : "idRecruitment"});
-    Pendaftar.belongsTo(Recruitment, { foreignKey : "idRecruitment"});
-
-    Recruitment.hasMany(Tahapan, { foreignKey:"idRecruitment"});
-    Tahapan.belongsTo(Recruitment, {foreignKey:"idRecruitment"});
+export const RelasiKepengurusan = async () => {
+    Kepengurusan.hasMany(DetailKepengurusan, { foreignKey: "idKepengurusan" });
+    DetailKepengurusan.belongsTo(Kepengurusan, { foreignKey: "idKepengurusan" });
 }
 
-export const RelasiPendaftar = async ()=>{
-    Pendaftar.hasMany(PesertaUjian, {foreignKey:"idPendaftar"});
-    PesertaUjian.belongsTo(Pendaftar, {foreignKey:"idPendaftar"});
+export const RelasiDivisi = async () => {
+    Divisi.hasMany(DetailKepengurusan, { foreignKey: "idDivisi" });
+    DetailKepengurusan.belongsTo(Divisi, { foreignKey: "idDivisi" });
+}
+export const RelasiKegiatan = async () => {
+    Kegiatan.hasMany(Recruitment, { foreignKey: "idKegiatan" });
+    Recruitment.belongsTo(Kegiatan, { foreignKey: "idKegiatan" });
+}
+export const RelasiRecruitment = async () => {
+    Recruitment.hasMany(Pendaftar, { foreignKey: "idRecruitment" });
+    Pendaftar.belongsTo(Recruitment, { foreignKey: "idRecruitment" });
 
-    Pendaftar.hasMany(PesertaWawancara, { foreignKey : "idPendaftar"});
-    PesertaWawancara.belongsTo(Pendaftar, {foreignKey :"idPendaftar"});
+    Recruitment.hasMany(Tahapan, { foreignKey: "idRecruitment" });
+    Tahapan.belongsTo(Recruitment, { foreignKey: "idRecruitment" });
+}
+
+export const RelasiPendaftar = async () => {
+    Pendaftar.hasMany(PesertaUjian, { foreignKey: "idPendaftar" });
+    PesertaUjian.belongsTo(Pendaftar, { foreignKey: "idPendaftar" });
+
+    Pendaftar.hasMany(PesertaWawancara, { foreignKey: "idPendaftar" });
+    PesertaWawancara.belongsTo(Pendaftar, { foreignKey: "idPendaftar" });
 
 }
 
-export const RelasiTahapan = async ()=>{
-    Tahapan.hasOne(Wawancara, {foreignKey:"idTahapan"});
-    Wawancara.belongsTo(Tahapan, { foreignKey:"idTahapan"});
+export const RelasiTahapan = async () => {
+    Tahapan.hasOne(Wawancara, { foreignKey: "idTahapan" });
+    Wawancara.belongsTo(Tahapan, { foreignKey: "idTahapan" });
 
-    Tahapan.hasOne(Ujian, { foreignKey:"idTahapan"});
-    Ujian.belongsTo(Tahapan,{ foreignKey : "idTahapan"});
+    Tahapan.hasOne(Ujian, { foreignKey: "idTahapan" });
+    Ujian.belongsTo(Tahapan, { foreignKey: "idTahapan" });
 }
 
-export const RelasiWawancara = async ()=>{
-    Wawancara.hasMany(PesertaWawancara, { foreignKey:"idWawancara"})
-    PesertaWawancara.belongsTo(Wawancara, {foreignKey:"idWawancara"});
+export const RelasiWawancara = async () => {
+    Wawancara.hasMany(PesertaWawancara, { foreignKey: "idWawancara" })
+    PesertaWawancara.belongsTo(Wawancara, { foreignKey: "idWawancara" });
 }
 
-export const RelasiBankSoal = async ()=>{
-    BankSoal.hasOne(SoalEssay, { foreignKey:"idBankSoal"});
-    SoalEssay.belongsTo(BankSoal,{ foreignKey: "idBankSoal"});
+export const RelasiBankSoal = async () => {
+    BankSoal.hasOne(SoalEssay, { foreignKey: "idBankSoal" });
+    SoalEssay.belongsTo(BankSoal, { foreignKey: "idBankSoal" });
 
-    BankSoal.hasOne(SoalMultiple, { foreignKey: "idBankSoal"});
-    SoalMultiple.belongsTo(BankSoal,{ foreignKey: "idBankSoal"});
+    BankSoal.hasOne(SoalMultiple, { foreignKey: "idBankSoal" });
+    SoalMultiple.belongsTo(BankSoal, { foreignKey: "idBankSoal" });
 
-    BankSoal.hasMany(SoalUjian, { foreignKey:"idSoal"});
-    SoalUjian.belongsTo(BankSoal,{ foreignKey: "idSoal"});
+    BankSoal.hasMany(SoalUjian, { foreignKey: "idSoal" });
+    SoalUjian.belongsTo(BankSoal, { foreignKey: "idSoal" });
 }
 
-export const RelasiUjian = async ()=>{
-    Ujian.hasMany(SoalUjian, { foreignKey:"idUjian"});
-    SoalUjian.belongsTo(Ujian,{ foreignKey:"idUjian"});
+export const RelasiUjian = async () => {
+    Ujian.hasMany(SoalUjian, { foreignKey: "idUjian" });
+    SoalUjian.belongsTo(Ujian, { foreignKey: "idUjian" });
 
-    Ujian.hasMany(PesertaUjian, { foreignKey:"idUjian"});
-    PesertaUjian.belongsTo(Ujian,{ foreignKey:"idUjian"});
+    Ujian.hasMany(PesertaUjian, { foreignKey: "idUjian" });
+    PesertaUjian.belongsTo(Ujian, { foreignKey: "idUjian" });
 }
 
-export const RelasiPesertaWawancara = async ()=>{
-    PesertaWawancara.hasMany(NilaiWawancara, { foreignKey:"idPesertaWawancara"});
-    NilaiWawancara.belongsTo(PesertaWawancara,{ foreignKey:"idPesertaWawancara"});
+export const RelasiPesertaWawancara = async () => {
+    PesertaWawancara.hasMany(NilaiWawancara, { foreignKey: "idPesertaWawancara" });
+    NilaiWawancara.belongsTo(PesertaWawancara, { foreignKey: "idPesertaWawancara" });
 }
 
-export const RelasiPewawancara = async()=>{
-    User.hasMany(NilaiWawancara, { foreignKey:"idUsers"});
-    NilaiWawancara.belongsTo(User,{ foreignKey:"idUsers"});
+export const RelasiPewawancara = async () => {
+    User.hasMany(NilaiWawancara, { foreignKey: "idUsers" });
+    NilaiWawancara.belongsTo(User, { foreignKey: "idUsers" });
 }
 
-export const RelasiPesertaUjian = async ()=>{
-    PesertaUjian.hasMany(JawabanUjian, {foreignKey:"idPesertaUjian"});
-    JawabanUjian.belongsTo(PesertaUjian, { foreignKey:"idPesertaUjian"});
+export const RelasiPesertaUjian = async () => {
+    PesertaUjian.hasMany(JawabanUjian, { foreignKey: "idPesertaUjian" });
+    JawabanUjian.belongsTo(PesertaUjian, { foreignKey: "idPesertaUjian" });
 
-    SoalUjian.hasMany(JawabanUjian, { foreignKey: "idSoalUjian"});
-    JawabanUjian.belongsTo(SoalUjian,  { foreignKey : "idSoalUjian"});
+    SoalUjian.hasMany(JawabanUjian, { foreignKey: "idSoalUjian" });
+    JawabanUjian.belongsTo(SoalUjian, { foreignKey: "idSoalUjian" });
+
+    User.hasMany(PesertaUjian, { foreignKey: "idUsers" });
+    PesertaUjian.belongsTo(User, { foreignKey: "idUsers" });
 }

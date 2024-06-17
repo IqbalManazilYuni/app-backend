@@ -18,25 +18,37 @@ const Pendaftar = db.define('Pendaftar', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     idUsers: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    },
+    file_krs: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    file_permohonan: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    alasan: {
+        type: DataTypes.TEXT,
+        allowNull: true,
     },
     idRecruitment: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     }
-},{
-    tableName:"Pendaftar"
+}, {
+    tableName: "Pendaftar"
 });
 
 export default Pendaftar;

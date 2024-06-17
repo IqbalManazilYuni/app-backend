@@ -14,30 +14,31 @@ const PesertaWawancara = db.define('PesertaWawancara', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     idPendaftar: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+        unique: true,
     },
-    lokasi:{
+    lokasi: {
         type: DataTypes.TEXT,
-        allowNull:false,
+        allowNull: false,
     },
-    jadwal_mulai:{
+    jadwal_mulai: {
         type: DataTypes.DATE,
-        allowNull:false,
+        allowNull: false,
     },
-    jadwal_selesai:{
+    jadwal_selesai: {
         type: DataTypes.DATE,
-        allowNull:false,
+        allowNull: false,
     },
-},{
-    tableName:"PesertaWawancara"
+}, {
+    tableName: "PesertaWawancara"
 });
 
 export default PesertaWawancara;

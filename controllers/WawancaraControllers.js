@@ -319,8 +319,6 @@ export const GetAsistePewawancara = async (req, res) => {
             id: asistens.id,
             nama: asistens.nama,
         }));
-
-        // console.log(payload);
         return res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         console.log(error);
@@ -498,27 +496,17 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
 export const GetWawancaraTimeByNIM = async (req, res) => {
     const { nim } = req.params;
     try {
-        // Mendapatkan user berdasarkan nim
         const userbynim = await User.findOne({ where: { nim } });
         if (!userbynim) {
             return res.status(404).json({ code: 404, status: "error", message: "User tidak ditemukan" });
         }
-
-        // Mendapatkan IdPendaftar berdasarkan idUsers
         const pendaftarList = await Pendaftar.findAll({ where: { idUsers: userbynim.id } });
-        if (pendaftarList.length === 0) {
-            return res.status(404).json({ code: 404, status: "error", message: "Pendaftar tidak ditemukan" });
-        }
-
-        // Mengambil data wawancara berdasarkan IdPendaftar
         const wawancaraPromises = pendaftarList.map(async (pendaftar) => {
             const pesertaWawancaraList = await PesertaWawancara.findAll({
                 where: { idPendaftar: pendaftar.id }
             });
-
             const tahapanPromises = pesertaWawancaraList.map(async (pesertaWawancara) => {
                 const wawancara = await Wawancara.findOne({ where: { id: pesertaWawancara.idWawancara } });
-
                 if (wawancara) {
                     const tahapan = await Tahapan.findOne({ where: { id: wawancara.idTahapan } });
                     if (tahapan) {
@@ -534,12 +522,9 @@ export const GetWawancaraTimeByNIM = async (req, res) => {
                     }
                 }
             });
-
             return Promise.all(tahapanPromises);
         });
-
         const wawancaraData = await Promise.all(wawancaraPromises);
-
         return res.status(200).json({ code: 200, status: "success", data: wawancaraData.flat().filter(item => item !== undefined) });
     } catch (error) {
         console.error("Terjadi Kesalahan saat Mengambil Jadwal Wawancara", error.message);

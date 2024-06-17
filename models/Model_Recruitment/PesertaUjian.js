@@ -14,23 +14,31 @@ const PesertaUjian = db.define('PesertaUjian', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+        unique: true,
+    },
+    idUsers: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     idUjian: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
-    nilaiUjian:{
+    nilaiUjian: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
     }
-},{
-    tableName:"PesertaUjian"
+}, {
+    tableName: "PesertaUjian"
 });
 
 export default PesertaUjian;

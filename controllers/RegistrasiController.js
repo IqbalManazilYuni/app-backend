@@ -15,6 +15,7 @@ export const PreviewPDF = async (req, res) => {
             return res.status(404).json({ message: "User Tidak Ditemukan" });
         }
         const nama_file = user.nama_file;
+        console.log(nama_file);
         const fileRef = ref(storage, `/cv/${nama_file}`);
         const url = await getDownloadURL(fileRef);
         return res.status(200).json({ code: 200, status: "success", URL: url });

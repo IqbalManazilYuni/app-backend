@@ -68,8 +68,11 @@ export const GetPesertaUjianByID = async (req, res) => {
         for (const pesertaujians of pesertaujian) {
             const pendaftar = await Pendaftar.findByPk(pesertaujians.idPendaftar);
             const user = await User.findByPk(pendaftar.idUsers);
+            const namaUjian = await Ujian.findByPk(pesertaujians.idUjian)
             const payloads = await pesertaujians.toJSON();
             payloads.nama = user.nama;
+            payloads.nama_ujian = namaUjian.nama_ujian,
+            payloads.kode_ujian = namaUjian.kode_ujian,
             payload.push(payloads)
         }
         return res.status(200).json({ code: 200, status: "success", data: payload })
@@ -104,7 +107,7 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
 };
 
 export const CreatePesertaUjian = async (req, res) => {
-    const { idPendaftar, idUjian, nilaiUjian } = req.body;
+    const { idPendaftar, idUjian, nilaiUjian,idUsers } = req.body;
     try {
         for (const pesertaId of idPendaftar) {
             const existingRecord = await PesertaUjian.findOne({
@@ -120,7 +123,8 @@ export const CreatePesertaUjian = async (req, res) => {
             await PesertaUjian.create({
                 idPendaftar: pesertaId,
                 idUjian,
-                nilaiUjian
+                nilaiUjian,
+                idUsers
             });
         }
         return res.status(201).json({ code: 201, status: "success", message: 'Peserta Ujian created successfully' });
@@ -161,7 +165,7 @@ export const GetJadwalUjian = async (req, res) => {
             const ujianInfoPromises = tahapan.map(async (tahapanItem) => {
                 const ujian = await Ujian.findOne({
                     where: { idTahapan: tahapanItem.id },
-                    attributes: ['nama_ujian', 'jadwal_mulai', 'jadwal_selesai', 'status']
+                    attributes: ['id','nama_ujian', 'jadwal_mulai', 'jadwal_selesai', 'status', 'kode_ujian']
                 });
                 return ujian;
             });
@@ -184,6 +188,11 @@ export const GetJadwalUjian = async (req, res) => {
     }
 }
 
-export const GetJawabanPesertaUjianById = async (req, res) => {
-
-}
+// export const GetPesertaUjianByIDUjian = async (req, res) => {
+//     const { id } = req.params;
+//     try {
+//         const idPesertaUjian = await PesertaUjian.findAll()
+//     } catch (error) {
+        
+//     }
+// }

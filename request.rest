@@ -39,20 +39,21 @@ POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"126353f5-fbd5-44e0-9431-f60b1f1dd793",
-  "nim":"2011522009",
-  "email":"ayam@gmail.com",
-  "nomor_asisten":"",
+  "idLabor":"a8f3b29d-ee61-436d-a267-6acfd22f1740",
+  "nim":"2011522014",
+  "email":"agasdasds3di@gmail.com",
+  "nomor_asisten":"LEA.V.14.SI",
   "jenisPengguna":"Asisten",
   "AksesRole":"User",
-  "nama":"Budi",
-  "password":"ayam2",
+  "nama":"Hendra Wijaya Kusuma",
+  "password":"Satu123@",
   "status":"Lulus",
   "nomor_hp":"081270403357",
   "tempat_lahir":"Lubuk Basung",
   "tanggal_lahir":"01/08/2001",
   "JenisKelamin":"Pria",
-  "alamat":"Kota Padang"
+  "alamat":"Kota Padang",
+  "angkatan":"2020"
 }
 ###
 

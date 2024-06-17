@@ -14,25 +14,19 @@ const Divisi = db.define('Divisi', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
     },
     nama_divisi: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        type: DataTypes.TEXT("long"),
+        allowNull: true,
     },
     deskripsi: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        type: DataTypes.TEXT("long"),
+        allowNull: true,
     },
-},{
-    tableName:"Divisi"
+}, {
+    tableName: "Divisi"
 });
 
 export default Divisi;

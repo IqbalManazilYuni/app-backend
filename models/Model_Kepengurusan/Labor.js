@@ -14,11 +14,11 @@ const Labor = db.define('Labor',{
         allowNull: false,
     },
     deskripsi:{
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT("long"),
         allowNull: false,
     },
     logo:{
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT("long"),
         allowNull:true,
     }
 },{
