@@ -142,6 +142,48 @@ export const DeletePesertaUjian = async (req, res) => {
     }
 };
 
+export const GetJadwalUjian = async (req, res) => {
+    const { idLabor } = req.params;
+    try {
+        const recruitmentList = await Recruitment.findAll({
+            where: { idLabor },
+            attributes: ['id', 'nama_recruitment'] // Selecting specific attributes
+        });
+
+        const tahapanListPromises = recruitmentList.map(async (recruitment) => {
+            const tahapan = await Tahapan.findAll({
+                where: {
+                    idRecruitment: recruitment.id,
+                    jenis_tahapan: "Ujian"
+                }
+            });
+
+            const ujianInfoPromises = tahapan.map(async (tahapanItem) => {
+                const ujian = await Ujian.findOne({
+                    where: { idTahapan: tahapanItem.id },
+                    attributes: ['nama_ujian', 'jadwal_mulai', 'jadwal_selesai', 'status']
+                });
+                return ujian;
+            });
+
+            const ujianInfo = await Promise.all(ujianInfoPromises);
+
+            return {
+                idRecruitment: recruitment.id,
+                nama_recruitment: recruitment.nama_recruitment,
+                ujianInfo: ujianInfo
+            };
+        });
+
+        const fullData = await Promise.all(tahapanListPromises);
+
+        return res.status(200).json({ code: 200, status: "success", data: fullData });
+    } catch (error) {
+        console.error("Error mengambil jadwal ujian", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Internal server error' });
+    }
+}
+
 export const GetJawabanPesertaUjianById = async (req, res) => {
-    
+
 }
