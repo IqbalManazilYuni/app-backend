@@ -39,10 +39,6 @@ export const GetRecruitmentByLabor = async (req, res) => {
     const { idLabor } = req.params;
     try {
         const proses = await Recruitment.findAll({ where: { idLabor: idLabor } });
-        if (!proses || proses.length === 0) {
-            return res.status(404).json({ status: "Not Found", code: 404, message: "Recruitment Labor Not Found" });
-        }
-
         const payload = await Promise.all(proses.map(async recruitment => {
             const kegiatan = await Kegiatan.findByPk(recruitment.idKegiatan);
             const jumlahPendaftar = await Pendaftar.count({ where: { idRecruitment: recruitment.id } }); // Count based on recruitment ID
