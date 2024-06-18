@@ -8,8 +8,9 @@ export const CreateRecruitment = async (req, res) => {
     try {
         const labor = await Recruitment.findOne({ where: { idLabor, idKegiatan } });
         if (labor) {
-            return res.status(404).json({ code: 404, status: "Found", message: "Labor Sudah Terdaftar Pada Kegiatan Recruitment Tahun ini" })
+            return res.status(404).json({ code: 404, status: "Found", message: "Labor Sudah Terdaftar Pada Kegiatan Recruitment Tahun ini" });
         }
+
         const tanggalbuka = new Date(tanggal_buka);
         const tanggaltutup = new Date(tanggal_tutup);
         const tanggalSekarang = new Date();
@@ -20,6 +21,20 @@ export const CreateRecruitment = async (req, res) => {
         if (tanggalbuka < tanggalSekarang) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena mendahului tanggal sekarang" });
         }
+
+        // // Fetch all existing recruitments for the given idLabor and idKegiatan
+        // const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
+
+        // // Check for conflicting dates
+        // for (let recruitment of existingRecruitments) {
+        //     const existingTanggalBuka = new Date(recruitment.tanggal_buka);
+        //     const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
+
+        //     if ((tanggalbuka >= existingTanggalBuka && tanggalbuka <= existingTanggalTutup) || tanggalbuka < existingTanggalBuka) {
+        //         return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
+        //     }
+        // }
+
         const newProses = await Recruitment.create({
             idLabor,
             idKegiatan,
@@ -27,11 +42,12 @@ export const CreateRecruitment = async (req, res) => {
             tanggal_buka,
             tanggal_tutup,
             nama_recruitment
-        })
-        return res.status(201).json({ code: 201, status: "success", message: "Recruitment Or berhasil didaftarkan.", data: newProses });
+        });
+
+        return res.status(201).json({ code: 201, status: "success", message: "Recruitment berhasil didaftarkan.", data: newProses });
     } catch (error) {
-        console.error("Error saat mendaftarkan Recruitment Or:", error);
-        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat mendaftarkan Recruitment Or." });
+        console.error("Error saat mendaftarkan Recruitment:", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat mendaftarkan Recruitment." });
     }
 };
 
@@ -119,7 +135,7 @@ export const GetRecruitmentByID = async (req, res) => {
 };
 
 export const EditRecruitment = async (req, res) => {
-    const { id, status, limit_peserta, tanggal_buka, tanggal_tutup } = req.body;
+    const { id, status, idLabor, limit_peserta, tanggal_buka, tanggal_tutup } = req.body;
     try {
         const recruitment = await Recruitment.findOne({ where: { id } });
         if (!recruitment) {
@@ -131,6 +147,17 @@ export const EditRecruitment = async (req, res) => {
         if (tanggaltutup <= tanggalbuka) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
         }
+        // const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
+
+        // for (let recruitment of existingRecruitments) {
+        //     const existingTanggalBuka = new Date(recruitment.tanggal_buka);
+        //     const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
+
+        //     if ((tanggalbuka >= existingTanggalBuka && tanggalbuka <= existingTanggalTutup) || tanggalbuka < existingTanggalBuka) {
+        //         return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
+        //     }
+        // }
+
         recruitment.tanggal_buka = tanggal_buka
         recruitment.tanggal_tutup = tanggal_tutup
         recruitment.status = status;
@@ -156,7 +183,7 @@ export const UpdateStatusRecruitment = async (req, res) => {
             if (jadwal_buka < jadwal && jadwal < jadwal_tutup) {
                 status = "Open"
             }
-            else if (jadwal > jadwal_tutup) {
+            else if (jadwal > jadwal_tutup || jadwal < jadwal_tutup) {
                 status = "Close"
             }
             // Memeriksa apakah status berubah

@@ -109,7 +109,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
 
         const pendaftar = await Pendaftar.findAll({
             where: { idRecruitment: idRecruitments },
-            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs','file_permohonan']
+            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan']
         });
         const idUsers = pendaftar.map(pend => pend.idUsers);
 
@@ -228,14 +228,26 @@ export const GetPendaftarByNIM = async (req, res) => {
     const { nim, idRecruitment } = req.body;
     try {
         const idUser = await User.findOne({ where: { nim } });
+
+        if (!idUser) {
+            return res.status(404).json({ code: 404, status: "failure", message: "User not found" });
+        }
+
         const pendaftar = await Pendaftar.findOne({ where: { idUsers: idUser.id, idRecruitment: idRecruitment } });
+
+        if (!pendaftar) {
+            console.log("ayam");
+            return res.status(404).json({ code: 404, status: "failure", message: "Pendaftar not found" });
+        }
+
         const payload = {
             id: pendaftar.id,
             file_krs: pendaftar.file_krs,
             file_permohonan: pendaftar.file_permohonan,
             alasan: pendaftar.alasan,
         };
-        return res.status(200).json({ code: 200, status: "success", data: payload })
+
+        return res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });
     }
@@ -246,10 +258,10 @@ export const EditPendaftarDokumen = async (req, res) => {
     try {
         const pendaftar = await Pendaftar.findOne({ where: { id } });
         pendaftar.file_krs = file_krs,
-        pendaftar.file_permohonan = file_permohonan,
-        pendaftar.alasan = alasan,
-        await pendaftar.save();
-        return res.status(200).json({ code: 200, message:"Berhasil Memperbarui File Dokumen dan Asalan Mendaftar"})
+            pendaftar.file_permohonan = file_permohonan,
+            pendaftar.alasan = alasan,
+            await pendaftar.save();
+        return res.status(200).json({ code: 200, message: "Berhasil Memperbarui File Dokumen dan Asalan Mendaftar" })
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Memperbarui Pendaftar", error });
 

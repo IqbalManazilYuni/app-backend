@@ -83,24 +83,24 @@ export const GetPesertaUjianByID = async (req, res) => {
         res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil ujian." });
     }
 };
-export const GetpesertaUjianByid = async(req, res) =>{
+export const GetpesertaUjianByid = async (req, res) => {
     const { id } = req.params
     try {
-        const PesertaUjianGet = await PesertaUjian.findOne({ where:{id}});
-        return res.status(200).json({ code: 200, status:"success", data:PesertaUjianGet})
+        const PesertaUjianGet = await PesertaUjian.findOne({ where: { id } });
+        return res.status(200).json({ code: 200, status: "success", data: PesertaUjianGet })
     } catch (error) {
         console.error("Error saat proses mengambil ujian:", error);
         res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil ujian." });
     }
 }
 
-export const UpdatePenganggungJawab = async(req, res) =>{
+export const UpdatePenganggungJawab = async (req, res) => {
     const { id, idUsers } = req.body
     try {
-        const PesertaUjianGet = await PesertaUjian.findOne({ where:{id}});
+        const PesertaUjianGet = await PesertaUjian.findOne({ where: { id } });
         PesertaUjianGet.idUsers = idUsers
         await PesertaUjianGet.save();
-        return res.status(200).json({ code: 200, status:"success", message:"Penanggung Jawab Berhasil Diperbarui"})
+        return res.status(200).json({ code: 200, status: "success", message: "Penanggung Jawab Berhasil Diperbarui" })
     } catch (error) {
         console.error("Error saat proses memperbarui Penanggung Jawab:", error);
         res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses memperbarui Penanggung Jawab." });
@@ -132,7 +132,7 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
 };
 
 export const CreatePesertaUjian = async (req, res) => {
-    const { idPendaftar, idUjian, nilaiUjian,idUsers } = req.body;
+    const { idPendaftar, idUjian, nilaiUjian, idUsers } = req.body;
     try {
         for (const pesertaId of idPendaftar) {
             const existingRecord = await PesertaUjian.findOne({
@@ -190,7 +190,7 @@ export const GetJadwalUjian = async (req, res) => {
             const ujianInfoPromises = tahapan.map(async (tahapanItem) => {
                 const ujian = await Ujian.findOne({
                     where: { idTahapan: tahapanItem.id },
-                    attributes: ['id','nama_ujian', 'jadwal_mulai', 'jadwal_selesai', 'status', 'kode_ujian']
+                    attributes: ['id', 'nama_ujian', 'jadwal_mulai', 'jadwal_selesai', 'status', 'kode_ujian']
                 });
                 return ujian;
             });
@@ -213,11 +213,77 @@ export const GetJadwalUjian = async (req, res) => {
     }
 }
 
-// export const GetPesertaUjianByIDUjian = async (req, res) => {
-//     const { id } = req.params;
-//     try {
-//         const idPesertaUjian = await PesertaUjian.findAll()
-//     } catch (error) {
-        
-//     }
-// }
+export const GetUjianTimeByNIM = async (req, res) => {
+    const { nim } = req.params;
+    try {
+        const userbynim = await User.findOne({ where: { nim } });
+        if (!userbynim) {
+            return res.status(404).json({ code: 404, status: "error", message: "User tidak ditemukan" });
+        }
+
+        const pendaftarList = await Pendaftar.findAll({ where: { idUsers: userbynim.id } });
+        const ujianPromises = pendaftarList.map(async (pendaftar) => {
+            const pesertaUjianList = await PesertaUjian.findAll({ where: { idPendaftar: pendaftar.id } });
+            const tahapanPromises = pesertaUjianList.map(async (pesertaUjian) => {
+                const ujian = await Ujian.findOne({ where: { id: pesertaUjian.idUjian } });
+                if (ujian) {
+                    const tahapan = await Tahapan.findOne({ where: { id: ujian.idTahapan } });
+                    if (tahapan) {
+                        const recruitment = await Recruitment.findOne({ where: { id: tahapan.idRecruitment } });
+                        return {
+                            nama_ujian: ujian.nama_ujian,
+                            jadwal_mulai: ujian.jadwal_mulai,
+                            jadwal_selesai: ujian.jadwal_selesai,
+                            kode_ujian: ujian.kode_ujian,
+                            status: ujian.status,
+                            idTahapan: tahapan.id,
+                            idRecruitment: tahapan.idRecruitment,
+                            nama_recruitment: recruitment ? recruitment.nama_recruitment : null
+                        };
+                    }
+                }
+            });
+            return Promise.all(tahapanPromises);
+        });
+
+        const ujianData = (await Promise.all(ujianPromises)).flat().filter(item => item !== undefined);
+
+        return res.status(200).json({ code: 200, status: "success", data: ujianData });
+    } catch (error) {
+        console.error("Terjadi Kesalahan saat Mengambil Jadwal Wawancara", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' });
+    }
+};
+
+export const UpdateStatusRecruitment = async (req, res) => {
+    const { date } = req.body;
+    try {
+        const ujianList = await Ujian.findAll();
+        const jadwal = new Date(date);
+
+        const updatePromises = ujianList.map(async (ujian) => {
+            const jadwalbuka = new Date(ujian.jadwal_mulai);
+            const jadwaltutup = new Date(ujian.jadwal_selesai);
+            let status = ujian.status;
+
+            if (jadwalbuka < jadwal && jadwal < jadwaltutup) {
+                status = "Open";
+            } else if (jadwal > jadwaltutup || jadwal < jadwalbuka) {
+                status = "Close";
+            }
+            if (status !== ujian.status) {
+                await Ujian.update({ status }, { where: { id: ujian.id } });
+            }
+            return {
+                ...ujian.toJSON(), // Assuming ujian is a Sequelize model instance, convert it to JSON
+                jadwaltutup,
+                status
+            };
+        });
+        await Promise.all(updatePromises);
+        return res.status(200).json({ code: 200, status: "success", message: "Recruitment telah diperbarui" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Recruitment" });
+    }
+};
