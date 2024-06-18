@@ -8,15 +8,29 @@ import { ref, getDownloadURL } from 'firebase/storage';
 dotenv.config();
 
 export const PreviewPDF = async (req, res) => {
-    const { id } = req.params;
+    const { id, nama_file, file_type } = req.body;
     try {
         const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: "User Tidak Ditemukan" });
         }
-        const nama_file = user.nama_file;
-        console.log(nama_file);
-        const fileRef = ref(storage, `/cv/${nama_file}`);
+
+        let folderPath;
+        switch (file_type) {
+            case 'file_krs':
+                folderPath = '/krs';
+                break;
+            case 'file_permohonan':
+                folderPath = '/file_permohonan';
+                break;
+            case 'nama_file':
+                folderPath = '/cv';
+                break;
+            default:
+                return res.status(400).json({ message: 'Invalid file type' });
+        }
+
+        const fileRef = ref(storage, `${folderPath}/${nama_file}`);
         const url = await getDownloadURL(fileRef);
         return res.status(200).json({ code: 200, status: "success", URL: url });
     } catch (error) {

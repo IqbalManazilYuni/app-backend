@@ -68,11 +68,13 @@ export const GetPesertaUjianByID = async (req, res) => {
         for (const pesertaujians of pesertaujian) {
             const pendaftar = await Pendaftar.findByPk(pesertaujians.idPendaftar);
             const user = await User.findByPk(pendaftar.idUsers);
+            const userAsisten = await User.findByPk(pesertaujians.idUsers)
             const namaUjian = await Ujian.findByPk(pesertaujians.idUjian)
             const payloads = await pesertaujians.toJSON();
             payloads.nama = user.nama;
-            payloads.nama_ujian = namaUjian.nama_ujian,
-            payloads.kode_ujian = namaUjian.kode_ujian,
+            payloads.nama_penanggung_jawab = userAsisten.nama;
+            // payloads.nama_ujian = namaUjian.nama_ujian,
+            // payloads.kode_ujian = namaUjian.kode_ujian,
             payload.push(payloads)
         }
         return res.status(200).json({ code: 200, status: "success", data: payload })
@@ -81,6 +83,29 @@ export const GetPesertaUjianByID = async (req, res) => {
         res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil ujian." });
     }
 };
+export const GetpesertaUjianByid = async(req, res) =>{
+    const { id } = req.params
+    try {
+        const PesertaUjianGet = await PesertaUjian.findOne({ where:{id}});
+        return res.status(200).json({ code: 200, status:"success", data:PesertaUjianGet})
+    } catch (error) {
+        console.error("Error saat proses mengambil ujian:", error);
+        res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil ujian." });
+    }
+}
+
+export const UpdatePenganggungJawab = async(req, res) =>{
+    const { id, idUsers } = req.body
+    try {
+        const PesertaUjianGet = await PesertaUjian.findOne({ where:{id}});
+        PesertaUjianGet.idUsers = idUsers
+        await PesertaUjianGet.save();
+        return res.status(200).json({ code: 200, status:"success", message:"Penanggung Jawab Berhasil Diperbarui"})
+    } catch (error) {
+        console.error("Error saat proses memperbarui Penanggung Jawab:", error);
+        res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses memperbarui Penanggung Jawab." });
+    }
+}
 
 export const GetPesertaUjianByIdTahapan = async (req, res) => {
     const { idTahapan } = req.params;
