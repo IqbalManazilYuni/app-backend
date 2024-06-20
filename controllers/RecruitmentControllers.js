@@ -22,18 +22,18 @@ export const CreateRecruitment = async (req, res) => {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena mendahului tanggal sekarang" });
         }
 
-        // // Fetch all existing recruitments for the given idLabor and idKegiatan
-        // const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
+        // Fetch all existing recruitments for the given idLabor and idKegiatan
+        const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
 
-        // // Check for conflicting dates
-        // for (let recruitment of existingRecruitments) {
-        //     const existingTanggalBuka = new Date(recruitment.tanggal_buka);
-        //     const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
+        // Check for conflicting dates
+        for (let recruitment of existingRecruitments) {
+            const existingTanggalBuka = new Date(recruitment.tanggal_buka);
+            const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
 
-        //     if ((tanggalbuka >= existingTanggalBuka && tanggalbuka <= existingTanggalTutup) || tanggalbuka < existingTanggalBuka) {
-        //         return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
-        //     }
-        // }
+            if ((tanggalbuka >= existingTanggalBuka && tanggalbuka <= existingTanggalTutup) || tanggalbuka < existingTanggalBuka) {
+                return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
+            }
+        }
 
         const newProses = await Recruitment.create({
             idLabor,
@@ -147,16 +147,19 @@ export const EditRecruitment = async (req, res) => {
         if (tanggaltutup <= tanggalbuka) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
         }
-        // const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
+        const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
+        const filterexistingRecruitments = existingRecruitments.filter(recruitment => recruitment.id !== id);
+        console.log(id)
+        console.log(JSON.stringify(filterexistingRecruitments))
 
-        // for (let recruitment of existingRecruitments) {
-        //     const existingTanggalBuka = new Date(recruitment.tanggal_buka);
-        //     const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
+        for (let recruitment of filterexistingRecruitments) {
+            const existingTanggalBuka = new Date(recruitment.tanggal_buka);
+            const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
 
-        //     if ((tanggalbuka >= existingTanggalBuka && tanggalbuka <= existingTanggalTutup) || tanggalbuka < existingTanggalBuka) {
-        //         return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
-        //     }
-        // }
+            if ((tanggalbuka >= existingTanggalBuka && tanggalbuka <= existingTanggalTutup) || tanggalbuka < existingTanggalBuka) {
+                return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
+            }
+        }
 
         recruitment.tanggal_buka = tanggal_buka
         recruitment.tanggal_tutup = tanggal_tutup

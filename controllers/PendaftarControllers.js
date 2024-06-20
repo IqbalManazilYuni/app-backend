@@ -5,7 +5,7 @@ import Labor from "../models/Model_Kepengurusan/Labor.js"
 import Kegiatan from "../models/Model_Recruitment/Kegiatan.js"
 
 export const CreatePendaftar = async (req, res) => {
-    const { idUsers, tanggal_daftar, idKegiatan, idRecruitment, alasan, file_permohonan, file_krs } = req.body;
+    const { idUsers, tanggal_daftar, idKegiatan, idRecruitment, alasan, Status_Pendaftar, file_permohonan, file_krs } = req.body;
     const transaction = await Pendaftar.sequelize.transaction();
 
     try {
@@ -57,6 +57,7 @@ export const CreatePendaftar = async (req, res) => {
             await transaction.rollback();
             return res.status(400).json({ message: "Angkatan Anda Tidak Bisa Mendaftar Pada Tahun ini", code: 400, status: "error" });
         }
+
         await Pendaftar.create({
             idUsers,
             tanggal_daftar,
@@ -64,7 +65,8 @@ export const CreatePendaftar = async (req, res) => {
             idRecruitment,
             alasan,
             file_permohonan,
-            file_krs
+            file_krs,
+            Status_Pendaftar,
         }, { transaction });
 
         await User.update({ status: 'Tahapan1' }, { where: { id: idUsers }, transaction });
@@ -109,7 +111,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
 
         const pendaftar = await Pendaftar.findAll({
             where: { idRecruitment: idRecruitments },
-            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan']
+            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan', 'Status_Pendaftar']
         });
         const idUsers = pendaftar.map(pend => pend.idUsers);
 
@@ -146,7 +148,8 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
                 id: pend.id,
                 idUsers: pend.idUsers,
                 file_krs: pend.file_krs,
-                file_permohonan: pend.file_permohonan
+                file_permohonan: pend.file_permohonan,
+                Status_Pendaftar: pend.Status_Pendaftar
             };
         });
         return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: payload })
@@ -164,6 +167,9 @@ export const DeletePendaftar = async (req, res) => {
             user.status = 'Pendaftar';
             await user.save();
         }
+        if (user.status === "Tahapan2" || user.status === "Lulus") {
+            return res.status(400).json({ message: "Tidak Bisa Menghapus Asisten yang Sedang OR atau Sudah Lulus", code: 400 })
+        }
         await pendaftar.destroy();
         return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Berhasi Dihapus" });
     } catch (error) {
@@ -174,50 +180,35 @@ export const DeletePendaftar = async (req, res) => {
 export const GetPendaftarLabByID = async (req, res) => {
     const { idLabor } = req.params;
     try {
-        // Fetch all recruitments for the given idLabor
         const recruitmentLab = await Recruitment.findAll({
             where: { idLabor },
             attributes: ['id', 'nama_recruitment']
         });
-
-        // Initialize an array to hold the result
         const result = [];
-
-        // Loop through each recruitment to fetch the pendaftar details
         for (const recruitment of recruitmentLab) {
-            // Fetch all pendaftar for the current recruitment
             const pendaftarList = await Pendaftar.findAll({
                 where: { idRecruitment: recruitment.id },
                 attributes: ['idRecruitment', 'idUsers', 'tanggal_daftar']
             });
-
-            // Initialize an array to hold the pendaftar details for the current recruitment
             const pendaftar = [];
-
-            // Loop through each pendaftar to fetch the user details
             for (const pend of pendaftarList) {
-                // Fetch the user details for the current pendaftar
                 const user = await User.findOne({
                     where: { id: pend.idUsers },
                     attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat'],
                 });
 
-                // Add the formatted pendaftar details to the array
                 pendaftar.push({
                     idUsers: pend.idUsers,
                     ...user.toJSON(),
                     tanggal_daftar: pend.tanggal_daftar
                 });
             }
-
-            // Push the formatted recruitment and pendaftar details to the result array
             result.push({
                 idRecruitment: recruitment.id,
                 nama_recruitment: recruitment.nama_recruitment,
                 pendaftar: pendaftar
             });
         }
-
         return res.status(200).json({ code: 200, status: "success", data: result });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });

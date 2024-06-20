@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer';
 import 'dotenv/config';
 import db from '../config/db.config.js';
 import { stat } from 'fs';
+import Pendaftar from '../models/Model_Recruitment/Pendaftar.js';
 
 // export const GetAllUsers = async (req, res) => {
 //     try {
@@ -179,13 +180,24 @@ export const EditUser = async (req, res) => {
         angkatan,
         JenisKelamin,
         alamat,
-        status
+        status,
     } = req.body;
     let encryptedToken, expiry;
     try {
         const user = await User.findOne({ where: { id } });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
+        }
+        if (jenisPengguna === "Calon Asisten") {
+            if (user.status !== status) {
+                if (status === "Lulus") {
+                    await Pendaftar.update({ Status_Pendaftar: 'Lulus' }, { where: { idUsers: user.id } });
+                } else if (status === "Gagal") {
+                    await Pendaftar.update({ Status_Pendaftar: 'Gagal' }, { where: { idUsers: user.id } });
+                } else {
+                    await Pendaftar.update({ Status_Pendaftar: 'OnProgress' }, { where: { idUsers: user.id } });
+                }
+            }
         }
         if (user.nim !== nim && user.AksesRole === "Admin") {
             const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik

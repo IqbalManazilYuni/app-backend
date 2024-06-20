@@ -28,6 +28,11 @@ const Pendaftar = db.define('Pendaftar', {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
+    Status_Pendaftar: {
+        type: DataTypes.ENUM('OnProgress', 'Lulus', 'Gagal'),
+        defaultValue: "OnProgress",
+        allowNull: false,
+    },
     file_krs: {
         type: DataTypes.TEXT,
         allowNull: true,
