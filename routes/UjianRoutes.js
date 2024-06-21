@@ -1,8 +1,9 @@
 import express from 'express';
-import { CreatePesertaUjian, DeletePesertaUjian, GetJadwalUjian, GetListUjianByIDLabor, GetPesertaUjianByID, GetPesertaUjianByIdTahapan, GetUjianByID, GetUjianTimeByNIM, GetpesertaUjianByid, UpdatePenganggungJawab, UpdateStatusRecruitment } from '../controllers/UjianControllers.js';
+import { CreatePesertaUjian, DeletePesertaUjian, GetJadwalUjian, GetListUjianByIDLabor, GetPesertaUjianByID, GetPesertaUjianByIdTahapan, GetSoalUjianByIdUjian, GetUjianByID, GetUjianTimeByNIM, GetpesertaUjianByid, UpdatePenganggungJawab, UpdateStatusRecruitment } from '../controllers/UjianControllers.js';
 
 const router = express.Router();
 
+router.get('/getsoalbyidujian/:idTahapan', GetSoalUjianByIdUjian)
 router.get('/getujianbyidlabor/:idLabor', GetListUjianByIDLabor);
 router.get('/getjadwalujian/:idLabor', GetJadwalUjian);
 router.get('/getujianbyid/:id', GetUjianByID);

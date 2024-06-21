@@ -4,7 +4,10 @@ import Ujian from "../models/Model_Recruitment/Ujian.js";
 import PesertaUjian from "../models/Model_Recruitment/PesertaUjian.js"
 import User from "../models/Model_User/Users.js";
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
-
+import BankSoal from "../models/Model_Soal/BankSoal.js";
+import SoalUjian from "../models/Model_Recruitment/SoalUjian.js"
+import SoalMultiple from "../models/Model_Soal/SoalMultple.js"
+import SoalEssay from "../models/Model_Soal/SoalEssay.js"
 export const GetListUjianByIDLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
@@ -275,7 +278,7 @@ export const UpdateStatusRecruitment = async (req, res) => {
                 await Ujian.update({ status }, { where: { id: ujian.id } });
             }
             return {
-                ...ujian.toJSON(), // Assuming ujian is a Sequelize model instance, convert it to JSON
+                ...ujian.toJSON(),
                 jadwaltutup,
                 status
             };
@@ -287,3 +290,52 @@ export const UpdateStatusRecruitment = async (req, res) => {
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Recruitment" });
     }
 };
+
+export const GetSoalUjianByIdUjian = async (req, res) => {
+    const { idTahapan } = req.params
+    try {
+        const ujianId = await Ujian.findOne({ where: { idTahapan } })
+        const idSoals = await SoalUjian.findAll({ where: { idUjian: ujianId.id } });
+        const payload = [];
+        for (const bankSoal of idSoals) {
+            const bankSoalId = await BankSoal.findOne({ where: { id: bankSoal.idSoal } });
+            let soal = null;
+            let pilihan1 = null;
+            let pilihan2 = null;
+            let pilihan3 = null;
+            let pilihan4 = null;
+            let kunci = null;
+            if (bankSoalId.tipe_soal === "Essay") {
+                const soalEssay = await SoalEssay.findOne({ where: { idBankSoal: bankSoalId.id } })
+                soal = soalEssay ? soalEssay.soal : null
+            }
+            else if (bankSoalId.tipe_soal === "Multiple") {
+                const soalMultiple = await SoalMultiple.findOne({ where: { idBankSoal: bankSoalId.id } })
+                soal = soalMultiple ? soalMultiple.soal : null;
+                pilihan1 = soalMultiple ? soalMultiple.pilihan1 : null;
+                pilihan2 = soalMultiple ? soalMultiple.pilihan2 : null;
+                pilihan3 = soalMultiple ? soalMultiple.pilihan3 : null;
+                pilihan4 = soalMultiple ? soalMultiple.pilihan4 : null;
+                kunci = soalMultiple ? soalMultiple.kunci : null;
+            }
+            const banksoalData = {
+                id: bankSoal.id,
+                tipe_soal: bankSoalId.tipe_soal,
+                tahun: bankSoal.tahun,
+                soal: soal
+            };
+            if (bankSoalId.tipe_soal === "Multiple") {
+                banksoalData.pilihan1 = pilihan1;
+                banksoalData.pilihan2 = pilihan2;
+                banksoalData.pilihan3 = pilihan3;
+                banksoalData.pilihan4 = pilihan4;
+                banksoalData.kunci = kunci;
+            }
+            payload.push(banksoalData)
+        }
+        return res.status(200).json({ code: 200, status: "success", data: payload })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Soal" });
+    }
+}
