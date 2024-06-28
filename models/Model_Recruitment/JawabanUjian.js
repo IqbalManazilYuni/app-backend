@@ -14,26 +14,30 @@ const JawabanUjian = db.define('JawabanUjian', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     idSoalUjian: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
-    Jawaban:{
+    Jawaban: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    nilai:{
+    tipe_soal: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    nilai: {
         type: DataTypes.INTEGER,
         allowNull: false,
     }
-},{
-    tableName:"JawabanUjian"
+}, {
+    tableName: "JawabanUjian"
 });
 
 export default JawabanUjian;

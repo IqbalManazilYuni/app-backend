@@ -345,9 +345,13 @@ export const GetSoalUjianByIdUjian = async (req, res) => {
 };
 
 export const CekKodeUjian = async (req, res) => {
-    const { kode_ujian, idUjian, date } = req.body;
+    const { kode_ujian, idUjian, date, idPesertaUjian } = req.body;
     try {
         const getUjian = await Ujian.findOne({ where: { id: idUjian } });
+        const UserJawabanUjian = await JawabanUjian.findAll({ where: { idPesertaUjian: idPesertaUjian } })
+        if (UserJawabanUjian && UserJawabanUjian.length > 0) {
+            return res.status(400).json({ status: "Error", code: 400, message: "Anda Sudah Mengerjakan Ujian" })
+        }
         const tanggalSekarang = new Date(date)
         if (getUjian.status === "Close") {
             if (tanggalSekarang > getUjian.jadwal_selesai) {
@@ -360,8 +364,9 @@ export const CekKodeUjian = async (req, res) => {
         if (getUjian.kode_ujian !== kode_ujian) {
             return res.status(400).json({ status: "Error", code: 400, message: "Kode Ujian Tidak Benar" })
         }
-        if ((getUjian.status === "Open") && (getUjian.kode_ujian === kode_ujian))
+        if ((getUjian.status === "Open") && (getUjian.kode_ujian === kode_ujian)) {
             return res.status(200).json({ status: "success", code: 200 })
+        }
     } catch (error) {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Pengecekan Kode Ujian" });
@@ -399,6 +404,7 @@ export const CreateJawabanUjian = async (req, res) => {
                 idPesertaUjian: jawaban.idPesertaUjian,
                 idSoalUjian: jawaban.id,
                 Jawaban: jawaban.jawaban,
+                tipe_soal: jawaban.tipe_soal,
                 nilai: jawaban.tipe_soal === "Multiple" && kunciMultipleSoal.find(k => k.idSoal === jawaban.id)?.kunci === jawaban.jawaban ? 10 : 0
             });
         }
@@ -407,4 +413,30 @@ export const CreateJawabanUjian = async (req, res) => {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Membaut Jawaban Ujian" });
     }
-}
+};
+
+export const GetJawabanCalonAsisten = async (req, res) => {
+    const { idPendaftar } = req.params;
+    try {
+        const pesertaUjian = await PesertaUjian.findOne({ where: { idPendaftar: idPendaftar } });
+        const jawabanUjianCalon = await JawabanUjian.findAll({ where: { idPesertaUjian: pesertaUjian.id } });
+        const jawabanWithSoal = await Promise.all(jawabanUjianCalon.map(async (jawaban) => {
+            const soalUjian = await SoalUjian.findOne({ where: { id: jawaban.idSoalUjian } });
+            const bankSoal = await BankSoal.findOne({ where: { id: soalUjian.idSoal } });
+            let soal;
+            if (jawaban.tipe_soal === 'Multiple') {
+                soal = await SoalMultiple.findOne({ where: { idBankSoal: bankSoal.id } });
+            } else if (jawaban.tipe_soal === 'Essay') {
+                soal = await SoalEssay.findOne({ where: { idBankSoal: bankSoal.id } });
+            }
+            return {
+                ...jawaban.dataValues,
+                soal: soal ? soal.dataValues : null
+            };
+        }));
+        return res.status(200).json({ code: 200, status: "success", data: jawabanWithSoal });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Jawaban Ujian" });
+    }
+};
