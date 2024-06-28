@@ -7,12 +7,8 @@ export const CreateSoalUjianList = async (req, res) => {
     const listSoal = req.body;
     try {
         const { idUjian, idSoal, tahun } = listSoal;
-
-        // Check if any of the idSoal already exist in the database
-        const existingSoal = await SoalUjian.findAll({ where: { idSoal: idSoal } });
-
+        const existingSoal = await SoalUjian.findAll({ where: { idSoal: idSoal, idUjian: idUjian } });
         if (existingSoal.length > 0) {
-            // If there are any existing records, return an error response
             return res.status(400).json({
                 status: "error",
                 code: 400,
@@ -20,16 +16,12 @@ export const CreateSoalUjianList = async (req, res) => {
                 existingSoal: existingSoal.map(soal => soal.idSoal)
             });
         }
-
-        // If no existing records, proceed to create new records
         const newSoalData = idSoal.map(soal => ({
             idUjian: idUjian,
             idSoal: soal,
             tahun: tahun
         }));
-
         await SoalUjian.bulkCreate(newSoalData);
-
         return res.status(201).json({
             code: 201,
             status: "success",
@@ -44,7 +36,6 @@ export const CreateSoalUjianList = async (req, res) => {
         });
     }
 };
-
 
 export const GetSoalUjianId = async (req, res) => {
     const { idUjian } = req.params

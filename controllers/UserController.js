@@ -200,7 +200,7 @@ export const EditUser = async (req, res) => {
             }
         }
         if (user.nim !== nim && user.AksesRole === "Admin") {
-            const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
+            const expiresIn = 3600;
             const jwtoken = jwt.sign({ nim: nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
             encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
             expiry = Math.floor(Date.now() / 1000) + expiresIn;

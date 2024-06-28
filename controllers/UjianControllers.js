@@ -8,6 +8,7 @@ import BankSoal from "../models/Model_Soal/BankSoal.js";
 import SoalUjian from "../models/Model_Recruitment/SoalUjian.js"
 import SoalMultiple from "../models/Model_Soal/SoalMultple.js"
 import SoalEssay from "../models/Model_Soal/SoalEssay.js"
+import JawabanUjian from "../models/Model_Recruitment/JawabanUjian.js"
 export const GetListUjianByIDLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
@@ -179,7 +180,7 @@ export const GetJadwalUjian = async (req, res) => {
     try {
         const recruitmentList = await Recruitment.findAll({
             where: { idLabor },
-            attributes: ['id', 'nama_recruitment'] // Selecting specific attributes
+            attributes: ['id', 'nama_recruitment']
         });
 
         const tahapanListPromises = recruitmentList.map(async (recruitment) => {
@@ -234,6 +235,7 @@ export const GetUjianTimeByNIM = async (req, res) => {
                     if (tahapan) {
                         const recruitment = await Recruitment.findOne({ where: { id: tahapan.idRecruitment } });
                         return {
+                            idUjian: ujian.id,
                             nama_ujian: ujian.nama_ujian,
                             jadwal_mulai: ujian.jadwal_mulai,
                             jadwal_selesai: ujian.jadwal_selesai,
@@ -241,7 +243,8 @@ export const GetUjianTimeByNIM = async (req, res) => {
                             status: ujian.status,
                             idTahapan: tahapan.id,
                             idRecruitment: tahapan.idRecruitment,
-                            nama_recruitment: recruitment ? recruitment.nama_recruitment : null
+                            nama_recruitment: recruitment ? recruitment.nama_recruitment : null,
+                            idPesertaUjian: pesertaUjian.id
                         };
                     }
                 }
@@ -258,7 +261,8 @@ export const GetUjianTimeByNIM = async (req, res) => {
     }
 };
 
-export const UpdateStatusRecruitment = async (req, res) => {
+
+export const UpdateStatusUjianRecruitment = async (req, res) => {
     const { date } = req.body;
     try {
         const ujianList = await Ujian.findAll();
@@ -337,5 +341,70 @@ export const GetSoalUjianByIdUjian = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Soal" });
+    }
+};
+
+export const CekKodeUjian = async (req, res) => {
+    const { kode_ujian, idUjian, date } = req.body;
+    try {
+        const getUjian = await Ujian.findOne({ where: { id: idUjian } });
+        const tanggalSekarang = new Date(date)
+        if (getUjian.status === "Close") {
+            if (tanggalSekarang > getUjian.jadwal_selesai) {
+                return res.status(400).json({ status: "Error", code: 400, message: "Pengerjaan Ujian Sudah tutup" })
+            }
+            else if (tanggalSekarang < getUjian.jadwal_mulai) {
+                return res.status(400).json({ status: "Error", code: 400, message: "Pengerjaan Ujian belum buka" })
+            }
+        }
+        if (getUjian.kode_ujian !== kode_ujian) {
+            return res.status(400).json({ status: "Error", code: 400, message: "Kode Ujian Tidak Benar" })
+        }
+        if ((getUjian.status === "Open") && (getUjian.kode_ujian === kode_ujian))
+            return res.status(200).json({ status: "success", code: 200 })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Pengecekan Kode Ujian" });
+    }
+}
+
+export const CreateJawabanUjian = async (req, res) => {
+    const jawabanUser = req.body;
+    try {
+        const idPesertaUjians = jawabanUser[0]?.idPesertaUjian;
+        const pesertaUjian = await PesertaUjian.findOne({ where: { id: idPesertaUjians } });
+        const soalUjian = await SoalUjian.findAll({ where: { idUjian: pesertaUjian.idUjian } });
+        let kunciMultipleSoal = [];
+        for (const soal of soalUjian) {
+            const bankSoal = await BankSoal.findOne({ where: { id: soal.idSoal } });
+            if (!bankSoal) {
+                continue;
+            }
+            if (bankSoal.tipe_soal === "Multiple") {
+                const soalMultiple = await SoalMultiple.findOne({ where: { idBankSoal: bankSoal.id } });
+                kunciMultipleSoal.push({ idSoal: soal.id, kunci: soalMultiple.kunci });
+            }
+        }
+        let totalScore = 0;
+        for (const jawaban of jawabanUser) {
+            if (jawaban.tipe_soal === "Multiple") {
+                const kunci = kunciMultipleSoal.find(k => k.idSoal === jawaban.id);
+                if (kunci && kunci.kunci === jawaban.jawaban) {
+                    totalScore += 10;
+                }
+            }
+        }
+        for (const jawaban of jawabanUser) {
+            await JawabanUjian.create({
+                idPesertaUjian: jawaban.idPesertaUjian,
+                idSoalUjian: jawaban.id,
+                Jawaban: jawaban.jawaban,
+                nilai: jawaban.tipe_soal === "Multiple" && kunciMultipleSoal.find(k => k.idSoal === jawaban.id)?.kunci === jawaban.jawaban ? 10 : 0
+            });
+        }
+        return res.status(201).json({ status: 'success', code: 201, message: "Anda Telah Menyelesaikan Ujian" })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Membaut Jawaban Ujian" });
     }
 }
