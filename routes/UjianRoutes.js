@@ -1,5 +1,5 @@
 import express from 'express';
-import { CekKodeUjian, CreateJawabanUjian, CreatePesertaUjian, DeletePesertaUjian, GetJadwalUjian, GetJawabanCalonAsisten, GetListUjianByIDLabor, GetPesertaUjianByID, GetPesertaUjianByIdTahapan, GetSoalUjianByIdUjian, GetUjianByID, GetUjianTimeByNIM, GetpesertaUjianByid, UpdatePenganggungJawab, UpdateStatusUjianRecruitment } from '../controllers/UjianControllers.js';
+import { CekKodeUjian, CreateJawabanUjian, CreatePesertaUjian, DeletePesertaUjian, EditNilaiJawabanEssay, GetJadwalUjian, GetJawabanCalonAsisten, GetListUjianByIDLabor, GetNilaiUjianCalonAsisten, GetPesertaUjianByID, GetPesertaUjianByIdTahapan, GetSoalUjianByIdUjian, GetUjianByID, GetUjianTimeByNIM, GetpesertaUjianByid, UpdatePenganggungJawab, UpdateStatusUjianRecruitment } from '../controllers/UjianControllers.js';
 
 const router = express.Router();
 
@@ -16,6 +16,8 @@ router.post('/create-pesertaujian', CreatePesertaUjian)
 router.post('/edit-pesertaujian', UpdatePenganggungJawab);
 router.post('/update-status-ujian', UpdateStatusUjianRecruitment);
 router.post('/cekkodeujian', CekKodeUjian);
+router.post('/postnilaijawabanessay', EditNilaiJawabanEssay);
+router.get('/postambilnilaicalon/:idPendaftarString', GetNilaiUjianCalonAsisten)
 router.post('/create-jawaban-user', CreateJawabanUjian)
 router.delete('/delete-pesertaujian/:id', DeletePesertaUjian)
 

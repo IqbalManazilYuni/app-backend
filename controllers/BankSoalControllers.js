@@ -2,6 +2,8 @@ import Labor from "../models/Model_Kepengurusan/Labor.js";
 import BankSoal from "../models/Model_Soal/BankSoal.js";
 import SoalEssay from "../models/Model_Soal/SoalEssay.js";
 import SoalMultiple from "../models/Model_Soal/SoalMultple.js";
+import SoalUjian from "../models/Model_Recruitment/SoalUjian.js"
+import JawabanUjian from "../models/Model_Recruitment/JawabanUjian.js"
 
 export const CreateSoalUjian = async (req, res) => {
     const { idLabor, tipe_soal, tahun, soal } = req.body;
@@ -259,6 +261,16 @@ export const EditSoal = async (req, res) => {
         } else if (tipe_soal === "Multiple") {
             try {
                 const soalmulti = await SoalMultiple.findOne({ where: { idBankSoal: id } });
+                if (soalmulti.kunci !== kunci) {
+                    const soalUjian = await SoalUjian.findAll({ where: { idSoal: soalmulti.idBankSoal } });
+                    for (const soal of soalUjian) {
+                        const jawabanUjian = await JawabanUjian.findAll({ where: { idSoalUjian: soal.id } });
+                        for (const jawaban of jawabanUjian) {
+                            const nilai = jawaban.Jawaban === kunci ? 10 : 0;
+                            await JawabanUjian.update({ nilai: nilai }, { where: { id: jawaban.id } });
+                        }
+                    }
+                }
                 soalmulti.soal = soal;
                 soalmulti.pilihan1 = pilihan1;
                 soalmulti.pilihan2 = pilihan2;
@@ -266,7 +278,6 @@ export const EditSoal = async (req, res) => {
                 soalmulti.pilihan4 = pilihan4;
                 soalmulti.kunci = kunci;
                 await soalmulti.save();
-
                 return res.status(200).json({ code: 200, status: "success", message: "Berhasil Memperbarui Soal Multiple" });
 
             } catch (error) {

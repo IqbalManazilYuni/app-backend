@@ -74,8 +74,39 @@ export const GetPesertaUjianByID = async (req, res) => {
             const user = await User.findByPk(pendaftar.idUsers);
             const userAsisten = await User.findByPk(pesertaujians.idUsers)
             const namaUjian = await Ujian.findByPk(pesertaujians.idUjian)
+            let nilai_multiple = 0;
+            let nilai_essay = 0;
+            let jumlah_essay = 0;
+            let jumlah_multiple = 0;
+
+            const jawabanUjian = await JawabanUjian.findAll({ where: { idPesertaUjian: pesertaujians.id } });
+
+            jawabanUjian.forEach(jawaban => {
+                if (jawaban.tipe_soal === "Multiple") {
+                    nilai_multiple += jawaban.nilai;
+                    jumlah_multiple++;
+                } else if (jawaban.tipe_soal === "Essay") {
+                    nilai_essay += jawaban.nilai;
+                    jumlah_essay++;
+                }
+            });
+
+            let rata_rata_essay = jumlah_essay > 0 ? (nilai_essay / jumlah_essay).toFixed(2) : 0;
+            let rata_rata_multiple = jumlah_multiple > 0 ? ((nilai_multiple / jumlah_multiple) * 10).toFixed(2) : 0;
+
+            let total = (parseFloat(rata_rata_essay) + parseFloat(rata_rata_multiple))
+
+            let rata = 0
+            if (total !== 0) {
+                rata = (total / 2).toFixed(2)
+            } else if (total === 0) {
+                rata = total
+            }
             const payloads = await pesertaujians.toJSON();
             payloads.nama = user.nama;
+            payloads.nilai_essay = rata_rata_essay
+            payloads.nilai_multiple = rata_rata_multiple
+            payloads.nilai_keseluruhan = rata
             payloads.nama_penanggung_jawab = userAsisten.nama;
             // payloads.nama_ujian = namaUjian.nama_ujian,
             // payloads.kode_ujian = namaUjian.kode_ujian,
@@ -244,7 +275,8 @@ export const GetUjianTimeByNIM = async (req, res) => {
                             idTahapan: tahapan.id,
                             idRecruitment: tahapan.idRecruitment,
                             nama_recruitment: recruitment ? recruitment.nama_recruitment : null,
-                            idPesertaUjian: pesertaUjian.id
+                            idPesertaUjian: pesertaUjian.id,
+                            idPendaftar: pesertaUjian.idPendaftar
                         };
                     }
                 }
@@ -337,6 +369,7 @@ export const GetSoalUjianByIdUjian = async (req, res) => {
             }
             payload.push(banksoalData)
         }
+        console.log("ayam")
         return res.status(200).json({ code: 200, status: "success", data: payload })
     } catch (error) {
         console.error(error);
@@ -429,8 +462,11 @@ export const GetJawabanCalonAsisten = async (req, res) => {
             } else if (jawaban.tipe_soal === 'Essay') {
                 soal = await SoalEssay.findOne({ where: { idBankSoal: bankSoal.id } });
             }
+            const jawabanWithoutCreateandUpdate = jawaban.toJSON();
+            delete jawabanWithoutCreateandUpdate.createdAt
+            delete jawabanWithoutCreateandUpdate.updatedAt
             return {
-                ...jawaban.dataValues,
+                ...jawabanWithoutCreateandUpdate,
                 soal: soal ? soal.dataValues : null
             };
         }));
@@ -440,3 +476,75 @@ export const GetJawabanCalonAsisten = async (req, res) => {
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Jawaban Ujian" });
     }
 };
+
+export const EditNilaiJawabanEssay = async (req, res) => {
+    const nilai = req.body;
+    try {
+        for (let key in nilai) {
+            if (nilai.hasOwnProperty(key)) {
+                const value = nilai[key];
+                const jawabanUjian = await JawabanUjian.findOne({ where: { id: key } })
+                if (jawabanUjian) {
+                    jawabanUjian.nilai = value;
+                    if (jawabanUjian.nilai > 100) {
+                        return res.status(400).json({ code: 400, status: "Error", message: "Inputkan Nilai Jawaban yang tidak Lebih dari 100" });
+                    } else if (jawabanUjian.nilai < 0) {
+                        return res.status(400).json({ code: 400, status: "Error", message: "Inputkan Nilai Jawaban yang tidak Kurang dari 0" });
+                    }
+                    await jawabanUjian.save();
+                }
+            }
+        }
+        return res.status(200).json({ code: 200, status: "success", message: "Nilai Jawaban Ujian berhasil diperbarui" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperabui Nilai Jawaban Ujian" });
+    }
+};
+
+export const GetNilaiUjianCalonAsisten = async (req, res) => {
+    const { idPendaftarString } = req.params;
+    try {
+        console.log("Babi",idPendaftarString);
+        const GetIdPesertaUjian = await PesertaUjian.findOne({ where: { idPendaftar: idPendaftarString } })
+        const jawabanUjian = await JawabanUjian.findAll({ where: { idPesertaUjian: GetIdPesertaUjian.id } })
+
+        let nilai_multiple = 0;
+        let nilai_essay = 0;
+        let jumlah_essay = 0;
+        let jumlah_multiple = 0;
+
+        jawabanUjian.forEach(jawaban => {
+            if (jawaban.tipe_soal === "Multiple") {
+                nilai_multiple += jawaban.nilai;
+                jumlah_multiple++;
+            } else if (jawaban.tipe_soal === "Essay") {
+                nilai_essay += jawaban.nilai;
+                jumlah_essay++;
+            }
+        });
+
+        let rata_rata_essay = jumlah_essay > 0 ? (nilai_essay / jumlah_essay).toFixed(2) : 0;
+        let rata_rata_multiple = jumlah_multiple > 0 ? ((nilai_multiple / jumlah_multiple) * 10).toFixed(2) : 0;
+
+        let total = (parseFloat(rata_rata_essay) + parseFloat(rata_rata_multiple))
+
+        let rata = 0
+        if (total !== 0) {
+            rata = (total / 2).toFixed(2)
+        } else if (total === 0) {
+            rata = total
+        }
+        const payload = [{
+            nilai_total: rata,
+            nilai_essay: rata_rata_essay,
+            nilai_multiple: rata_rata_multiple
+        }]
+
+        return res.status(200).json({ code: 200, status: "success", data: payload })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Nilai Jawaban Ujian" });
+
+    }
+}
