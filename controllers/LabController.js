@@ -7,6 +7,8 @@ import Labor from "../models/Model_Kepengurusan/Labor.js";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import User from "../models/Model_User/Users.js";
 import Modul from "../models/Model_Modul/Modul.js"
+import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
+import BankSoal from "../models/Model_Soal/BankSoal.js";
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi } = req.body;
     const file = req.file;
@@ -62,14 +64,29 @@ export const GetLabByID = async (req, res) => {
 export const GetInfoLab = async (req, res) => {
     const { idLabor } = req.params
     try {
-        const userAs = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" } });
-        const userEx = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Ex-Asisten" } });
-        const moduleTotal = await Modul.findAll({ where: { idLabor } })
-        console.log(userAs.length);
-        console.log(userEx.length);
-        console.log(moduleTotal.length);
+        const [userAs, userEx, userCalon, kepengurusanCount] = await Promise.all([
+            User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" } }),
+            User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Ex-Asisten" } }),
+            User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Calon Asisten" } }),
+            Kepengurusan.findAll({ where: { idLabor: idLabor } }),
+        ]);
+        const pesertaPromises = userCalon.map(usercalon =>
+            Pendaftar.findAll({ where: { idUsers: usercalon.id } })
+        );
+        const pesertaResults = await Promise.all(pesertaPromises);
+        const peserta = pesertaResults.flat();
+        const pesertaCount = peserta.length;
 
-
+        return res.status(200).json({
+            status: "success",
+            code: 200,
+            data: {
+                userAsCount: userAs.length,
+                userExCount: userEx.length,
+                pesertaCount: pesertaCount,
+                kepengurusanCount: kepengurusanCount.length
+            },
+        });
     } catch (error) {
         console.error("Error saat mengambil Informasi Laboratorium berdasarkan id", error);
         return res.status(500).json({ status: "error", code: 500, message: "Terjadi Kesalahan saat memproses permintaan pengambilan id." });
