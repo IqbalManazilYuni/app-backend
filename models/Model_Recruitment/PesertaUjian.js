@@ -33,7 +33,7 @@ const PesertaUjian = db.define('PesertaUjian', {
         onUpdate: 'CASCADE'
     },
     nilaiUjian: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
         defaultValue: 0,
     }

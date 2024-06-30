@@ -6,7 +6,7 @@ import Kepengurusan from "../models/Model_Kepengurusan/Kepengurusan.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import User from "../models/Model_User/Users.js";
-
+import Modul from "../models/Model_Modul/Modul.js"
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi } = req.body;
     const file = req.file;
@@ -59,6 +59,23 @@ export const GetLabByID = async (req, res) => {
     }
 };
 
+export const GetInfoLab = async (req, res) => {
+    const { idLabor } = req.params
+    try {
+        const userAs = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" } });
+        const userEx = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Ex-Asisten" } });
+        const moduleTotal = await Modul.findAll({ where: { idLabor } })
+        console.log(userAs.length);
+        console.log(userEx.length);
+        console.log(moduleTotal.length);
+
+
+    } catch (error) {
+        console.error("Error saat mengambil Informasi Laboratorium berdasarkan id", error);
+        return res.status(500).json({ status: "error", code: 500, message: "Terjadi Kesalahan saat memproses permintaan pengambilan id." });
+    }
+}
+
 export const EditLab = async (req, res) => {
     const { id, nama_Labor, deskripsi } = req.body;
     const file = req.file;
@@ -82,7 +99,7 @@ export const EditLab = async (req, res) => {
         lab.logo = logoFileName;
 
         await lab.save();
-        res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully'});
+        res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully' });
     } catch (error) {
         console.error('Error updating Laboratorium:', error);
         res.status(500).json({ code: 500, status: "error", message: 'Failed to update Laboratorium' });

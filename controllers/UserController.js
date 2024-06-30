@@ -127,7 +127,7 @@ export const LoginWeb = async (req, res) => {
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
         const expiry = Math.floor(Date.now() / 1000) + expiresIn;
-        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry });
+        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry, data: user.idLabor });
     } catch (error) {
         console.error("Error saat proses login:", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses login." });
