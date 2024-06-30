@@ -58,6 +58,7 @@ export const GetUserByToken = async (req, res) => {
             nama_Labor: labor ? labor.nama_Labor : null,
             jenisPengguna: user.jenisPengguna,
             JenisKelamin: user.JenisKelamin,
+            AksesRole: user.AksesRole,
         }
         return res.status(200).json({ code: 200, message: "User found", data: payload });
     } catch (error) {
@@ -108,7 +109,13 @@ export const LoginWeb = async (req, res) => {
     try {
         const user = await User.findOne({ where: { nim } });
 
+        const payload = {
+            idLabor: user.idLabor,
+            AksesRole: user.AksesRole,
+            nama: user.nama
+        }
         if (!user) {
+            s
             return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
         }
 
@@ -117,7 +124,7 @@ export const LoginWeb = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
-        if (user.AksesRole !== "Admin") {
+        if (user.AksesRole !== "Admin" && user.AksesRole !== "Super Admin") {
             return res.status(404).json({ message: `${user.AksesRole} Tidak Memiliki Akses Ke Dashboard Admin` });
         }
         if (user.jenisPengguna !== "Asisten") {
@@ -127,7 +134,7 @@ export const LoginWeb = async (req, res) => {
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
         const expiry = Math.floor(Date.now() / 1000) + expiresIn;
-        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry, data: user.idLabor });
+        return res.status(200).json({ code: 200, status: "success", message: "Login berhasil.", token: encryptedToken, expiry, data: payload });
     } catch (error) {
         console.error("Error saat proses login:", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses login." });

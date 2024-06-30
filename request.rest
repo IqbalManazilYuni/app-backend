@@ -40,20 +40,15 @@ Content-Type: application/json
 
 {
   "idLabor":"a8f3b29d-ee61-436d-a267-6acfd22f1740",
-  "nim":"2011522014",
-  "email":"agasdasds3di@gmail.com",
-  "nomor_asisten":"LEA.V.14.SI",
+  "nim":"123456789",
+  "email":"manazilyuniiqbal@gmail.com",
   "jenisPengguna":"Asisten",
-  "AksesRole":"User",
-  "nama":"Hendra Wijaya Kusuma",
-  "password":"Satu123@",
-  "status":"Lulus",
-  "nomor_hp":"081270403357",
-  "tempat_lahir":"Lubuk Basung",
-  "tanggal_lahir":"01/08/2001",
-  "JenisKelamin":"Pria",
-  "alamat":"Kota Padang",
-  "angkatan":"2020"
+  "AksesRole":"Super Admin",
+  "nama":"SuperAdmin",
+  "password":"SuperAdmin123@",
+  "nomor_hp":"080000000000",
+  "angkatan":"0000",
+  "JenisKelamin":"Pria"
 }
 ###
 

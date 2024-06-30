@@ -67,7 +67,7 @@ const User = db.define('User', {
         allowNull: false,
     },
     AksesRole: {
-        type: DataTypes.ENUM('User', 'Admin'),
+        type: DataTypes.ENUM('User', 'Admin','Super Admin'),
         allowNull: false,
         defaultValue: 'User'
     },
