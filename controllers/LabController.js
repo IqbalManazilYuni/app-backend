@@ -93,6 +93,36 @@ export const GetInfoLab = async (req, res) => {
     }
 }
 
+export const GetInfoLabWithoutIdlabor = async (req, res) => {
+    try {
+        const [userAs, userEx, userCalon, kepengurusanCount] = await Promise.all([
+            User.findAll({ where: { jenisPengguna: "Asisten" } }),
+            User.findAll({ where: { jenisPengguna: "Ex-Asisten" } }),
+            User.findAll({ where: { jenisPengguna: "Calon Asisten" } }),
+            Kepengurusan.findAll(),
+        ]);
+        const pesertaPromises = userCalon.map(usercalon =>
+            Pendaftar.findAll({ where: { idUsers: usercalon.id } })
+        );
+        const pesertaResults = await Promise.all(pesertaPromises);
+        const peserta = pesertaResults.flat();
+        const pesertaCount = peserta.length;
+
+        return res.status(200).json({
+            status: "success",
+            code: 200,
+            data: {
+                userAsCount: userAs.length,
+                userExCount: userEx.length,
+                pesertaCount: pesertaCount,
+                kepengurusanCount: kepengurusanCount.length
+            },
+        });
+    } catch (error) {
+        console.error("Error saat mengambil Informasi Laboratorium berdasarkan id", error);
+        return res.status(500).json({ status: "error", code: 500, message: "Terjadi Kesalahan saat memproses permintaan pengambilan id." });
+    }
+}
 export const EditLab = async (req, res) => {
     const { id, nama_Labor, deskripsi } = req.body;
     const file = req.file;
@@ -178,6 +208,117 @@ export const GetKepengurusanByIDLabor = async (req, res) => {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
     }
+};
+
+export const GetAdminLabor = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            where: { AksesRole: "Admin" },
+            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'idLabor']
+        });
+
+        if (users.length === 0) {
+            return res.status(404).json({ code: 404, message: "User Admin Belum Ada" });
+        }
+
+        const payload = await Promise.all(users.map(async (user) => {
+            const labor = await Labor.findOne({
+                where: { id: user.idLabor },
+                attributes: ['id', 'nama_Labor']
+            });
+            return {
+                id: labor ? labor.id : null,
+                idUser: user.id,
+                nama: user.nama,
+                nim: user.nim,
+                nomorAsisten: user.nomor_asisten,
+                namaLabor: labor ? labor.nama_Labor : null,
+            };
+        }));
+
+        return res.json({ code: 200, status: "success", data: payload });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
+    }
+};
+
+export const GetAdminByIdLabor = async (req, res) => {
+    const { idLabor } = req.params
+    try {
+        const getAllUser = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten", AksesRole: ["Admin", "User"] }, attributes: ['id', 'nama', 'AksesRole'] })
+        const datauser = []
+        for (const user of getAllUser) {
+            const payloads = user.toJSON()
+            datauser.push(payloads)
+        }
+        return res.json({ code: 200, status: "success", payload: datauser });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
+    }
 }
+
+export const EditAdminLabor = async (req, res) => {
+    const { idUser } = req.body;
+    let transaction;
+    console.log(idUser)
+    try {
+        // Memulai transaksi
+        transaction = await User.sequelize.transaction();
+
+        // Temukan dan perbarui UserAdmin
+        const UserAdmin = await User.findOne({ where: { AksesRole: "Admin" }, transaction });
+        if (!UserAdmin) {
+            throw new Error("User Admin tidak ditemukan");
+        }
+        UserAdmin.AksesRole = "User";
+        await UserAdmin.save({ transaction });
+
+        // Temukan dan perbarui UserBeAdmin setelah UserAdmin berhasil diperbarui
+        const UserBeAdmin = await User.findOne({ where: { id: idUser }, transaction });
+        if (!UserBeAdmin) {
+            throw new Error("User dengan ID tersebut tidak ditemukan");
+        }
+        UserBeAdmin.AksesRole = "Admin";
+        await UserBeAdmin.save({ transaction });
+
+        // Commit transaksi jika semuanya berhasil
+        await transaction.commit();
+
+        return res.json({ code: 200, status: "success", message: "Admin Berhasil Diperbarui" });
+    } catch (error) {
+        console.error(error);
+        if (transaction) {
+            await transaction.rollback();
+        }
+        return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
+    }
+};
+
+export const AddAdminLabor = async (req, res, next) => {
+    const { idUser, idLabor } = req.body;
+    try {
+        const UserAdmin = await User.findOne({ where: { id: idUser } });
+        if (!UserAdmin) {
+            throw new Error("User tidak ditemukan");
+        }
+        const userCekAdmin = await User.findOne({ where: { idLabor: idLabor, AksesRole: "Admin" } });
+        if (userCekAdmin) {
+            return res.status(400).json({ code: 400, status: "Error", message: "Admin Laboratorium Sudah Ada" })
+        }
+        UserAdmin.AksesRole = "Admin";
+        await UserAdmin.save();
+        return res.status(200).json({ code: 200, status: "success", message: "Berhasil Menambahkan Admin" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
+    }
+}
+
+
+
+
+
 
 
