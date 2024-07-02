@@ -37,7 +37,7 @@ const JawabanUjian = db.define('JawabanUjian', {
         allowNull: false,
     }
 }, {
-    tableName: "JawabanUjian"
+    tableName: "jawabanujian"
 });
 
 export default JawabanUjian;

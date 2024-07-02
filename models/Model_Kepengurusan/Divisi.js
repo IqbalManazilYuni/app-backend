@@ -26,7 +26,7 @@ const Divisi = db.define('Divisi', {
         allowNull: true,
     },
 }, {
-    tableName: "Divisi"
+    tableName: "divisi"
 });
 
 export default Divisi;

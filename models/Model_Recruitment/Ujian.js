@@ -41,7 +41,7 @@ const Ujian = db.define('Ujian', {
     },
 
 },{
-    tableName:"Ujian"
+    tableName:"ujian"
 });
 
 export default Ujian;

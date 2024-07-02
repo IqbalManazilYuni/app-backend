@@ -22,7 +22,7 @@ const SoalEssay = db.define('SoalEssay', {
         allowNull:false,
     },
 },{
-    tableName:"SoalEssay"
+    tableName:"soalessay"
 });
 
 export default SoalEssay;

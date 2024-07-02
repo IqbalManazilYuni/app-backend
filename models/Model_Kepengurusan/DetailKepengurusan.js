@@ -36,7 +36,7 @@ const DetailKepengurusan = db.define('DetailKepengurusan', {
         allowNull: false,
     }
 },{
-    tableName:"DetailKepengurusan"
+    tableName:"detailkepengurusan"
 });
 
 export default DetailKepengurusan;

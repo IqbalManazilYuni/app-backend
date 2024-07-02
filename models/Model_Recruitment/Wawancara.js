@@ -27,7 +27,7 @@ const Wawancara = db.define('Wawancara', {
         allowNull: false,
     }
 },{
-    tableName:"Wawancara"
+    tableName:"wawancara"
 });
 
 export default Wawancara;

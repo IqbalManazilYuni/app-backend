@@ -35,7 +35,7 @@ const Kepengurusan = db.define('Kepengurusan', {
         onUpdate:'CASCADE'
     },
 },{
-    tableName:"Kepengurusan"
+    tableName:"kepengurusan"
 });
 
 export default Kepengurusan;

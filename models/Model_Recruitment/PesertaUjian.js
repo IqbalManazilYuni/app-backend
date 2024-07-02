@@ -38,7 +38,7 @@ const PesertaUjian = db.define('PesertaUjian', {
         defaultValue: 0,
     }
 }, {
-    tableName: "PesertaUjian"
+    tableName: "pesertaujian"
 });
 
 export default PesertaUjian;

@@ -30,7 +30,7 @@ const Modul = db.define('Modul', {
         allowNull: false,
     }
 }, {
-    tableName: "Modul"
+    tableName: "modul"
 });
 
 export default Modul;

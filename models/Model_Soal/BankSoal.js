@@ -26,7 +26,7 @@ const BankSoal = db.define('BankSoal', {
         allowNull: false,
     }
 },{
-    tableName:"BankSoal"
+    tableName:"banksoal"
 });
 
 export default BankSoal;

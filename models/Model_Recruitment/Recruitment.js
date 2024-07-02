@@ -46,7 +46,7 @@ const Recruitment = db.define('Recruitment', {
         allowNull: false,
     }
 }, {
-    tableName: "Recruitment"
+    tableName: "recruitment"
 });
 
 export default Recruitment;

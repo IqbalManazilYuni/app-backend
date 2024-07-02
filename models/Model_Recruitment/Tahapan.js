@@ -26,7 +26,7 @@ const Tahapan = db.define('Tahapan', {
         allowNull: false,
     }
 },{
-    tableName:"Tahapan"
+    tableName:"tahapan"
 });
 
 export default Tahapan;

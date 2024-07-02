@@ -34,7 +34,7 @@ const NilaiWawancara = db.define('NilaiWawancara', {
         allowNull: false,
     },
 },{
-    tableName:"NilaiWawancara"
+    tableName:"nilaiwawancara"
 });
 
 export default NilaiWawancara;

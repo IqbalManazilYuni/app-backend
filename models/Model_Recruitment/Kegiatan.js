@@ -24,7 +24,7 @@ const Kegiatan = db.define('Kegiatan', {
         allowNull: false,
     }
 },{
-    tableName:"Kegiatan"
+    tableName:"kegiatan"
 });
 
 export default Kegiatan;

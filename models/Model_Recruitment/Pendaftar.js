@@ -62,7 +62,7 @@ const Pendaftar = db.define('Pendaftar', {
         onUpdate: 'CASCADE'
     }
 }, {
-    tableName: "Pendaftar"
+    tableName: "pendaftar"
 });
 
 export default Pendaftar;

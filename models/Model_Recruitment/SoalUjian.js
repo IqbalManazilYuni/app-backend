@@ -29,7 +29,7 @@ const SoalUjian = db.define('SoalUjian', {
         allowNull: false,
     }
 },{
-    tableName:"SoalUjian"
+    tableName:"soalujian"
 });
 
 export default SoalUjian;

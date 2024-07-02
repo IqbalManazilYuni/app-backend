@@ -43,7 +43,7 @@ const SoalMultiple = db.define('SoalMultiple', {
     }
 
 },{
-    tableName:"SoalMultiple"
+    tableName:"soalmultiple"
 });
 
 export default SoalMultiple;
