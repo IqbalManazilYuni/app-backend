@@ -111,7 +111,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
 
         const pendaftar = await Pendaftar.findAll({
             where: { idRecruitment: idRecruitments },
-            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan', 'Status_Pendaftar']
+            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan', 'Status_Pendaftar','verifikasi_berkas']
         });
         const idUsers = pendaftar.map(pend => pend.idUsers);
 
@@ -146,10 +146,11 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
                 nama_recruitment: recruitmentMap[pend.idRecruitment],
                 nama_Labor: laborMap[userWithoutPassword.idLabor],
                 id: pend.id,
+                verifikasi:pend.verifikasi_berkas,
                 idUsers: pend.idUsers,
                 file_krs: pend.file_krs,
                 file_permohonan: pend.file_permohonan,
-                Status_Pendaftar: pend.Status_Pendaftar
+                Status_Pendaftar: pend.Status_Pendaftar,
             };
         });
         return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: payload })
@@ -236,6 +237,8 @@ export const GetPendaftarByNIM = async (req, res) => {
             file_krs: pendaftar.file_krs,
             file_permohonan: pendaftar.file_permohonan,
             alasan: pendaftar.alasan,
+            verifikasi_berkas: pendaftar.verifikasi_berkas,
+            note: pendaftar.note
         };
 
         return res.status(200).json({ code: 200, status: "success", data: payload });

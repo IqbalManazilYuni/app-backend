@@ -33,6 +33,15 @@ const Pendaftar = db.define('Pendaftar', {
         defaultValue: "OnProgress",
         allowNull: false,
     },
+    verifikasi_berkas: {
+        type: DataTypes.ENUM('OnSubmit', 'Terverifikasi', 'Tidak Terverifikasi'),
+        defaultValue: "OnSubmit",
+        allowNull: false,
+    },
+    note: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
     file_krs: {
         type: DataTypes.TEXT,
         allowNull: true,

@@ -138,9 +138,8 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
         console.log("Tahapan: ", wawancara)
 
         // Cari pendaftar berdasarkan idRecruitment dari tahapan
-        const pendaftarList = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment } });
+        const pendaftarList = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment, verifikasi_berkas: "Terverifikasi" } });
 
-        console.log("Tahapan: ", pendaftarList)
 
         if (pendaftarList.length === 0) {
             return res.status(200).json({ code: 200, status: "success", message: "Tidak ada pendaftar", data: [] });

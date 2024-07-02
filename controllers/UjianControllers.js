@@ -158,7 +158,7 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
     const { idTahapan } = req.params;
     try {
         const tahapan = await Tahapan.findOne({ where: { id: idTahapan } });
-        const pendaftar = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment } });
+        const pendaftar = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment, verifikasi_berkas: "Terverifikasi" } });
 
         const payload = [];
 
