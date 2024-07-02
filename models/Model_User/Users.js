@@ -122,7 +122,7 @@ const User = db.define('User', {
         allowNull: true,
     },
 }, {
-    tableName: "User"
+    tableName: "user"
 });
 
 export default User;
