@@ -260,15 +260,14 @@ export const GetAdminByIdLabor = async (req, res) => {
 }
 
 export const EditAdminLabor = async (req, res) => {
-    const { idUser } = req.body;
+    const { idUser, idLabor } = req.body;
     let transaction;
-    console.log(idUser)
     try {
         // Memulai transaksi
         transaction = await User.sequelize.transaction();
 
         // Temukan dan perbarui UserAdmin
-        const UserAdmin = await User.findOne({ where: { AksesRole: "Admin" }, transaction });
+        const UserAdmin = await User.findOne({ where: { AksesRole: "Admin", idLabor: idLabor }, transaction });
         if (!UserAdmin) {
             throw new Error("User Admin tidak ditemukan");
         }
