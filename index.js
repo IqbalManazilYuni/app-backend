@@ -165,6 +165,6 @@ app.use(BankSoalRoutes);
 app.use(SoalUjianRoutes);
 app.use(ModulRoutes);
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT,'0.0.0.0', () => {
   console.log("Listening on port", process.env.PORT);
 });
