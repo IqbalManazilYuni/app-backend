@@ -389,6 +389,8 @@ export const GetSoalUjianByIdUjian = async (req, res) => {
     }
 };
 
+
+
 export const CekKodeUjian = async (req, res) => {
     const { kode_ujian, idUjian, date, idPesertaUjian } = req.body;
     try {
@@ -558,5 +560,25 @@ export const GetNilaiUjianCalonAsisten = async (req, res) => {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Nilai Jawaban Ujian" });
 
+    }
+};
+
+export const GenerateKodeUjian = async (req, res) => {
+    const { id } = req.params
+    try {
+        const ujian = await Ujian.findOne({ where: { id } });
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        const length = 10;
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters[randomIndex];
+        }
+        ujian.kode_ujian = result;
+        await ujian.save();
+        return res.status(200).json({ code: 200, message: "Kode Berhasi Diperbarui", status: "success" })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Kode Ujian" });
     }
 }
