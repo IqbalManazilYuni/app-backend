@@ -1,18 +1,21 @@
 import express from 'express';
 import { ChangePassword, DeletUser, EditUser, GetCvById, GetUserById, GetUserByJenisPenggunaAndIdLabor, GetUserByKode, GetUserByNIM, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
+import verifyToken from '../config/middleware.js';
 
 const router = express.Router();
 
-router.get('/get-cv/:id', GetCvById);
+router.get('/get-cv/:id', verifyToken, GetCvById);
 router.post('/login', LoginUser);
 router.post('/login-web', LoginWeb);
-router.post('/getuserbytoken', GetUserByToken);
-router.post('/GetUsersByPengguna', GetUsersByPengguna);
-router.post('/User/Edit-User', EditUser);
-router.post('/GetUserById', GetUserById);
-router.post('/GetUserByJenisPenggunaAndIdLabor', GetUserByJenisPenggunaAndIdLabor);
-router.delete('/deleteuser/:id',DeletUser)
-router.post('/getuserbyNIM', GetUserByNIM);
+router.post('/getuserbytoken', verifyToken, GetUserByToken);
+router.post('/getuserbytokenwithouttoken', GetUserByToken);
+router.post('/GetUsersByPengguna', verifyToken, GetUsersByPengguna);
+router.post('/User/Edit-User', verifyToken, EditUser);
+router.post('/GetUserById', verifyToken, GetUserById);
+router.post('/GetUserByJenisPenggunaAndIdLabor', verifyToken, GetUserByJenisPenggunaAndIdLabor);
+router.delete('/deleteuser/:id', verifyToken, DeletUser)
+router.post('/getuserbyNIM', verifyToken, GetUserByNIM);
+router.post('/getuserbynimwithouttoken', GetUserByNIM);
 router.post('/getuserbykode', GetUserByKode)
 router.post('/update-password', ChangePassword)
 

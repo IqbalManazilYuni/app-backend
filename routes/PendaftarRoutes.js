@@ -1,14 +1,15 @@
 import express from 'express';
 import { CreatePendaftar, DeletePendaftar, EditPendaftarDokumen, GetListPendaftarByIdLabor, GetPendaftarByIdRecruitment, GetPendaftarByNIM, GetPendaftarLabByID } from '../controllers/PendaftarControllers.js';
+import verifyToken from '../config/middleware.js';
 
 const router = express.Router();
 
-router.post('/add-pendaftar', CreatePendaftar);
-router.post('/getbynimpendaftar', GetPendaftarByNIM);
-router.post('/edit-pendaftaran', EditPendaftarDokumen);
-router.post('/get-pendaftar', GetPendaftarByIdRecruitment)
-router.get('/get-pendaftarbyidLabor/:idLabor', GetListPendaftarByIdLabor)
-router.get('/getpendaftarlaborbyidlabor/:idLabor', GetPendaftarLabByID)
-router.delete('/deletependaftar/:id', DeletePendaftar)
+router.post('/add-pendaftar', verifyToken, CreatePendaftar);
+router.post('/getbynimpendaftar', verifyToken, GetPendaftarByNIM);
+router.post('/edit-pendaftaran', verifyToken, EditPendaftarDokumen);
+router.post('/get-pendaftar', verifyToken, GetPendaftarByIdRecruitment)
+router.get('/get-pendaftarbyidLabor/:idLabor', verifyToken, GetListPendaftarByIdLabor)
+router.get('/getpendaftarlaborbyidlabor/:idLabor', verifyToken, GetPendaftarLabByID)
+router.delete('/deletependaftar/:id', verifyToken, DeletePendaftar)
 
 export default router;

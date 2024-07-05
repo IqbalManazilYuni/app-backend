@@ -22,22 +22,6 @@ import Pendaftar from '../models/Model_Recruitment/Pendaftar.js';
 //     }
 // };
 
-const decryptToken = (encryptedToken, secretKey) => {
-    try {
-        const key = Buffer.alloc(32);
-        const providedKeyBuffer = Buffer.from(secretKey, 'utf8');
-        providedKeyBuffer.copy(key, 0, 0, Math.min(providedKeyBuffer.length, key.length));
-        const iv = Buffer.from(encryptedToken.slice(0, 32), 'hex');
-        const encryptedText = encryptedToken.slice(32);
-        const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-        let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        return decrypted;
-    } catch (error) {
-        console.error("Error saat mendekripsi token:", error);
-        throw new Error("Gagal mendekripsi token");
-    }
-};
 
 export const GetUserByToken = async (req, res) => {
     const { token } = req.body;
@@ -66,6 +50,7 @@ export const GetUserByToken = async (req, res) => {
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 };
+
 const encryptToken = (token, secretKey) => {
     const key = Buffer.alloc(32);
     const providedKeyBuffer = Buffer.from(secretKey, 'utf8');
@@ -75,6 +60,23 @@ const encryptToken = (token, secretKey) => {
     let encrypted = cipher.update(token, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return iv.toString('hex') + encrypted;
+};
+
+export const decryptToken = (encryptedToken, secretKey) => {
+    try {
+        const key = Buffer.alloc(32);
+        const providedKeyBuffer = Buffer.from(secretKey, 'utf8');
+        providedKeyBuffer.copy(key, 0, 0, Math.min(providedKeyBuffer.length, key.length));
+        const iv = Buffer.from(encryptedToken.slice(0, 32), 'hex');
+        const encryptedText = encryptedToken.slice(32);
+        const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+        let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } catch (error) {
+        console.error("Error saat mendekripsi token:", error);
+        throw new Error("Gagal mendekripsi token");
+    }
 };
 
 export const LoginUser = async (req, res) => {
@@ -108,16 +110,16 @@ export const LoginWeb = async (req, res) => {
 
     try {
         const user = await User.findOne({ where: { nim } });
+        if (!user) {
 
+            return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
+        }
         const payload = {
             idLabor: user.idLabor,
             AksesRole: user.AksesRole,
             nama: user.nama
         }
-        if (!user) {
-            s
-            return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
-        }
+
 
         const isPasswordValid = await argon2.verify(user.password, password);
 
