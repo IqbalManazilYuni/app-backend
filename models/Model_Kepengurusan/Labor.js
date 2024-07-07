@@ -20,7 +20,11 @@ const Labor = db.define('Labor',{
     logo:{
         type: DataTypes.TEXT("long"),
         allowNull:true,
-    }
+    },
+    nama_pembina:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 },{
     tableName:"labor"
 });

@@ -9,8 +9,9 @@ import User from "../models/Model_User/Users.js";
 import Modul from "../models/Model_Modul/Modul.js"
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
 import BankSoal from "../models/Model_Soal/BankSoal.js";
+
 export const AddLab = async (req, res) => {
-    const { nama_Labor, deskripsi } = req.body;
+    const { nama_Labor, deskripsi, nama_pembina } = req.body;
     const file = req.file;
 
     try {
@@ -25,7 +26,8 @@ export const AddLab = async (req, res) => {
         const newLab = await Labor.create({
             logo: logoFileName,
             nama_Labor,
-            deskripsi
+            deskripsi,
+            nama_pembina
         });
         return res.status(201).json({ code: 201, status: "success", message: "Laboratorium berhasil didaftarkan." });
     } catch (error) {
@@ -124,7 +126,7 @@ export const GetInfoLabWithoutIdlabor = async (req, res) => {
     }
 }
 export const EditLab = async (req, res) => {
-    const { id, nama_Labor, deskripsi } = req.body;
+    const { id, nama_Labor, deskripsi, nama_pembina } = req.body;
     const file = req.file;
 
     try {
@@ -144,6 +146,7 @@ export const EditLab = async (req, res) => {
         lab.nama_Labor = nama_Labor;
         lab.deskripsi = deskripsi;
         lab.logo = logoFileName;
+        lab.nama_pembina = nama_pembina
 
         await lab.save();
         res.status(200).json({ code: 200, status: "success", message: 'Laboratorium updated successfully' });

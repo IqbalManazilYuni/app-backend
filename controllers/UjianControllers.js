@@ -430,6 +430,7 @@ export const CekKodeUjian = async (req, res) => {
 
 export const CreateJawabanUjian = async (req, res) => {
     const jawabanUser = req.body;
+    console.log(jawabanUser)
     try {
         const idPesertaUjians = jawabanUser[0]?.idPesertaUjian;
         const pesertaUjian = await PesertaUjian.findOne({ where: { id: idPesertaUjians } });

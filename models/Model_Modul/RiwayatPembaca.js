@@ -27,13 +27,9 @@ const RiwayatPembaca = db.define('RiwayatPembaca', {
     tanggal_baca: {
         type: DataTypes.STRING,
         allowNull: false,
-    },
-    durasi_baca: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
     }
 }, {
-    tableName: "RiwayatPembaca"
+    tableName: "riwayatpembaca"
 });
 
 export default RiwayatPembaca;

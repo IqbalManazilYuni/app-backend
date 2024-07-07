@@ -1,6 +1,7 @@
 import Modul from '../models/Model_Modul/Modul.js'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import storage from "../config/firebase.config.js";
+import RiwayatPembaca from '../models/Model_Modul/RiwayatPembaca.js';
 
 export const GetModulAll = async (req, res) => {
     const { idLabor } = req.params
@@ -84,5 +85,21 @@ export const DeleteModul = async (req, res) => {
         return res.status(200).json({ code: 200, status: 'success', message: "Modul Berhasil Dihapus" });
     } catch (error) {
         return res.status(500).json({ code: 500, status: 'error', message: "Gagal Menghapus Modul" });
+    }
+};
+
+export const CreateRiwayatPembaca = async (req, res) => {
+    const { idUsers, idModul, tanggal_baca } = req.body;
+    console.log(req.body);
+    try {
+        await RiwayatPembaca.create({
+            idUsers: idUsers,
+            idModul: idModul,
+            tanggal_baca: tanggal_baca,
+        });
+        return res.status(201).json({ code: 201, status: "success", message: "Riwayat berhasil ditambahkan." });
+    } catch (error) {
+        console.error("Error saat menambahkan Modul:", error);
+        return res.status(500).json({ status: "error", code: 500, message: "Terjadi kesalahan saat menambahkan Modul." });
     }
 }
