@@ -17,11 +17,6 @@ const Kegiatan = db.define('Kegiatan', {
     tahun:{
         type: DataTypes.STRING,
         allowNull:false,
-    },
-    status:{
-        type: DataTypes.ENUM('Open','Close'),
-        defaultValue:'Open',
-        allowNull: false,
     }
 },{
     tableName:"kegiatan"

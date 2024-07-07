@@ -6,7 +6,7 @@ import SoalMultiple from "../models/Model_Soal/SoalMultple.js";
 export const CreateSoalUjianList = async (req, res) => {
     const listSoal = req.body;
     try {
-        const { idUjian, idSoal, tahun } = listSoal;
+        const { idUjian, idSoal } = listSoal;
         const existingSoal = await SoalUjian.findAll({ where: { idSoal: idSoal, idUjian: idUjian } });
         if (existingSoal.length > 0) {
             return res.status(400).json({
@@ -19,7 +19,6 @@ export const CreateSoalUjianList = async (req, res) => {
         const newSoalData = idSoal.map(soal => ({
             idUjian: idUjian,
             idSoal: soal,
-            tahun: tahun
         }));
         await SoalUjian.bulkCreate(newSoalData);
         return res.status(201).json({

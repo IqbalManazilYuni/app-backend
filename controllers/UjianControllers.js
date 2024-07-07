@@ -9,6 +9,7 @@ import SoalUjian from "../models/Model_Recruitment/SoalUjian.js"
 import SoalMultiple from "../models/Model_Soal/SoalMultple.js"
 import SoalEssay from "../models/Model_Soal/SoalEssay.js"
 import JawabanUjian from "../models/Model_Recruitment/JawabanUjian.js"
+import { Op } from "sequelize";
 export const GetListUjianByIDLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
@@ -158,8 +159,15 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
     const { idTahapan } = req.params;
     try {
         const tahapan = await Tahapan.findOne({ where: { id: idTahapan } });
-        const pendaftar = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment, verifikasi_berkas: "Terverifikasi" } });
-
+        const pendaftar = await Pendaftar.findAll({
+            where: {
+                idRecruitment: tahapan.idRecruitment,
+                verifikasi_berkas: "Terverifikasi",
+                Status_Pendaftar: {
+                    [Op.notIn]: ["Gagal", "Lulus"]
+                }
+            }
+        });
         const payload = [];
 
         for (const pendaftars of pendaftar) {

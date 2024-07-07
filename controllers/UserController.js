@@ -203,11 +203,11 @@ export const EditUser = async (req, res) => {
         if (jenisPengguna === "Calon Asisten") {
             if (user.status !== status) {
                 if (status === "Lulus") {
-                    await Pendaftar.update({ Status_Pendaftar: 'Lulus' }, { where: { idUsers: user.id } });
+                    await Pendaftar.update({ Status_Pendaftar: 'Lulus' }, { where: { idUsers: user.id, id: idPendaftar } });
                 } else if (status === "Gagal") {
-                    await Pendaftar.update({ Status_Pendaftar: 'Gagal' }, { where: { idUsers: user.id } });
+                    await Pendaftar.update({ Status_Pendaftar: 'Gagal' }, { where: { idUsers: user.id, id: idPendaftar } });
                 } else {
-                    await Pendaftar.update({ Status_Pendaftar: 'OnProgress' }, { where: { idUsers: user.id } });
+                    await Pendaftar.update({ Status_Pendaftar: 'OnProgress' }, { where: { idUsers: user.id, id: idPendaftar } });
                 }
             }
         }
@@ -240,12 +240,12 @@ export const EditUser = async (req, res) => {
                 return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
             }
         }
-
-        const dataPendaftar = await Pendaftar.findOne({ where: { id: idPendaftar, idUsers: id } });
-        dataPendaftar.verifikasi_berkas = verifikasi;
-        dataPendaftar.note = note;
-        await dataPendaftar.save();
-
+        if (user.jenisPengguna === "Calon Asisten") {
+            const dataPendaftar = await Pendaftar.findOne({ where: { id: idPendaftar, idUsers: id } });
+            dataPendaftar.verifikasi_berkas = verifikasi;
+            dataPendaftar.note = note;
+            await dataPendaftar.save();
+        }
         user.nama = nama;
         user.nim = nim;
         user.angkatan = angkatan
@@ -269,7 +269,6 @@ export const EditUser = async (req, res) => {
 
 export const GetUserById = async (req, res) => {
     const { id, idPendaftar } = req.body;
-    console.log(idPendaftar)
     try {
         const user = await User.findOne({
             where: { id },
@@ -278,7 +277,11 @@ export const GetUserById = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
         }
-        const verifikasiberkas = await Pendaftar.findOne({ where: { id: idPendaftar, idUsers: id } })
+        let verifikasiberkas = null
+        if (user.jenisPengguna === "Calon Asisten") {
+            verifikasiberkas = await Pendaftar.findOne({ where: { id: idPendaftar, idUsers: id } })
+        }
+
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
         const formattedUser = {
@@ -296,8 +299,9 @@ export const GetUserById = async (req, res) => {
             alamat: user.alamat,
             status: user.status,
             nama_file: user.nama_file,
-            verifikasi_berkas: verifikasiberkas.verifikasi_berkas,
-            note: verifikasiberkas.note,
+            verifikasi_berkas: verifikasiberkas?.verifikasi_berkas,
+            note: verifikasiberkas?.note,
+            statusPendaftar: verifikasiberkas?.Status_Pendaftar,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
         return res.status(200).json({ code: 200, status: "success", message: "User Ditemukan", formattedUser });

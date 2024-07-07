@@ -1,4 +1,4 @@
-import { Op, where } from "sequelize";
+import { Op } from "sequelize";
 import PesertaWawancara from "../models/Model_Recruitment/PesertaWawancara.js";
 import Recruitment from "../models/Model_Recruitment/Recruitment.js"
 import Tahapan from "../models/Model_Recruitment/Tahapan.js";
@@ -135,18 +135,21 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
         if (!tahapan) {
             return res.status(404).json({ code: 404, status: "error", message: "Tahapan tidak ditemukan" });
         }
-        console.log("Tahapan: ", wawancara)
-
         // Cari pendaftar berdasarkan idRecruitment dari tahapan
         const pendaftarList = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment, verifikasi_berkas: "Terverifikasi" } });
-
-
         if (pendaftarList.length === 0) {
             return res.status(200).json({ code: 200, status: "success", message: "Tidak ada pendaftar", data: [] });
         }
         // Ambil detail user berdasarkan idUsers dari pendaftar
         const payload = await Promise.all(pendaftarList.map(async (pendaftar) => {
-            const user = await User.findOne({ where: { id: pendaftar.idUsers, status: 'Tahapan1' } });
+            const user = await User.findOne({
+                where: {
+                    id: pendaftar.idUsers,
+                    status: {
+                        [Op.notIn]: ["Gagal", "Lulus","Pendaftar"]
+                    }
+                }
+            });
 
             if (user) {
                 return {

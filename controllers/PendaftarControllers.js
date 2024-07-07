@@ -238,7 +238,8 @@ export const GetPendaftarByNIM = async (req, res) => {
             file_permohonan: pendaftar.file_permohonan,
             alasan: pendaftar.alasan,
             verifikasi_berkas: pendaftar.verifikasi_berkas,
-            note: pendaftar.note
+            note: pendaftar.note,
+            Status_Pendaftar: pendaftar.Status_Pendaftar,
         };
 
         return res.status(200).json({ code: 200, status: "success", data: payload });

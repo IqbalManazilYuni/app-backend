@@ -178,17 +178,19 @@ export const UpdateStatusRecruitment = async (req, res) => {
     const { date } = req.body;
     try {
         const recruitmentList = await Recruitment.findAll();
-        const updatedRecruitmentList = recruitmentList.map(async (recruitment) => {
+
+        const updatedRecruitmentList = await Promise.all(recruitmentList.map(async (recruitment) => {
             const jadwal_buka = new Date(recruitment.tanggal_buka);
             const jadwal_tutup = new Date(recruitment.tanggal_tutup);
             const jadwal = new Date(date);
-            let status = recruitment.status
-            if (jadwal_buka < jadwal && jadwal < jadwal_tutup) {
-                status = "Open"
+            let status = recruitment.status;
+
+            if (jadwal_buka <= jadwal && jadwal <= jadwal_tutup) {
+                status = "Open";
+            } else if (jadwal > jadwal_tutup) {
+                status = "Close";
             }
-            else if (jadwal > jadwal_tutup || jadwal < jadwal_tutup) {
-                status = "Close"
-            }
+
             // Memeriksa apakah status berubah
             if (status !== recruitment.status) {
                 // Jika status berubah, lakukan update pada tabel Recruitment
@@ -200,11 +202,13 @@ export const UpdateStatusRecruitment = async (req, res) => {
                 jadwal_tutup,
                 status
             };
-        });
-        return res.status(200).json({ code: 200, status: "success", message: "Recruitment telah diperbarui" });
+        }));
+
+        return res.status(200).json({ code: 200, status: "success", message: "Recruitment telah diperbarui", data: updatedRecruitmentList });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Recruitment" });
     }
 }
+
 

@@ -23,10 +23,6 @@ const SoalUjian = db.define('SoalUjian', {
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
-    },
-    tahun:{
-        type: DataTypes.STRING,
-        allowNull: false,
     }
 },{
     tableName:"soalujian"
