@@ -1,5 +1,5 @@
 import express from 'express';
-import { CreateNilaiWawancara, CreatePesertaWawancara, DeletePesertaWawancara, DeletePewawancara, EditPesertaWawancara, GetAsistePewawancara, GetJadwalWawancara, GetListPesertaWawancaraByIDMobile, GetNilaiPewawancara, GetNilaiWawancaraByID, GetPendaftarByIDWawancara, GetPesertaByID, GetPesertaWawancara, GetWawancaraByIDLaborMobile, GetWawancaraById, GetWawancaraByIdLabor, GetWawancaraTimeByNIM, UpdateNilaiWawancaraPeserta } from '../controllers/WawancaraControllers.js';
+import { CreateNilaiWawancara, CreatePesertaWawancara, DeletePesertaWawancara, DeletePewawancara, EditPesertaWawancara, GetAsistePewawancara, GetJadwalWawancara, GetListPesertaWawancaraByIDMobile, GetNilaiPewawancara, GetNilaiWawancaraByID, GetPendaftarByIDWawancara, GetPesertaByID, GetPesertaWawancara, GetWawancaraByIDLaborMobile, GetWawancaraById, GetWawancaraByIdLabor, GetWawancaraTimeByNIM, KirimPengajuanWawancara, UpdateNilaiWawancaraPeserta } from '../controllers/WawancaraControllers.js';
 import verifyToken from '../config/middleware.js';
 
 const router = express.Router();
@@ -19,6 +19,7 @@ router.get('/getasistenpewawancara/:idLabor', verifyToken, GetAsistePewawancara)
 router.post('/jadwalwawancara', verifyToken, GetJadwalWawancara);
 router.post('/addpewawancara', verifyToken, CreateNilaiWawancara);
 router.post('/add-pesertawawancara', verifyToken, CreatePesertaWawancara);
+router.post('/pengajuanpemindahan', verifyToken, KirimPengajuanWawancara);
 router.post('/edit-peserta-wawancara', verifyToken, EditPesertaWawancara);
 router.delete('/delete-pesertawawancara/:id', verifyToken, DeletePesertaWawancara);
 router.delete('/delete-pewawancara/:id', verifyToken, DeletePewawancara);

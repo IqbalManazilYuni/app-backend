@@ -6,6 +6,7 @@ import Wawancara from "../models/Model_Recruitment/Wawancara.js";
 import User from "../models/Model_User/Users.js";
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
 import NilaiWawancara from "../models/Model_Recruitment/NilaiWawancara.js"
+
 export const GetWawancaraByIdLabor = async (req, res) => {
     const { idLabor } = req.params;
     try {
@@ -48,7 +49,7 @@ export const GetWawancaraById = async (req, res) => {
         const wawancara = await Wawancara.findOne({ where: { id } });
         const payload = {
             nama_wawancara: wawancara.nama_wawancara,
-            metode_wawancara: wawancara.metode_wawancara,
+            tanggal_terakhir_pengajuan: new Date(wawancara.tanggal_terakhir_pengajuan).toLocaleString(),
         }
         return res.status(200).json({ code: 200, status: "success", message: "Wawancara Ditemukan", data: payload });
     } catch (error) {
@@ -86,7 +87,7 @@ export const GetPesertaWawancara = async (req, res) => {
 };
 
 export const CreatePesertaWawancara = async (req, res) => {
-    const { idWawancara, idPendaftar, lokasi, jadwal_mulai, jadwal_selesai } = req.body;
+    const { idWawancara, idPendaftar, lokasi, jadwal_mulai, jadwal_selesai, metode_wawancara, jadwalPengajuanTerakhir } = req.body;
     try {
         const pendaftar = await PesertaWawancara.findOne({ where: { idPendaftar } });
         if (pendaftar) {
@@ -96,12 +97,20 @@ export const CreatePesertaWawancara = async (req, res) => {
         const mulai = new Date(jadwal_mulai);
         const selesai = new Date(jadwal_selesai);
         const tanggalSekarang = new Date();
+        const jadwalPengajuan = new Date(jadwalPengajuanTerakhir)
 
+        const minimumMulai = new Date(jadwalPengajuan.getTime() + 24 * 60 * 60 * 1000);
+        if (mulai < minimumMulai) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara harus setidaknya 24 jam setelah Jadwal Pengajuan" });
+        }
+        if (mulai < jadwalPengajuan) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara tidak boleh sebelum Jadwal Pengajuan" });
+        }
         if (tanggalSekarang > mulai) {
-            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Invalid" });
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara tidak boleh di masa lalu" });
         }
         if (selesai <= mulai) {
-            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Wawancara harus setelah Jadwal Mulai Wawancara" });
         }
         await PesertaWawancara.create({
             idWawancara,
@@ -109,6 +118,7 @@ export const CreatePesertaWawancara = async (req, res) => {
             lokasi,
             jadwal_mulai,
             jadwal_selesai,
+            metode_wawancara,
         })
         res.status(201).json({ code: 201, status: "success", message: "Peserta Wawancara Berhasil ditambahkan" });
 
@@ -146,7 +156,7 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
                 where: {
                     id: pendaftar.idUsers,
                     status: {
-                        [Op.notIn]: ["Gagal", "Lulus","Pendaftar"]
+                        [Op.notIn]: ["Gagal", "Lulus", "Pendaftar"]
                     }
                 }
             });
@@ -207,8 +217,11 @@ export const GetPesertaByID = async (req, res) => {
         const payload = {
             nama: DetailUser.nama,
             lokasi: peserta.lokasi,
+            metode_wawancara: peserta.metode_wawancara,
             jadwal_mulai: jadwalmulai,
             jadwal_selesai: jadwalselesai,
+            asalan_pengajuan: peserta.asalan_pengajuan,
+            status_pengajuan: peserta.status_pengajuan
         }
         return res.status(200).json({ code: 200, status: "success", message: "Peserta Ditemukan", data: payload })
     } catch (error) {
@@ -218,14 +231,22 @@ export const GetPesertaByID = async (req, res) => {
 };
 
 export const EditPesertaWawancara = async (req, res) => {
-    const { id, jadwal_mulai, jadwal_selesai, lokasi } = req.body;
+    const { id, jadwal_mulai, jadwal_selesai, lokasi, jadwalPengajuanTerakhir, metode_wawancara, status_pengajuan } = req.body;
     try {
 
         const pesertaWawancara = await PesertaWawancara.findOne({ where: { id } });
 
         const mulai = new Date(jadwal_mulai);
         const selesai = new Date(jadwal_selesai);
+        const jadwalPengajuan = new Date(jadwalPengajuanTerakhir)
 
+        const minimumMulai = new Date(jadwalPengajuan.getTime() + 24 * 60 * 60 * 1000);
+        if (mulai < minimumMulai) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara harus setidaknya 24 jam setelah Jadwal Pengajuan" });
+        }
+        if (mulai < jadwalPengajuan) {
+            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara tidak boleh sebelum Jadwal Pengajuan" });
+        }
         if (selesai <= mulai) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
         }
@@ -234,23 +255,22 @@ export const EditPesertaWawancara = async (req, res) => {
             where: { idWawancara: pesertaWawancara.idWawancara, lokasi: pesertaWawancara.lokasi },
             order: [['jadwal_mulai', 'DESC']],
         });
-
-        // Array to store conflicting time slots
         const conflictingSlots = [];
-
-        // Check if new start time falls within existing schedule
-        existingJadwal.forEach(jadwal => {
-            const existingStart = new Date(jadwal.jadwal_mulai);
-            const existingEnd = new Date(jadwal.jadwal_selesai);
-
-            if ((mulai >= existingStart && mulai <= existingEnd) || (selesai >= existingStart && selesai <= existingEnd)) {
-                conflictingSlots.push({
-                    start: existingStart.toLocaleString(),
-                    end: existingEnd.toLocaleString()
-                });
-            }
-        });
-
+        const existingStart = new Date(pesertaWawancara.jadwal_mulai);
+        if (existingStart.getTime() !== mulai.getTime()) {
+            existingJadwal.forEach(jadwal => {
+                const existingStart = new Date(jadwal.jadwal_mulai);
+                const existingEnd = new Date(jadwal.jadwal_selesai);
+                if (jadwal.lokasi === lokasi) {
+                    if ((mulai >= existingStart && mulai <= existingEnd) || (selesai >= existingStart && selesai <= existingEnd)) {
+                        conflictingSlots.push({
+                            start: existingStart.toLocaleString(),
+                            end: existingEnd.toLocaleString()
+                        });
+                    }
+                }
+            });
+        }
         if (conflictingSlots.length > 0) {
             const conflictingMessage = conflictingSlots.map(slot => `${slot.start} - ${slot.end}`).join(", ");
             return res.status(400).json({ code: 400, status: "error", message: `Jadwal bentrok dengan jadwal yang sudah ada: ${conflictingMessage}` });
@@ -259,6 +279,8 @@ export const EditPesertaWawancara = async (req, res) => {
         pesertaWawancara.lokasi = lokasi;
         pesertaWawancara.jadwal_mulai = jadwal_mulai;
         pesertaWawancara.jadwal_selesai = jadwal_selesai;
+        pesertaWawancara.metode_wawancara = metode_wawancara
+        pesertaWawancara.status_pengajuan = status_pengajuan
 
         await pesertaWawancara.save();
 
@@ -514,9 +536,14 @@ export const GetWawancaraTimeByNIM = async (req, res) => {
                     if (tahapan) {
                         const recruitment = await Recruitment.findOne({ where: { id: tahapan.idRecruitment } });
                         return {
+                            id: pesertaWawancara.id,
                             lokasi: pesertaWawancara.lokasi,
                             jadwal_mulai: pesertaWawancara.jadwal_mulai,
                             jadwal_selesai: pesertaWawancara.jadwal_selesai,
+                            status_pengajuan: pesertaWawancara.status_pengajuan,
+                            asalan_pengajuan: pesertaWawancara.asalan_pengajuan,
+                            metode_wawancara: pesertaWawancara.metode_wawancara,
+                            jamPengajuan: wawancara.tanggal_terakhir_pengajuan,
                             idTahapan: tahapan.id,
                             idRecruitment: tahapan.idRecruitment,
                             nama_recruitment: recruitment ? recruitment.nama_recruitment : null
@@ -530,6 +557,20 @@ export const GetWawancaraTimeByNIM = async (req, res) => {
         return res.status(200).json({ code: 200, status: "success", data: wawancaraData.flat().filter(item => item !== undefined) });
     } catch (error) {
         console.error("Terjadi Kesalahan saat Mengambil Jadwal Wawancara", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' });
+    }
+}
+
+export const KirimPengajuanWawancara = async (req, res) => {
+    const { id, alasan, status } = req.body;
+    try {
+        const pesertawawancara = await PesertaWawancara.findOne({ where: { id } });
+        pesertawawancara.status_pengajuan = status;
+        pesertawawancara.asalan_pengajuan = alasan;
+        await pesertawawancara.save();
+        return res.status(200).json({ code: 200, status: "success", message: "Konfirmasi Jadwal Wawancara Dikirim" })
+    } catch (error) {
+        console.error("Terjadi Kesalahan saat Memperbarui Jadwal Wawancara", error.message);
         return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' });
     }
 }

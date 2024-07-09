@@ -4,7 +4,6 @@ import { decryptToken } from '../controllers/UserController.js';
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization'];
     const splittoken = token.split(' ')[1];
-    console.log(splittoken);
     if (!splittoken) {
         return res.status(403).json({ code: 403, status: "error", message: "Token tidak tersedia" });
     }
@@ -13,7 +12,6 @@ const verifyToken = (req, res, next) => {
         
         const decryptedToken = decryptToken(splittoken, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
-        console.log(decoded);
         req.user = decoded;
         
         next();

@@ -6,7 +6,7 @@ import Wawancara from '../models/Model_Recruitment/Wawancara.js';
 export const CreateTahapan = async (req, res) => {
     const { idRecruitment, nama_tahapan, jenis_tahapan } = req.body;
     if (jenis_tahapan === "Wawancara") {
-        const { nama_wawancara, metode_wawancara } = req.body;
+        const { nama_wawancara, tanggal_terakhir_pengajuan, durasi_persesi } = req.body;
         try {
             const tahapan = await Tahapan.create({
                 idRecruitment,
@@ -16,7 +16,8 @@ export const CreateTahapan = async (req, res) => {
             await Wawancara.create({
                 idTahapan: tahapan.id,
                 nama_wawancara: nama_wawancara,
-                metode_wawancara: metode_wawancara
+                tanggal_terakhir_pengajuan: tanggal_terakhir_pengajuan,
+                durasi_persesi: durasi_persesi
             })
             return res.status(201).json({ code: 201, status: "success", message: "Berhasil Menambahkan Tahapan" })
 
@@ -65,7 +66,8 @@ export const GetTahapanByID = async (req, res) => {
                 nama_tahapan: tahapan.nama_tahapan,
                 jenis_tahapan: tahapan.jenis_tahapan,
                 nama_wawancara: wawancara.nama_wawancara,
-                metode_wawancara: wawancara.metode_wawancara,
+                durasi_persesi: wawancara.durasi_persesi,
+                tanggal_terakhir_pengajuan: new Date(wawancara.tanggal_terakhir_pengajuan).toLocaleString(),
             };
             return res.status(200).json({ code: 200, status: "success", message: "Tahapan Ditemukan", data: payload });
         } else if (tahapan.jenis_tahapan === "Ujian") {
@@ -95,14 +97,15 @@ export const GetTahapanByID = async (req, res) => {
 export const EditTahapan = async (req, res) => {
     const { id, nama_tahapan, jenis_tahapan } = req.body;
     if (jenis_tahapan === "Wawancara") {
-        const { nama_wawancara, metode_wawancara } = req.body;
+        const { nama_wawancara, tanggal_terakhir_pengajuan, durasi_persesi } = req.body;
         try {
             const tahapan = await Tahapan.findOne({ where: { id } });
             const wawancara = await Wawancara.findOne({ where: { idTahapan: id } })
             wawancara.nama_wawancara = nama_wawancara
-            wawancara.metode_wawancara = metode_wawancara
+            wawancara.tanggal_terakhir_pengajuan = tanggal_terakhir_pengajuan
             tahapan.nama_tahapan = nama_tahapan
             tahapan.jenis_tahapan = jenis_tahapan
+            wawancara.durasi_persesi = durasi_persesi
             await wawancara.save()
             await tahapan.save();
             return res.status(200).json({ code: 200, status: "success", message: "Tahapan Berhasil Diperbarui" });

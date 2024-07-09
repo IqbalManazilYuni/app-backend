@@ -14,20 +14,29 @@ const Wawancara = db.define('Wawancara', {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        onDelete:'CASCADE',
-        onUpdate:'CASCADE',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
         unique: true,
     },
     nama_wawancara: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    metode_wawancara: {
-        type: DataTypes.ENUM('Offline','Online'),
+    // metode_wawancara: {
+    //     type: DataTypes.ENUM('Offline','Online'),
+    //     allowNull: false,
+    // }
+    tanggal_terakhir_pengajuan: {
+        type: DataTypes.DATE,
         allowNull: false,
+    },
+    durasi_persesi: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 15
     }
-},{
-    tableName:"wawancara"
+}, {
+    tableName: "wawancara"
 });
 
 export default Wawancara;

@@ -188,6 +188,7 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
 
 export const CreatePesertaUjian = async (req, res) => {
     const { idPendaftar, idUjian, nilaiUjian, idUsers } = req.body;
+    const existingRecords = [];
     try {
         for (const pesertaId of idPendaftar) {
             const existingRecord = await PesertaUjian.findOne({
@@ -196,8 +197,16 @@ export const CreatePesertaUjian = async (req, res) => {
                 }
             });
             if (existingRecord) {
-                return res.status(400).json({ message: "Sudah Terdapat Peserta Ujian yang sama sudah anda inputkan" });
+                existingRecords.push(pesertaId);
             }
+        }
+        if (existingRecords.length > 0) {
+            console.log(existingRecords)
+            return res.status(400).json({
+                code:400,
+                message: "Sudah Terdapat Peserta Ujian yang sama sudah anda inputkan",
+                existingRecords
+            });
         }
         for (const pesertaId of idPendaftar) {
             await PesertaUjian.create({
@@ -207,12 +216,21 @@ export const CreatePesertaUjian = async (req, res) => {
                 idUsers
             });
         }
-        return res.status(201).json({ code: 201, status: "success", message: 'Peserta Ujian created successfully' });
+        return res.status(201).json({
+            code: 201,
+            status: "success",
+            message: 'Peserta Ujian created successfully'
+        });
     } catch (error) {
         console.error("Error creating peserta ujian", error.message);
-        return res.status(500).json({ code: 500, status: "error", message: 'Internal server error' });
+        return res.status(500).json({
+            code: 500,
+            status: "error",
+            message: 'Internal server error'
+        });
     }
 };
+
 
 export const DeletePesertaUjian = async (req, res) => {
     const { id } = req.params;
