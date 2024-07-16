@@ -380,10 +380,21 @@ export const GetUserByNIM = async (req, res) => {
             }
         });
         let mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"no-reply" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Kode Verifikasi Anda',
-            text: `Kode verifikasi Anda adalah ${code}`
+            html: `
+                <div style="font-family: Arial, sans-serif; text-align: center;">
+                    <div style="background-color: #f8f8f8; padding: 20px; border-radius: 10px; display: inline-block; margin-top: 50px;">
+                        <h2 style="color: #333;">Verifikasi pemulihan password Anda</h2>
+                        <p style="color: #555;">RecruitLabDSI menerima permintaan untuk menggunakan</p>
+                        <p style="color: #555; font-weight: bold;">${email}</p>
+                        <p style="color: #555;">sebagai email pemulihan untuk password anda. Gunakan kode ini untuk menyelesaikan penyiapan pemulihan password:</p>
+                        <h1 style="color: #333; font-size: 36px; margin: 20px 0;">${code}</h1>
+                        <p style="color: #555;">Jika Ada kendala harap hubungi Admin Laboratorium.</p>
+                    </div>
+                </div>
+            `
         };
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {

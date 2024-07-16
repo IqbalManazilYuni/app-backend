@@ -32,9 +32,19 @@ const PesertaUjian = db.define('PesertaUjian', {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
+    status_pengajuan: {
+        type: DataTypes.ENUM('Cek', 'Pengajuan Tidak Diterima', 'Pengajuan Diterima', 'Pengajuan', 'Jadwal Diterima'),
+        allowNull: true,
+        defaultValue: "Cek",
+    },
+    asalan_pengajuan: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: ""
+    },
     nilaiUjian: {
         type: DataTypes.FLOAT,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 0,
     }
 }, {

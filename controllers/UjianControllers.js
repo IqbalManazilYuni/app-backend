@@ -13,14 +13,9 @@ import { Op } from "sequelize";
 export const GetListUjianByIDLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
-        // Mengambil semua recruitment berdasarkan idLabor
         const recruitments = await Recruitment.findAll({ where: { idLabor } });
-
-        // Memproses setiap recruitment detail
         const payload = await Promise.all(recruitments.map(async (recruitment) => {
-            // Mengambil semua tahapan ujian berdasarkan idRecruitment dan jenis_tahapan
             const tahapanList = await Tahapan.findAll({ where: { idRecruitment: recruitment.id, jenis_tahapan: "Ujian" } });
-            // Mengambil semua ujian berdasarkan idTahapan
             const ujianDetails = await Promise.all(tahapanList.map(async (tahapan) => {
                 const ujians = await Ujian.findAll({ where: { idTahapan: tahapan.id } });
                 return ujians.map(ujian => ({
@@ -29,10 +24,7 @@ export const GetListUjianByIDLabor = async (req, res) => {
                     jadwal_selesai: new Date(ujian.jadwal_selesai).toLocaleString()
                 }));
             }));
-
-            // Menggabungkan semua ujian menjadi satu array
             const ujianFlat = ujianDetails.flat();
-
             return {
                 // ...recruitment.toJSON(), kalau ingin menampilkan semua data
                 // idLabor: recruitment.idLabor,
@@ -40,8 +32,6 @@ export const GetListUjianByIDLabor = async (req, res) => {
                 ujian: ujianFlat
             };
         }));
-
-        // Mengembalikan payload ke client
         res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         console.error("Error saat proses mengambil ujian:", error);
@@ -57,6 +47,7 @@ export const GetUjianByID = async (req, res) => {
             ...ujian.toJSON(),
             jadwal_mulai: new Date(ujian.jadwal_mulai).toLocaleString(),
             jadwal_selesai: new Date(ujian.jadwal_selesai).toLocaleString(),
+            tanggal_terakhir_pengajuan: new Date(ujian.tanggal_terakhir_pengajuan).toLocaleString(),
         }
         return res.status(200).json({ code: 200, status: "success", data: payload })
     } catch (error) {
@@ -70,8 +61,6 @@ export const GetPesertaUjianByID = async (req, res) => {
     try {
         const pesertaujian = await PesertaUjian.findAll({ where: { idUjian: id } });
         const payload = [];
-
-        // Gunakan Promise.all untuk mempercepat pengambilan data
         await Promise.all(pesertaujian.map(async pesertaujians => {
             const pendaftar = await Pendaftar.findByPk(pesertaujians.idPendaftar);
             const user = await User.findByPk(pendaftar.idUsers);
@@ -106,14 +95,10 @@ export const GetPesertaUjianByID = async (req, res) => {
             } else if (total === 0) {
                 rata = total;
             }
-
-            // Update nilai ujian terlebih dahulu
             await PesertaUjian.update(
                 { nilaiUjian: rata },
                 { where: { id: pesertaujians.id } }
             );
-
-            // Setelah nilai diperbarui, baru isi data ke dalam payload
             const payloads = await pesertaujians.toJSON();
             payloads.nama = user.nama;
             payloads.nilai_essay = rata_rata_essay;
@@ -130,7 +115,6 @@ export const GetPesertaUjianByID = async (req, res) => {
     }
 };
 
-
 export const GetpesertaUjianByid = async (req, res) => {
     const { id } = req.params
     try {
@@ -143,10 +127,11 @@ export const GetpesertaUjianByid = async (req, res) => {
 }
 
 export const UpdatePenganggungJawab = async (req, res) => {
-    const { id, idUsers } = req.body
+    const { id, idUsers, status_pengajuan } = req.body
     try {
         const PesertaUjianGet = await PesertaUjian.findOne({ where: { id } });
         PesertaUjianGet.idUsers = idUsers
+        PesertaUjianGet.status_pengajuan = status_pengajuan
         await PesertaUjianGet.save();
         return res.status(200).json({ code: 200, status: "success", message: "Penanggung Jawab Berhasil Diperbarui" })
     } catch (error) {
@@ -203,7 +188,7 @@ export const CreatePesertaUjian = async (req, res) => {
         if (existingRecords.length > 0) {
             console.log(existingRecords)
             return res.status(400).json({
-                code:400,
+                code: 400,
                 message: "Sudah Terdapat Peserta Ujian yang sama sudah anda inputkan",
                 existingRecords
             });
@@ -310,6 +295,8 @@ export const GetUjianTimeByNIM = async (req, res) => {
                             jadwal_selesai: ujian.jadwal_selesai,
                             kode_ujian: ujian.kode_ujian,
                             status: ujian.status,
+                            status_pengajuan: pesertaUjian.status_pengajuan,
+                            tanggal_terakhir_pengajuan: ujian.tanggal_terakhir_pengajuan,
                             idTahapan: tahapan.id,
                             idRecruitment: tahapan.idRecruitment,
                             nama_recruitment: recruitment ? recruitment.nama_recruitment : null,
@@ -607,5 +594,67 @@ export const GenerateKodeUjian = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Mengambil Kode Ujian" });
+    }
+};
+
+export const KirimPengajuanUjian = async (req, res) => {
+    const { id, status, alasan } = req.body;
+    try {
+        const pesertawawancara = await PesertaUjian.findOne({ where: { id } });
+        pesertawawancara.status_pengajuan = status;
+        pesertawawancara.asalan_pengajuan = alasan;
+        await pesertawawancara.save();
+        return res.status(200).json({ code: 200, status: "success", message: "Konfirmasi Jadwal Wawancara Dikirim" })
+    } catch (error) {
+        console.error("Terjadi Kesalahan saat Memperbarui Jadwal Wawancara", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' });
+    }
+}
+
+export const GetUjianList = async (req, res) => {
+    const { idUjian } = req.params;
+    try {
+        const idUjianTahapan = await Ujian.findOne({ where: { id: idUjian } })
+        const idTahapanRecruitment = await Tahapan.findOne({ where: { id: idUjianTahapan.idTahapan } });
+        const tahapanList = await Tahapan.findAll({ where: { idRecruitment: idTahapanRecruitment.idRecruitment } })
+        const tahapanIds = tahapanList.map(tahapan => tahapan.id);
+
+        // Finding all Ujian records that match the tahapan IDs
+        const ujianList = await Ujian.findAll({
+            where: {
+                idTahapan: tahapanIds,
+                id: {
+                    [Op.notIn]: [idUjian]
+                }
+            }
+        });
+        if (ujianList.length === 0) {
+            return res.status(404).json({ code: 404, status: "error", message: "Tambahkan Jadwal Ujian yang lainnya" })
+        }
+        else {
+            return res.status(200).json({ code: 200, status: 'success', data: ujianList })
+        }
+
+    } catch (error) {
+        console.error("Terjadi Kesalahan : ", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' })
+    }
+}
+export const PostPenggantiJadwal = async (req, res) => {
+    const { id, idUjian, idPendaftar, idUsers, status_pengajuan } = req.body
+    console.log(req.body);
+    try {
+        const pesertaujianbyid = await PesertaUjian.findOne({ where: { id } });
+        await pesertaujianbyid.destroy()
+        await PesertaUjian.create({
+            idPendaftar,
+            idUjian,
+            idUsers,
+            status_pengajuan,
+        });
+        return res.status(200).json({ code: 200, status: 'success', message: "Jadwal Berhasil Dipindahkan" });
+    } catch (error) {
+        console.error("Terjadi Kesalahan : ", error.message);
+        return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' })
     }
 }

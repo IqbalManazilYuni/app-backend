@@ -12,7 +12,7 @@ export const CreatePendaftar = async (req, res) => {
         const recruitment = await Recruitment.findOne({ where: { id: idRecruitment }, transaction });
         if (recruitment.status === "Close") {
             await transaction.rollback();
-            return res.status(202).json({ status: "accept", code: 202, message: "Pendaftaraan Sudah Tutup" });
+            return res.status(400).json({ status: "accept", code: 400, message: "Pendaftaraan Sudah Tutup" });
         }
 
         const tanggalBuka = new Date(recruitment.tanggal_buka);
@@ -21,29 +21,29 @@ export const CreatePendaftar = async (req, res) => {
 
         if (tanggalDaftar < tanggalBuka) {
             await transaction.rollback();
-            return res.status(202).json({ status: "accept", code: 202, message: "Pendaftaraan Belum Buka" });
+            return res.status(400).json({ status: "accept", code: 400, message: "Pendaftaraan Belum Buka" });
         }
         if (tanggalDaftar > tanggalTutup) {
             await transaction.rollback();
-            return res.status(202).json({ status: "accept", code: 202, message: "Pendaftaraan Sudah Tutup" });
+            return res.status(400).json({ status: "accept", code: 400, message: "Pendaftaraan Sudah Tutup" });
         }
 
         const jumlah_pendaftar = await Pendaftar.count({ where: { idRecruitment }, transaction });
         if (jumlah_pendaftar >= recruitment.limit_peserta) {
             await transaction.rollback();
-            return res.status(202).json({ status: "accept", code: 202, message: "Pendaftaraan Sudah Full" });
+            return res.status(400).json({ status: "accept", code: 400, message: "Pendaftaraan Sudah Full" });
         }
 
         const pendaftar = await Pendaftar.findOne({ where: { idUsers, idKegiatan }, transaction });
         if (pendaftar) {
             await transaction.rollback();
-            return res.status(202).json({ status: "accept", code: 202, message: "Anda Tidak Bisa Mendaftar Lebih dari satu kali di kegiatan yang sama" });
+            return res.status(400).json({ status: "accept", code: 400, message: "Anda Tidak Bisa Mendaftar Lebih dari satu kali di kegiatan yang sama" });
         }
 
         const user = await User.findOne({ where: { id: idUsers }, transaction });
         if (user.jenisPengguna !== "Calon Asisten") {
             await transaction.rollback();
-            return res.status(202).json({ status: "accept", code: 202, message: "Jenis Pengguna Selain Calon Asisten Tidak diperbolehkan" });
+            return res.status(400).json({ status: "accept", code: 400, message: "Jenis Pengguna Selain Calon Asisten Tidak diperbolehkan" });
         }
         const kegiatanOr = await Kegiatan.findOne({ id: { idKegiatan }, transaction });
         const tahunkegiatan = Number(kegiatanOr.tahun);
@@ -111,7 +111,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
 
         const pendaftar = await Pendaftar.findAll({
             where: { idRecruitment: idRecruitments },
-            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan', 'Status_Pendaftar','verifikasi_berkas']
+            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan', 'Status_Pendaftar', 'verifikasi_berkas']
         });
         const idUsers = pendaftar.map(pend => pend.idUsers);
 
@@ -146,7 +146,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
                 nama_recruitment: recruitmentMap[pend.idRecruitment],
                 nama_Labor: laborMap[userWithoutPassword.idLabor],
                 id: pend.id,
-                verifikasi:pend.verifikasi_berkas,
+                verifikasi: pend.verifikasi_berkas,
                 idUsers: pend.idUsers,
                 file_krs: pend.file_krs,
                 file_permohonan: pend.file_permohonan,
@@ -228,7 +228,6 @@ export const GetPendaftarByNIM = async (req, res) => {
         const pendaftar = await Pendaftar.findOne({ where: { idUsers: idUser.id, idRecruitment: idRecruitment } });
 
         if (!pendaftar) {
-            console.log("ayam");
             return res.status(404).json({ code: 404, status: "failure", message: "Pendaftar not found" });
         }
 
@@ -241,7 +240,7 @@ export const GetPendaftarByNIM = async (req, res) => {
             note: pendaftar.note,
             Status_Pendaftar: pendaftar.Status_Pendaftar,
         };
-
+        console.log(payload);
         return res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });
@@ -252,10 +251,13 @@ export const EditPendaftarDokumen = async (req, res) => {
     const { id, file_krs, file_permohonan, alasan } = req.body;
     try {
         const pendaftar = await Pendaftar.findOne({ where: { id } });
+        if(!pendaftar){
+            return res.status(400).json({ status:"Error", code: 400, message: "Data Pendaftar Tidak Ditemukan"})
+        }
         pendaftar.file_krs = file_krs,
-            pendaftar.file_permohonan = file_permohonan,
-            pendaftar.alasan = alasan,
-            await pendaftar.save();
+        pendaftar.file_permohonan = file_permohonan,
+        pendaftar.alasan = alasan,
+        await pendaftar.save();
         return res.status(200).json({ code: 200, message: "Berhasil Memperbarui File Dokumen dan Asalan Mendaftar" })
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Memperbarui Pendaftar", error });

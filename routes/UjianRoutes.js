@@ -1,5 +1,25 @@
 import express from 'express';
-import { CekKodeUjian, CreateJawabanUjian, CreatePesertaUjian, DeletePesertaUjian, EditNilaiJawabanEssay, GenerateKodeUjian, GetJadwalUjian, GetJawabanCalonAsisten, GetListUjianByIDLabor, GetNilaiUjianCalonAsisten, GetPesertaUjianByID, GetPesertaUjianByIdTahapan, GetSoalUjianByIdUjian, GetUjianByID, GetUjianTimeByNIM, GetpesertaUjianByid, UpdatePenganggungJawab, UpdateStatusUjianRecruitment } from '../controllers/UjianControllers.js';
+import {
+    CekKodeUjian,
+    CreateJawabanUjian,
+    CreatePesertaUjian,
+    DeletePesertaUjian,
+    EditNilaiJawabanEssay,
+    GenerateKodeUjian,
+    GetJadwalUjian,
+    GetJawabanCalonAsisten,
+    GetListUjianByIDLabor,
+    GetNilaiUjianCalonAsisten,
+    GetPesertaUjianByID,
+    GetPesertaUjianByIdTahapan,
+    GetSoalUjianByIdUjian,
+    GetUjianByID, GetUjianList, GetUjianTimeByNIM,
+    GetpesertaUjianByid,
+    KirimPengajuanUjian,
+    PostPenggantiJadwal,
+    UpdatePenganggungJawab,
+    UpdateStatusUjianRecruitment
+} from '../controllers/UjianControllers.js';
 import verifyToken from '../config/middleware.js';
 
 const router = express.Router();
@@ -22,5 +42,8 @@ router.post('/postnilaijawabanessay', verifyToken, EditNilaiJawabanEssay);
 router.get('/postambilnilaicalon/:idPendaftarString', verifyToken, GetNilaiUjianCalonAsisten)
 router.post('/create-jawaban-user', verifyToken, CreateJawabanUjian)
 router.delete('/delete-pesertaujian/:id', verifyToken, DeletePesertaUjian)
+router.post('/konfirmasikesedian', verifyToken, KirimPengajuanUjian);
+router.post('/penggantianjadwal', verifyToken, PostPenggantiJadwal);
+router.get('/getujianlistbyid/:idUjian', verifyToken, GetUjianList);
 
 export default router;

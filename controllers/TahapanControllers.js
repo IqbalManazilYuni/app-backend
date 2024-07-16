@@ -26,7 +26,7 @@ export const CreateTahapan = async (req, res) => {
             return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses menambah tahapan." });
         }
     } else if (jenis_tahapan === "Ujian") {
-        const { nama_ujian, kode_ujian, jadwal_mulai, jadwal_selesai } = req.body;
+        const { nama_ujian, kode_ujian, jadwal_mulai, jadwal_selesai, tanggal_terakhir_pengajuan } = req.body;
         try {
             const mulai = new Date(jadwal_mulai);
             const selesai = new Date(jadwal_selesai);
@@ -41,6 +41,7 @@ export const CreateTahapan = async (req, res) => {
             })
             await Ujian.create({
                 idTahapan: tahapan.id,
+                tanggal_terakhir_pengajuan,
                 nama_ujian,
                 kode_ujian,
                 jadwal_mulai,
@@ -84,7 +85,8 @@ export const GetTahapanByID = async (req, res) => {
                 jadwal_mulai: jadwalmulai,
                 jadwal_selesai: jadwalselesai,
                 kode_ujian: ujian.kode_ujian,
-                status: ujian.status
+                status: ujian.status,
+                tanggal_terakhir_pengajuan: new Date(ujian.tanggal_terakhir_pengajuan).toLocaleString(),
             };
             return res.status(200).json({ code: 200, status: "success", message: "Tahapan Ditemukan", data: payload });
         }
@@ -116,7 +118,7 @@ export const EditTahapan = async (req, res) => {
         }
     }
     else if (jenis_tahapan === "Ujian") {
-        const { nama_ujian, kode_ujian, jadwal_mulai, jadwal_selesai, status } = req.body;
+        const { nama_ujian, kode_ujian, jadwal_mulai, jadwal_selesai, status, tanggal_terakhir_pengajuan } = req.body;
         try {
             const tahapan = await Tahapan.findOne({ where: { id } });
             const ujian = await Ujian.findOne({ where: { idTahapan: id } })
@@ -135,6 +137,7 @@ export const EditTahapan = async (req, res) => {
             ujian.status = status
             tahapan.nama_tahapan = nama_tahapan
             tahapan.jenis_tahapan = jenis_tahapan
+            ujian.tanggal_terakhir_pengajuan = tanggal_terakhir_pengajuan
             await ujian.save()
             await tahapan.save();
             return res.status(200).json({ code: 200, status: "success", message: "Tahapan Berhasil Diperbarui" });

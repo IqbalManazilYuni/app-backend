@@ -31,6 +31,10 @@ const Ujian = db.define('Ujian', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    tanggal_terakhir_pengajuan: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
     idTahapan: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
