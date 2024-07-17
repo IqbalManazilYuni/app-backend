@@ -12,7 +12,7 @@ const User = db.define('User', {
     },
     idLabor: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     },
