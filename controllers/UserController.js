@@ -119,18 +119,17 @@ export const LoginWeb = async (req, res) => {
             AksesRole: user.AksesRole,
             nama: user.nama
         }
-
-
         const isPasswordValid = await argon2.verify(user.password, password);
-
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
         if (user.AksesRole !== "Admin" && user.AksesRole !== "Super Admin") {
             return res.status(404).json({ message: `${user.AksesRole} Tidak Memiliki Akses Ke Dashboard Admin` });
         }
-        if (user.jenisPengguna !== "Asisten") {
-            return res.status(404).json({ message: `${user.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
+        if (user.AksesRole !== "Super Admin") {
+            if (user.jenisPengguna !== "Asisten") {
+                return res.status(404).json({ message: `${user.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
+            }
         }
         const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
