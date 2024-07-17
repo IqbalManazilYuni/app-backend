@@ -35,20 +35,15 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:3001/register
+POST http://20.2.9.74:3001/register
 Content-Type: application/json
 
 {
-  "idLabor":"a8f3b29d-ee61-436d-a267-6acfd22f1740",
   "nim":"123456789",
   "email":"manazilyuniiqbal@gmail.com",
-  "jenisPengguna":"Asisten",
   "AksesRole":"Super Admin",
   "nama":"SuperAdmin",
   "password":"SuperAdmin123@",
-  "nomor_hp":"080000000000",
-  "angkatan":"0000",
-  "JenisKelamin":"Pria"
 }
 ###
 
@@ -63,7 +58,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3001/add-pendaftar
+POST http://20.2.9.74:3001/add-pendaftar
 Content-Type: application/json
 
 {

@@ -64,7 +64,7 @@ const User = db.define('User', {
     },
     jenisPengguna: {
         type: DataTypes.ENUM('Asisten', 'Calon Asisten', 'Ex-Asisten'),
-        allowNull: false,
+        allowNull: true,
     },
     AksesRole: {
         type: DataTypes.ENUM('User', 'Admin','Super Admin'),
@@ -81,7 +81,7 @@ const User = db.define('User', {
     },
     status: {
         type: DataTypes.ENUM('Pendaftar', 'Tahapan1', 'Tahapan2', 'Gagal', 'Lulus'),
-        allowNull: false,
+        allowNull: true,
         defaultValue: 'Pendaftar',
     },
     nama_file: {
@@ -111,7 +111,7 @@ const User = db.define('User', {
     },
     JenisKelamin: {
         type: DataTypes.ENUM('Pria', 'Wanita'),
-        allowNull: false,
+        allowNull: true,
     },
     alamat: {
         type: DataTypes.TEXT,
