@@ -49,6 +49,17 @@ export const GetLab = async (req, res) => {
     }
 };
 
+export const GetLabByIdLabor = async (req, res) => {
+    const { idLabor } = req.params
+    try {
+        const Lab = await Labor.findOne({ where: { id: idLabor } });
+        return res.status(200).json({ code: 200, status: "success", message: "Data Laboratorium ditemukan", data: Lab });
+    } catch (error) {
+        console.error("Error saat mendapatkan semua Laboratorium:", error);
+        return res.status(500).json({ status: "error", code: 500, message: "Terjadi kesalahan saat mendapatkan semua Laboratorium." });
+    }
+};
+
 export const GetLabByID = async (req, res) => {
     const { id } = req.body;
     try {
