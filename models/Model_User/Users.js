@@ -52,15 +52,6 @@ const User = db.define('User', {
     angkatan: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-            // len: [4, 4],
-            customValidator(value) {
-                const regex = /^[0-9]+$/;
-                if (!regex.test(value)) {
-                    throw new Error('Format Angkatan tidak benar');
-                }
-            }
-        }
     },
     jenisPengguna: {
         type: DataTypes.ENUM('Asisten', 'Calon Asisten', 'Ex-Asisten'),
@@ -91,15 +82,6 @@ const User = db.define('User', {
     nomor_hp: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-            isNumeric: true,
-            customValidator(value) {
-                const regex = /^[0-9]+$/;
-                if (!regex.test(value)) {
-                    throw new Error('Format Number harus 08xxxx');
-                }
-            }
-        }
     },
     tempat_lahir: {
         type: DataTypes.STRING,
