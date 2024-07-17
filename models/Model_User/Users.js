@@ -53,7 +53,7 @@ const User = db.define('User', {
         type: DataTypes.STRING,
         allowNull: true,
         validate: {
-            len: [4, 4],
+            // len: [4, 4],
             customValidator(value) {
                 const regex = /^[0-9]+$/;
                 if (!regex.test(value)) {
