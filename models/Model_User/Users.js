@@ -58,7 +58,7 @@ const User = db.define('User', {
         allowNull: true,
     },
     AksesRole: {
-        type: DataTypes.ENUM('User', 'Admin','Super Admin'),
+        type: DataTypes.ENUM('User', 'Admin', 'Super Admin'),
         allowNull: false,
         defaultValue: 'User'
     },
@@ -100,6 +100,14 @@ const User = db.define('User', {
         allowNull: true,
     },
     kode_verifikasi: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    status_akun: {
+        type: DataTypes.ENUM('Terverifikasi', 'Tidak Terverifikasi'),
+        allowNull: true,
+    },
+    verifikasiToken: {
         type: DataTypes.STRING,
         allowNull: true,
     },

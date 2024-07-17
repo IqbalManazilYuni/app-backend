@@ -4,6 +4,10 @@ import User from '../models/Model_User/Users.js';
 import dotenv from 'dotenv';
 import storage from '../config/firebase.config.js';
 import { ref, getDownloadURL } from 'firebase/storage';
+import nodemailer from 'nodemailer';
+import 'dotenv/config';
+import crypto from 'crypto';
+import { stat } from 'fs';
 
 dotenv.config();
 
@@ -58,9 +62,31 @@ export const RegisterUser = async (req, res) => {
         status,
         nama_file,
     } = req.body;
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-        return res.status(400).json({ message: "Password harus terdiri dari setidaknya 8 karakter dan mengandung setidaknya satu huruf besar, satu angka, dan satu karakter khusus." });
+    const minLengthRegex = /^.{8,}$/;
+    const uppercaseRegex = /[A-Z]/;
+    const lowercaseRegex = /[a-z]/;
+    const digitRegex = /\d/;
+
+    let errorMessage = "Password harus terdiri dari setidaknya 8 karakter";
+
+    if (!minLengthRegex.test(password)) {
+        errorMessage += ", memiliki panjang minimal 8 karakter";
+    }
+
+    if (!uppercaseRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu huruf besar";
+    }
+
+    if (!lowercaseRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu huruf kecil";
+    }
+
+    if (!digitRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu angka";
+    }
+
+    if (errorMessage !== "Password harus terdiri dari setidaknya 8 karakter") {
+        return res.status(400).json({ message: errorMessage });
     }
     try {
         const existingUser = await User.findOne({ where: { nim } });
@@ -77,7 +103,9 @@ export const RegisterUser = async (req, res) => {
             return res.status(400).json({ code: 400, status: "error", message: "Tanggal Lahir Tidak Benar" });
         }
         const hashedPassword = await argon2.hash(password);
-        await User.create({
+        const token = crypto.randomBytes(32).toString('hex');
+        console.log(token);
+        const newUser = await User.create({
             nama,
             nim,
             email,
@@ -94,8 +122,42 @@ export const RegisterUser = async (req, res) => {
             alamat,
             AksesRole,
             nama_file,
+            status_akun: "Tidak Terverifikasi",
+            verifikasiToken: token,
         });
-
+        const link = `http://localhost:3000/verifikasi-akun/${token}`
+        if (jenisPengguna === "Calon Asisten") {
+            let transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+            let mailOptions = {
+                from: `"no-reply" <${process.env.EMAIL_USER}>`,
+                to: email,
+                subject: 'Verifikasi Akun Anda',
+                html: `
+    <div style="font-family: Arial, sans-serif; text-align: center;">
+        <div style="background-color: #f8f8f8; padding: 20px; border-radius: 10px; display: inline-block; margin-top: 50px;">
+            <h2 style="color: #333;">Verifikasi Akun yang telah Anda Daftarkan</h2>
+            <p style="color: #555;">Anda Telah Mendaftarkan Akun Anda Pada aplikasi kami dengan menggunakan akun email</p>
+            <p style="color: #555; font-weight: bold;">${email}</p>
+            <p style="color: #555;">Selanjutnya Anda Diharapkan untuk Melakukan Verifikasi Akun Anda dengan Link Berikut:</p>
+            <a href="${link}" style="background-color: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block; margin: 20px 0;">Verifikasi Akun Anda</a>
+            <p style="color: #555;">Jika Ada kendala harap hubungi Admin Laboratorium.</p>
+        </div>
+    </div>
+`
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error("Error saat mengirim email: ", error);
+                    return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat mengirim email." });
+                }
+            });
+        }
         return res.status(201).json({ code: 201, status: "success", message: "User berhasil didaftarkan." });
     } catch (error) {
         console.log(error);
@@ -103,13 +165,29 @@ export const RegisterUser = async (req, res) => {
     }
 };
 
+export const VerifikasiAkun = async (req, res) => {
+    const { token } = req.body
+    try {
+        const userToken = await User.findOne({ where: { verifikasiToken: token } });
+        if (!userToken) {
+            return res.status(400).json({ code: 404, status: "Bad Request", message: "Akun Anda Sudah Terverifikasi" })
+        }
+        userToken.status_akun = "Terverifikasi"
+        userToken.verifikasiToken = null
+        await userToken.save();
+        return res.status(200).json({ code: 200, status: "success" })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ code: 500, message: error.errors[0].message });
+    }
+}
+
 export const GetUserByNimRegistrasi = async (req, res) => {
     const { nim } = req.body;
     console.log(nim)
     try {
         const user = await User.findOne({
-            where: { nim },
-            attributes: ['id', 'nama', 'email', 'nim', 'status', 'angkatan', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            where: { nim }
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -134,7 +212,6 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             angkatan: user.angkatan,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
-        console.log(formattedUser);
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUser });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan nim:", error);

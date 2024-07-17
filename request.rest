@@ -35,15 +35,16 @@ Content-Type: application/json
 
 ###
 
-POST http://20.2.9.74:3001/register
+POST http://localhost:3001/register
 Content-Type: application/json
 
 {
-  "nim":"123456789",
-  "email":"manazilyuniiqbal@gmail.com",
+  "nim":"5213123",
+  "email":"manazilyuni@gmail.com",
   "AksesRole":"Super Admin",
   "nama":"SuperAdmin",
-  "password":"SuperAdmin123@"
+  "password":"SuperAdmin123@",
+  "jenisPengguna":"Calon Asisten"
 }
 ###
 

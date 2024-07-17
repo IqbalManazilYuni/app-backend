@@ -5,8 +5,6 @@ import User from '../models/Model_User/Users.js';
 import Labor from '../models/Model_Kepengurusan/Labor.js';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
-import db from '../config/db.config.js';
-import { stat } from 'fs';
 import Pendaftar from '../models/Model_Recruitment/Pendaftar.js';
 
 // export const GetAllUsers = async (req, res) => {
@@ -94,6 +92,9 @@ export const LoginUser = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Login gagal. Cek kembali NIM dan password Anda." });
         }
+        if (user.status_akun !== "Terverifikasi") {
+            return res.status(404).json({ message: `Akun Anda Belum Terverifikasi` });
+        }
         const expiresIn = 10600; // Waktu kedaluwarsa token dalam detik
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
@@ -131,7 +132,12 @@ export const LoginWeb = async (req, res) => {
                 return res.status(404).json({ message: `${user.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
             }
         }
-        const expiresIn = 3600; // Waktu kedaluwarsa token dalam detik
+        if (user.AksesRole !== "Super Admin") {
+            if (user.status_akun !== "Terverifikasi") {
+                return res.status(404).json({ message: `Akun Anda Belum Terverifikasi` });
+            }
+        }
+        const expiresIn = 3600;
         const jwtoken = jwt.sign({ nim: user.nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
         const encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
         const expiry = Math.floor(Date.now() / 1000) + expiresIn;
@@ -192,6 +198,7 @@ export const EditUser = async (req, res) => {
         note,
         verifikasi,
         idPendaftar,
+        status_akun,
     } = req.body;
     let encryptedToken, expiry;
     try {
@@ -258,6 +265,7 @@ export const EditUser = async (req, res) => {
         user.tanggal_lahir = tanggal_lahir;
         user.JenisKelamin = JenisKelamin;
         user.alamat = alamat;
+        user.status_akun = status_akun;
         await user.save();
         res.status(200).json({ code: 200, status: "success", message: 'User updated successfully', token: encryptedToken, expiry });
     } catch (error) {
@@ -271,7 +279,7 @@ export const GetUserById = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: ['nama', 'nim', 'email', 'angkatan', 'status_akun', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
@@ -297,6 +305,7 @@ export const GetUserById = async (req, res) => {
             JenisKelamin: user.JenisKelamin,
             alamat: user.alamat,
             status: user.status,
+            status_akun: user.status_akun,
             nama_file: user.nama_file,
             verifikasi_berkas: verifikasiberkas?.verifikasi_berkas,
             note: verifikasiberkas?.note,
@@ -422,7 +431,7 @@ export const GetUserByKode = async (req, res) => {
             id: user.id,
         };
 
-        user.kode_verifikasi = "";
+        user.kode_verifikasi = null;
         await user.save();
 
         return res.status(200).json({ code: 200, status: "success", message: "Kode Verifikasi Anda Benar", data: payload })
