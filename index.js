@@ -37,6 +37,7 @@ import BankSoal from "./models/Model_Soal/BankSoal.js";
 import SoalEssay from "./models/Model_Soal/SoalEssay.js";
 import SoalMultiple from "./models/Model_Soal/SoalMultple.js";
 import User from "./models/Model_User/Users.js";
+import Akun from "./models/Model_User/Akun.js";
 import { 
   RelasiBankSoal,
   RelasiDivisi,
@@ -52,7 +53,8 @@ import {
   RelasiTahapan, 
   RelasiUjian, 
   RelasiUser,
-  RelasiWawancara
+  RelasiWawancara,
+  RelasiAkun
 } from "./models/ModelRelasi.js";
 import Kegiatan from "./models/Model_Recruitment/Kegiatan.js";
 
@@ -79,6 +81,7 @@ try {
 
 // const modelsToSync = [
 //   Labor,
+//   Akun,
 //   User,
 //   Kepengurusan,
 //   Kegiatan,
@@ -130,6 +133,7 @@ try {
 //     await RelasiPesertaWawancara();
 //     await RelasiPewawancara();
 //     await RelasiPesertaUjian();
+//     await RelasiAkun();
 
 //     console.log('Relationships setup successfully.');
 //   } catch (error) {
@@ -146,7 +150,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Increase the body size limit
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 

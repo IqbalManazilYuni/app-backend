@@ -6,6 +6,7 @@ import Labor from '../models/Model_Kepengurusan/Labor.js';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
 import Pendaftar from '../models/Model_Recruitment/Pendaftar.js';
+import Akun from '../models/Model_User/Akun.js';
 
 // export const GetAllUsers = async (req, res) => {
 //     try {
@@ -26,23 +27,34 @@ export const GetUserByToken = async (req, res) => {
     try {
         const decryptedToken = decryptToken(token, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
-        const user = await User.findOne({ where: { nim: decoded.nim } });
+        const user = await Akun.findOne({ where: { nim: decoded.nim } });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
         }
-        const labor = await Labor.findByPk(user.idLabor);
-        user.setDataValue('labor', labor);
-        const payload = {
-            id: user.id,
-            nama: user.nama,
-            nim: user.nim,
-            idLabor: user.idLabor,
-            nama_Labor: labor ? labor.nama_Labor : null,
-            jenisPengguna: user.jenisPengguna,
-            JenisKelamin: user.JenisKelamin,
-            AksesRole: user.AksesRole,
+        if (user.AksesRole !== "Super Admin") {
+            const mahasiswa = await User.findOne({ where: { idAkun: user.id } })
+            const labor = await Labor.findByPk(mahasiswa.idLabor);
+            user.setDataValue('labor', labor);
+            const payload = {
+                id: mahasiswa.id,
+                nama: user.nama,
+                nim: user.nim,
+                idLabor: mahasiswa.idLabor,
+                nama_Labor: labor ? labor.nama_Labor : null,
+                jenisPengguna: mahasiswa.jenisPengguna,
+                JenisKelamin: mahasiswa.JenisKelamin,
+                AksesRole: user.AksesRole,
+            }
+            return res.status(200).json({ code: 200, message: "User found", data: payload });
+        } else {
+            const payload = {
+                id: user.id,
+                nama: user.nama,
+                nim: user.nim,
+                AksesRole: user.AksesRole,
+            }
+            return res.status(200).json({ code: 200, message: "User found", data: payload });
         }
-        return res.status(200).json({ code: 200, message: "User found", data: payload });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan token:", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
@@ -81,7 +93,7 @@ export const LoginUser = async (req, res) => {
     const { nim, password } = req.body;
 
     try {
-        const user = await User.findOne({ where: { nim } });
+        const user = await Akun.findOne({ where: { nim } });
 
         if (!user) {
             return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
@@ -110,13 +122,16 @@ export const LoginWeb = async (req, res) => {
     const { nim, password } = req.body;
 
     try {
-        const user = await User.findOne({ where: { nim } });
+        const user = await Akun.findOne({ where: { nim } });
         if (!user) {
-
             return res.status(404).json({ message: "User dengan NIM tersebut tidak terdaftar." });
         }
+        let mahasiswa = null
+        if (user.AksesRole !== "Super Admin") {
+            mahasiswa = await User.findOne({ where: { idAkun: user.id } })
+        }
         const payload = {
-            idLabor: user.idLabor,
+            idLabor: user.AksesRole === "Super Admin" ? "" : mahasiswa.idLabor,
             AksesRole: user.AksesRole,
             nama: user.nama
         }
@@ -128,7 +143,7 @@ export const LoginWeb = async (req, res) => {
             return res.status(404).json({ message: `${user.AksesRole} Tidak Memiliki Akses Ke Dashboard Admin` });
         }
         if (user.AksesRole !== "Super Admin") {
-            if (user.jenisPengguna !== "Asisten") {
+            if (mahasiswa.jenisPengguna !== "Asisten") {
                 return res.status(404).json({ message: `${user.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
             }
         }
@@ -158,7 +173,6 @@ export const GetUsersByPengguna = async (req, res) => {
     try {
         const users = await User.findAll({
             where: { jenisPengguna: jenisPengguna, idLabor: idLabor },
-            attributes: ['id', 'nama', 'nim', 'angkatan', 'nomor_asisten', 'nama_file', 'status', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'createdAt', 'updatedAt'],
         });
 
         if (!users || users.length === 0) {
@@ -167,8 +181,11 @@ export const GetUsersByPengguna = async (req, res) => {
         const formattedUsers = [];
         for (const user of users) {
             const labor = await Labor.findByPk(user.idLabor);
+            const akunUser = await Akun.findByPk(user.idAkun);
             const formattedUser = user.toJSON();
             formattedUser.nama_Labor = labor ? labor.nama_Labor : null;
+            formattedUser.nama = akunUser ? akunUser.nama : null;
+            formattedUser.nim = akunUser ? akunUser.nim : null;
             formattedUsers.push(formattedUser);
         }
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUsers });
@@ -206,6 +223,7 @@ export const EditUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        const mahasiswaAkun = await Akun.findOne({ where: { id: user.idAkun } })
         if (jenisPengguna === "Calon Asisten") {
             if (user.status !== status) {
                 if (status === "Lulus") {
@@ -217,7 +235,7 @@ export const EditUser = async (req, res) => {
                 }
             }
         }
-        if (user.nim !== nim && user.AksesRole === "Admin") {
+        if (mahasiswaAkun.nim !== nim && mahasiswaAkun.AksesRole === "Admin") {
             const expiresIn = 3600;
             const jwtoken = jwt.sign({ nim: nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
             encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
@@ -226,9 +244,9 @@ export const EditUser = async (req, res) => {
         if (status !== "Lulus" && jenisPengguna === "Asisten") {
             return res.status(400).json({ message: 'Calon Asisten harus lulus untuk menjadi Asisten' });
         }
-        const change = user.nim !== nim;
+        const change = mahasiswaAkun.nim !== nim;
         if (change) {
-            const existingUserWithNim = await User.findOne({ where: { nim } });
+            const existingUserWithNim = await Akun.findOne({ where: { nim } });
             if (existingUserWithNim && existingUserWithNim.nim === nim) {
                 return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
             }
@@ -238,10 +256,10 @@ export const EditUser = async (req, res) => {
         if (tanggalSekarang < tanggalLahir) {
             return res.status(400).json({ code: 400, status: "error", message: "Tanggal Lahir Tidak Benar" });
         }
-        const change1 = user.email !== email;
+        const change1 = mahasiswaAkun.email !== email;
 
         if (change1) {
-            const existingUserWithEmail = await User.findOne({ where: { email } });
+            const existingUserWithEmail = await Akun.findOne({ where: { email } });
             if (existingUserWithEmail && existingUserWithEmail.email === email) {
                 return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
             }
@@ -252,10 +270,10 @@ export const EditUser = async (req, res) => {
             dataPendaftar.note = note;
             await dataPendaftar.save();
         }
-        user.nama = nama;
-        user.nim = nim;
+        mahasiswaAkun.nama = nama;
+        mahasiswaAkun.nim = nim;
         user.angkatan = angkatan
-        user.email = email;
+        mahasiswaAkun.email = email;
         user.nomor_asisten = nomor_asisten;
         user.idLabor = idLabor;
         user.jenisPengguna = jenisPengguna;
@@ -267,6 +285,7 @@ export const EditUser = async (req, res) => {
         user.alamat = alamat;
         user.status_akun = status_akun;
         await user.save();
+        await mahasiswaAkun.save();
         res.status(200).json({ code: 200, status: "success", message: 'User updated successfully', token: encryptedToken, expiry });
     } catch (error) {
         console.error('Error updating user:', error);
@@ -279,8 +298,11 @@ export const GetUserById = async (req, res) => {
     try {
         const user = await User.findOne({
             where: { id },
-            attributes: ['nama', 'nim', 'email', 'angkatan', 'status_akun', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'idLabor', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat', 'nama_file'],
+            attributes: { exclude: ['createdAt', 'updatedAt'] }
         });
+
+        const akunMahasiswa = await Akun.findOne({ where: { id: user.idAkun } })
+
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
         }
@@ -292,9 +314,10 @@ export const GetUserById = async (req, res) => {
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
         const formattedUser = {
-            nama: user.nama,
-            nim: user.nim,
-            email: user.email,
+            nama: akunMahasiswa.nama,
+            nim: akunMahasiswa.nim,
+            email: akunMahasiswa.email,
+            status_akun: akunMahasiswa.status_akun,
             angkatan: user.angkatan,
             nomor_asisten: user.nomor_asisten,
             jenisPengguna: user.jenisPengguna,
@@ -305,7 +328,6 @@ export const GetUserById = async (req, res) => {
             JenisKelamin: user.JenisKelamin,
             alamat: user.alamat,
             status: user.status,
-            status_akun: user.status_akun,
             nama_file: user.nama_file,
             verifikasi_berkas: verifikasiberkas?.verifikasi_berkas,
             note: verifikasiberkas?.note,

@@ -68,3 +68,14 @@ Content-Type: application/json
   "idRecruitment":"42b84e31-55cd-4cb0-ba6f-d5e55503c711",
   "tanggal_daftar":"2024-05-22T05:12:55.000Z"
 }
+###
+
+POST http://localhost:3001/register/superadmin
+Content-Type: application/json
+
+{
+  "no_identitas":"1234567890",
+  "email":"icyscrub533@gmail.com",
+  "nama":"SuperAdmin",
+  "password":"SuperAdmin123"
+}

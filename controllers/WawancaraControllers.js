@@ -6,6 +6,7 @@ import Wawancara from "../models/Model_Recruitment/Wawancara.js";
 import User from "../models/Model_User/Users.js";
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
 import NilaiWawancara from "../models/Model_Recruitment/NilaiWawancara.js"
+import Akun from "../models/Model_User/Akun.js";
 
 export const GetWawancaraByIdLabor = async (req, res) => {
     const { idLabor } = req.params;
@@ -338,11 +339,13 @@ export const GetAsistePewawancara = async (req, res) => {
     const { idLabor } = req.params
     try {
         const PewawancaraAsisten = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" } });
-
-        const payload = PewawancaraAsisten.map(asistens => ({
-            id: asistens.id,
-            nama: asistens.nama,
-        }));
+        const payload = await Promise.all(PewawancaraAsisten.map(async pewawancara => {
+            const akunPewawancara = await Akun.findByPk(pewawancara.idAkun)
+            return {
+                id: pewawancara.id,
+                nama: akunPewawancara.nama
+            }
+        }))
         return res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         console.log(error);

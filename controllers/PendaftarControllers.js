@@ -3,6 +3,8 @@ import Pendaftar from "../models/Model_Recruitment/Pendaftar.js"
 import User from "../models/Model_User/Users.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js"
 import Kegiatan from "../models/Model_Recruitment/Kegiatan.js"
+import { Op, where } from "sequelize";
+import Akun from "../models/Model_User/Akun.js";
 
 export const CreatePendaftar = async (req, res) => {
     const { idUsers, tanggal_daftar, idKegiatan, idRecruitment, alasan, Status_Pendaftar, file_permohonan, file_krs } = req.body;
@@ -104,60 +106,60 @@ export const GetPendaftarByIdRecruitment = async (req, res) => {
 };
 
 export const GetListPendaftarByIdLabor = async (req, res) => {
-    const { idLabor } = req.params
+    const { idLabor } = req.params;
     try {
-        const recruitment = await Recruitment.findAll({ where: { idLabor } });
-        const idRecruitments = recruitment.map(rec => rec.id);
-
-        const pendaftar = await Pendaftar.findAll({
-            where: { idRecruitment: idRecruitments },
-            attributes: ['id', 'idUsers', 'idRecruitment', 'file_krs', 'file_permohonan', 'Status_Pendaftar', 'verifikasi_berkas']
-        });
-        const idUsers = pendaftar.map(pend => pend.idUsers);
-
-        const users = await User.findAll({
-            where: { id: idUsers }
+        const mahasiswaList = await User.findAll({
+            where: {
+                idLabor: idLabor,
+            },
+            attributes: ['id', 'alamat', 'nomor_hp', 'JenisKelamin', 'idAkun', 'nama_file']
         });
 
-        const idLabors = users.map(user => user.idLabor);
+        const payload = await Promise.all(mahasiswaList.map(async peserta => {
+            const pendaftar = await Pendaftar.findOne({
+                where: { idUsers: peserta.id },
+                attributes: { exclude: ['createdAt', 'updatedAt'] }
+            });
 
-        const labors = await Labor.findAll({
-            where: { id: idLabors }
-        });
+            if (!pendaftar) {
+                return null;
+            }
 
-        const recruitmentMap = recruitment.reduce((map, rec) => {
-            map[rec.id] = rec.nama_recruitment;
-            return map;
-        }, {});
+            const akunMahasiswa = await Akun.findByPk(peserta.idAkun);
+            const recruitment = await Recruitment.findByPk(pendaftar.idRecruitment, {
+                attributes: ['nama_recruitment']
+            });
 
-        const laborMap = labors.reduce((map, lab) => {
-            map[lab.id] = lab.nama_Labor;
-            return map;
-        }, {});
-
-        const payload = pendaftar.map(pend => {
-            const user = users.find(usr => usr.id === pend.idUsers);
-            const userWithoutPassword = user.toJSON();
-            delete userWithoutPassword.password;
-            delete userWithoutPassword.id;
-            delete userWithoutPassword.nomor_asisten;
             return {
-                ...userWithoutPassword,
-                nama_recruitment: recruitmentMap[pend.idRecruitment],
-                nama_Labor: laborMap[userWithoutPassword.idLabor],
-                id: pend.id,
-                verifikasi: pend.verifikasi_berkas,
-                idUsers: pend.idUsers,
-                file_krs: pend.file_krs,
-                file_permohonan: pend.file_permohonan,
-                Status_Pendaftar: pend.Status_Pendaftar,
+                id: pendaftar.id,
+                alamat: peserta.alamat,
+                nama_file: peserta.nama_file,
+                nomor_hp: peserta.nomor_hp,
+                JenisKelamin: peserta.JenisKelamin,
+                nama: akunMahasiswa.nama,
+                nim: akunMahasiswa.nim,
+                tanggal_daftar: pendaftar.tanggal_daftar,
+                idKegiatan: pendaftar.idKegiatan,
+                idUsers: pendaftar.idUsers,
+                Status_Pendaftar: pendaftar.Status_Pendaftar,
+                verifikasi_berkas: pendaftar.verifikasi_berkas,
+                note: pendaftar.note,
+                file_krs: pendaftar.file_krs,
+                file_permohonan: pendaftar.file_permohonan,
+                idRecruitment: pendaftar.idRecruitment,
+                nama_recruitment: recruitment.nama_recruitment
             };
-        });
-        return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: payload })
+        }));
+
+        const filteredPayload = payload.filter(p => p !== null);
+
+        console.log(filteredPayload);
+        return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: filteredPayload });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Menggambil Pendaftar", error });
     }
 };
+
 
 export const DeletePendaftar = async (req, res) => {
     const { id } = req.params
@@ -251,13 +253,13 @@ export const EditPendaftarDokumen = async (req, res) => {
     const { id, file_krs, file_permohonan, alasan } = req.body;
     try {
         const pendaftar = await Pendaftar.findOne({ where: { id } });
-        if(!pendaftar){
-            return res.status(400).json({ status:"Error", code: 400, message: "Data Pendaftar Tidak Ditemukan"})
+        if (!pendaftar) {
+            return res.status(400).json({ status: "Error", code: 400, message: "Data Pendaftar Tidak Ditemukan" })
         }
         pendaftar.file_krs = file_krs,
-        pendaftar.file_permohonan = file_permohonan,
-        pendaftar.alasan = alasan,
-        await pendaftar.save();
+            pendaftar.file_permohonan = file_permohonan,
+            pendaftar.alasan = alasan,
+            await pendaftar.save();
         return res.status(200).json({ code: 200, message: "Berhasil Memperbarui File Dokumen dan Asalan Mendaftar" })
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Memperbarui Pendaftar", error });

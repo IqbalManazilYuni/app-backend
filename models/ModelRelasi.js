@@ -18,6 +18,7 @@ import Wawancara from "./Model_Recruitment/Wawancara.js";
 import BankSoal from "./Model_Soal/BankSoal.js";
 import SoalEssay from "./Model_Soal/SoalEssay.js";
 import SoalMultiple from "./Model_Soal/SoalMultple.js";
+import Akun from "./Model_User/Akun.js";
 import User from "./Model_User/Users.js"
 
 export const RelasiLabor = async () => {
@@ -40,6 +41,11 @@ export const RelasiLabor = async () => {
     Labor.hasMany(Recruitment, { foreignKey: "idLabor" });
     Recruitment.belongsTo(Labor, { foreignKey: "idLabor" });
 
+}
+
+export const RelasiAkun = async () => {
+    Akun.hasOne(User, { foreignKey: "idAkun" });
+    User.belongsTo(Akun, { foreignKey: "idAkun" });
 }
 
 export const RelasiUser = async () => {

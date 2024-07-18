@@ -8,6 +8,8 @@ import nodemailer from 'nodemailer';
 import 'dotenv/config';
 import crypto from 'crypto';
 import { stat } from 'fs';
+import Akun from '../models/Model_User/Akun.js';
+import { where } from 'sequelize';
 
 dotenv.config();
 
@@ -89,11 +91,11 @@ export const RegisterUser = async (req, res) => {
         return res.status(400).json({ message: errorMessage });
     }
     try {
-        const existingUser = await User.findOne({ where: { nim } });
+        const existingUser = await Akun.findOne({ where: { nim } });
         if (existingUser) {
             return res.status(400).json({ message: "User dengan NIM tersebut sudah terdaftar." });
         }
-        const existtingEmail = await User.findOne({ where: { email } });
+        const existtingEmail = await Akun.findOne({ where: { email } });
         if (existtingEmail) {
             return res.status(400).json({ message: "User dengan Email tersebut sudah terdaftar." });
         }
@@ -105,12 +107,18 @@ export const RegisterUser = async (req, res) => {
         const hashedPassword = await argon2.hash(password);
         const token = crypto.randomBytes(32).toString('hex');
         console.log(token);
-        const newUser = await User.create({
+        const createAkun = await Akun.create({
             nama,
             nim,
             email,
-            nomor_asisten,
             password: hashedPassword,
+            AksesRole,
+            status_akun: "Tidak Terverifikasi",
+            verifikasiToken: jenisPengguna === "Calon Asisten" ? token : null,
+        })
+        const newUser = await User.create({
+            nomor_asisten,
+            idAkun: createAkun.id,
             status,
             idLabor,
             angkatan,
@@ -120,10 +128,7 @@ export const RegisterUser = async (req, res) => {
             tanggal_lahir,
             JenisKelamin,
             alamat,
-            AksesRole,
             nama_file,
-            status_akun: "Tidak Terverifikasi",
-            verifikasiToken: token,
         });
         const link = `http://localhost:3000/verifikasi-akun/${token}`
         if (jenisPengguna === "Calon Asisten") {
@@ -167,8 +172,9 @@ export const RegisterUser = async (req, res) => {
 
 export const VerifikasiAkun = async (req, res) => {
     const { token } = req.body
+    console.log(token);
     try {
-        const userToken = await User.findOne({ where: { verifikasiToken: token } });
+        const userToken = await Akun.findOne({ where: { verifikasiToken: token } });
         if (!userToken) {
             return res.status(400).json({ code: 404, status: "Bad Request", message: "Akun Anda Sudah Terverifikasi" })
         }
@@ -184,32 +190,32 @@ export const VerifikasiAkun = async (req, res) => {
 
 export const GetUserByNimRegistrasi = async (req, res) => {
     const { nim } = req.body;
-    console.log(nim)
     try {
-        const user = await User.findOne({
+        const user = await Akun.findOne({
             where: { nim }
         });
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
         }
-        const labor = await Labor.findByPk(user.idLabor);
-        user.setDataValue('labor', labor);
+        const mahasiswa = await User.findOne({ where: { idAkun: user.id } })
+        const labor = await Labor.findByPk(mahasiswa.idLabor);
+        mahasiswa.setDataValue('labor', labor);
         const formattedUser = {
-            id: user.id,
+            id: mahasiswa.id,
             nama: user.nama,
             nim: user.nim,
             email: user.email,
-            nomor_asisten: user.nomor_asisten,
-            jenisPengguna: user.jenisPengguna,
-            nomor_hp: user.nomor_hp,
-            idLabor: user.idLabor,
-            status: user.status,
-            tempat_lahir: user.tempat_lahir,
-            tanggal_lahir: user.tanggal_lahir,
-            JenisKelamin: user.JenisKelamin,
-            alamat: user.alamat,
-            nama_file: user.nama_file,
-            angkatan: user.angkatan,
+            nomor_asisten: mahasiswa.nomor_asisten,
+            jenisPengguna: mahasiswa.jenisPengguna,
+            nomor_hp: mahasiswa.nomor_hp,
+            idLabor: mahasiswa.idLabor,
+            status: mahasiswa.status,
+            tempat_lahir: mahasiswa.tempat_lahir,
+            tanggal_lahir: mahasiswa.tanggal_lahir,
+            JenisKelamin: mahasiswa.JenisKelamin,
+            alamat: mahasiswa.alamat,
+            nama_file: mahasiswa.nama_file,
+            angkatan: mahasiswa.angkatan,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUser });
@@ -242,8 +248,10 @@ export const EditUserRegistrasi = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        const existingUserWithNim = await User.findOne({ where: { nim } });
-        if (user.nim !== nim) {
+        console.log(id);
+        const akunmahasiswa = await Akun.findOne({ where: { id: user.idAkun } })
+        const existingUserWithNim = await Akun.findOne({ where: { nim } });
+        if (akunmahasiswa.nim !== nim) {
             if (existingUserWithNim && existingUserWithNim.nim === nim) {
                 return res.status(400).json({ message: 'NIM Sudah Digunakan Oleh User Lain' });
             }
@@ -253,15 +261,15 @@ export const EditUserRegistrasi = async (req, res) => {
         if (tanggalSekarang < tanggalLahir) {
             return res.status(400).json({ code: 400, status: "error", message: "Tanggal Lahir Tidak Benar" });
         }
-        const existingUserWithEmail = await User.findOne({ where: { email } });
-        if (user.email !== email) {
+        const existingUserWithEmail = await Akun.findOne({ where: { email } });
+        if (akunmahasiswa.email !== email) {
             if (existingUserWithEmail && existingUserWithEmail.email === email) {
                 return res.status(400).json({ message: 'Email Sudah Digunakan Oleh User Lain' });
             }
         }
-        user.nama = nama,
-            user.nim = nim,
-            user.email = email,
+        akunmahasiswa.nama = nama,
+            akunmahasiswa.nim = nim,
+            akunmahasiswa.email = email,
             user.angkatan = angkatan,
             user.nomor_asisten = nomor_asisten,
             user.status = status,
@@ -274,9 +282,59 @@ export const EditUserRegistrasi = async (req, res) => {
             user.alamat = alamat,
             user.nama_file = nama_file,
             await user.save();
+        await akunmahasiswa.save()
         res.status(200).json({ code: 200, status: "success", message: 'Berhasil Memperbarui Data Pengguna' });
     } catch (error) {
         return res.status(500).json({ code: 500, message: error.errors[0].message });
     }
 };
 
+export const RegisterSuperAdmin = async (req, res) => {
+    const { nama, email, no_identitas, password } = req.body
+    const minLengthRegex = /^.{8,}$/;
+    const uppercaseRegex = /[A-Z]/;
+    const lowercaseRegex = /[a-z]/;
+    const digitRegex = /\d/;
+
+    let errorMessage = "Password harus terdiri dari setidaknya 8 karakter";
+
+    if (!minLengthRegex.test(password)) {
+        errorMessage += ", memiliki panjang minimal 8 karakter";
+    }
+
+    if (!uppercaseRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu huruf besar";
+    }
+
+    if (!lowercaseRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu huruf kecil";
+    }
+
+    if (!digitRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu angka";
+    }
+
+    if (errorMessage !== "Password harus terdiri dari setidaknya 8 karakter") {
+        return res.status(400).json({ message: errorMessage });
+    }
+    try {
+        const ceksuperadmin = await Akun.findOne({ where: { AksesRole: "Super Admin" } });
+        let status = false;
+        if (ceksuperadmin === null) {
+            status = true;
+        }
+        console.log(status);
+        const hashedPassword = await argon2.hash(password);
+        await Akun.create({
+            nama,
+            email,
+            nim: no_identitas,
+            password: hashedPassword,
+            status_akun: status === true ? "Terverifikasi" : "Tidak Terverifikasi",
+            AksesRole: "Super Admin",
+        })
+        return res.status(201).json({ code: 201, status: "success", message: "Super Admin Berhasil Ditambahkan" })
+    } catch (error) {
+        return res.status(500).json({ code: 500, message: error.errors[0].message });
+    }
+}

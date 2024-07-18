@@ -9,6 +9,7 @@ import User from "../models/Model_User/Users.js";
 import Modul from "../models/Model_Modul/Modul.js"
 import Pendaftar from "../models/Model_Recruitment/Pendaftar.js";
 import BankSoal from "../models/Model_Soal/BankSoal.js";
+import Akun from "../models/Model_User/Akun.js";
 
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi, nama_pembina } = req.body;
@@ -226,16 +227,38 @@ export const GetKepengurusanByIDLabor = async (req, res) => {
 
 export const GetAdminLabor = async (req, res) => {
     try {
-        const users = await User.findAll({
+        const users = await Akun.findAll({
             where: { AksesRole: "Admin" },
-            attributes: ['id', 'nama', 'nim', 'nomor_asisten', 'idLabor']
+            attributes: ['id', 'nama', 'nim']
         });
 
         if (users.length === 0) {
             return res.status(404).json({ code: 404, message: "User Admin Belum Ada" });
         }
 
-        const payload = await Promise.all(users.map(async (user) => {
+        const mahasiswaList = [];
+
+        for (const user of users) {
+            const mahasiswa = await User.findOne({
+                where: { idAkun: user.id },
+                attributes: ['idLabor', 'nomor_asisten']
+            });
+            if (mahasiswa) {
+                mahasiswaList.push({
+                    ...mahasiswa.dataValues,
+                    nama: user.nama,
+                    nim: user.nim,
+                    id: user.id
+                });
+            }
+        }
+
+        console.log(mahasiswaList);
+        if (mahasiswaList.length === 0) {
+            return res.status(404).json({ code: 404, message: "Mahasiswa Tidak Ditemukan" });
+        }
+
+        const payload = await Promise.all(mahasiswaList.map(async (user) => {
             const labor = await Labor.findOne({
                 where: { id: user.idLabor },
                 attributes: ['id', 'nama_Labor']
@@ -249,7 +272,7 @@ export const GetAdminLabor = async (req, res) => {
                 namaLabor: labor ? labor.nama_Labor : null,
             };
         }));
-
+        console.log(payload);
         return res.json({ code: 200, status: "success", data: payload });
     } catch (error) {
         console.error(error);
@@ -260,11 +283,19 @@ export const GetAdminLabor = async (req, res) => {
 export const GetAdminByIdLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
-        const getAllUser = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten", AksesRole: ["Admin", "User"] }, attributes: ['id', 'nama', 'AksesRole'] })
+        const getAllUser = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" }, attributes: ['idAkun'] })
         const datauser = []
         for (const user of getAllUser) {
-            const payloads = user.toJSON()
-            datauser.push(payloads)
+            const mahasiswa = await Akun.findOne({
+                where: { id: user.idAkun }
+            });
+            if (mahasiswa) {
+                datauser.push({
+                    ...mahasiswa.dataValues,
+                    // nama: user.nama,
+                    // nim: user.nim
+                });
+            }
         }
         return res.json({ code: 200, status: "success", payload: datauser });
     } catch (error) {
@@ -275,36 +306,27 @@ export const GetAdminByIdLabor = async (req, res) => {
 
 export const EditAdminLabor = async (req, res) => {
     const { idUser, idLabor } = req.body;
-    let transaction;
     try {
-        // Memulai transaksi
-        transaction = await User.sequelize.transaction();
-
-        // Temukan dan perbarui UserAdmin
-        const UserAdmin = await User.findOne({ where: { AksesRole: "Admin", idLabor: idLabor }, transaction });
-        if (!UserAdmin) {
-            throw new Error("User Admin tidak ditemukan");
+        const UserMahasiswa = await User.findAll({ where: { idLabor: idLabor, jenisPengguna: "Asisten" } });
+        let akunadminbyid = null
+        for (const akunUser of UserMahasiswa) {
+            const akun = await Akun.findOne({ where: { id: akunUser.idAkun } })
+            if (akun.AksesRole === 'Admin') {
+                akunadminbyid = akun
+                break;
+            }
         }
-        UserAdmin.AksesRole = "User";
-        await UserAdmin.save({ transaction });
+        console.log(akunadminbyid);
+        akunadminbyid.AksesRole = "User"
+        await akunadminbyid.save();
 
-        // Temukan dan perbarui UserBeAdmin setelah UserAdmin berhasil diperbarui
-        const UserBeAdmin = await User.findOne({ where: { id: idUser }, transaction });
-        if (!UserBeAdmin) {
-            throw new Error("User dengan ID tersebut tidak ditemukan");
-        }
-        UserBeAdmin.AksesRole = "Admin";
-        await UserBeAdmin.save({ transaction });
+        const akunadminbaru = await Akun.findOne({ where: { id: idUser } });
+        akunadminbaru.AksesRole = "Admin"
+        await akunadminbaru.save();
 
-        // Commit transaksi jika semuanya berhasil
-        await transaction.commit();
-
-        return res.json({ code: 200, status: "success", message: "Admin Berhasil Diperbarui" });
+        return res.status(200).json({ code: 200, status: "success", message: "Admin Berhasi Di Perbarui" })
     } catch (error) {
         console.error(error);
-        if (transaction) {
-            await transaction.rollback();
-        }
         return res.status(500).json({ code: 500, status: "error", message: "Internal Server Error" });
     }
 };
@@ -312,13 +334,16 @@ export const EditAdminLabor = async (req, res) => {
 export const AddAdminLabor = async (req, res, next) => {
     const { idUser, idLabor } = req.body;
     try {
-        const UserAdmin = await User.findOne({ where: { id: idUser } });
+        const UserAdmin = await Akun.findOne({ where: { id: idUser } });
         if (!UserAdmin) {
             throw new Error("User tidak ditemukan");
         }
-        const userCekAdmin = await User.findOne({ where: { idLabor: idLabor, AksesRole: "Admin" } });
-        if (userCekAdmin) {
-            return res.status(400).json({ code: 400, status: "Error", message: "Admin Laboratorium Sudah Ada" })
+        const userCekAdmin = await Akun.findAll({ where: { AksesRole: "Admin" } });
+        for (const mahasiswa of userCekAdmin) {
+            const mahasiswaAdminLabor = await User.findOne({ where: { idAkun: mahasiswa.id } });
+            if (mahasiswaAdminLabor.idLabor === idLabor) {
+                return res.status(400).json({ code: 400, status: "Error", message: "Admin Laboratorium Sudah Ada" })
+            }
         }
         UserAdmin.AksesRole = "Admin";
         await UserAdmin.save();

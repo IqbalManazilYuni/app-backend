@@ -10,6 +10,7 @@ import SoalMultiple from "../models/Model_Soal/SoalMultple.js"
 import SoalEssay from "../models/Model_Soal/SoalEssay.js"
 import JawabanUjian from "../models/Model_Recruitment/JawabanUjian.js"
 import { Op } from "sequelize";
+import Akun from "../models/Model_User/Akun.js";
 export const GetListUjianByIDLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
@@ -64,7 +65,9 @@ export const GetPesertaUjianByID = async (req, res) => {
         await Promise.all(pesertaujian.map(async pesertaujians => {
             const pendaftar = await Pendaftar.findByPk(pesertaujians.idPendaftar);
             const user = await User.findByPk(pendaftar.idUsers);
+            const userAkun = await Akun.findByPk(user.idAkun)
             const userAsisten = await User.findByPk(pesertaujians.idUsers);
+            const userAsistenAkun = await Akun.findByPk(userAsisten.idAkun)
             const namaUjian = await Ujian.findByPk(pesertaujians.idUjian);
 
             let nilai_multiple = 0;
@@ -100,11 +103,11 @@ export const GetPesertaUjianByID = async (req, res) => {
                 { where: { id: pesertaujians.id } }
             );
             const payloads = await pesertaujians.toJSON();
-            payloads.nama = user.nama;
+            payloads.nama = userAkun.nama;
             payloads.nilai_essay = rata_rata_essay;
             payloads.nilai_multiple = rata_rata_multiple;
             payloads.nilai_keseluruhan = rata;
-            payloads.nama_penanggung_jawab = userAsisten.nama;
+            payloads.nama_penanggung_jawab = userAsistenAkun.nama;
             payload.push(payloads);
         }));
 
@@ -153,17 +156,14 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
                 }
             }
         });
-        const payload = [];
-
-        for (const pendaftars of pendaftar) {
-            const user = await User.findByPk(pendaftars.idUsers);
-            const payloads = pendaftars.toJSON();
-            const data = {
-                nama: user.nama,
-                idPendaftar: pendaftars.id,
+        const payload = await Promise.all(pendaftar.map(async data => {
+            const mahasiswa = await User.findByPk(data.idUsers);
+            const akunMahasiswa = await Akun.findByPk(mahasiswa.idAkun);
+            return {
+                nama: akunMahasiswa.nama,
+                idPendaftar: data.id
             }
-            payload.push(data);
-        }
+        }))
         return res.status(200).json({ code: 200, status: "success", data: payload })
     } catch (error) {
         console.error("Error saat proses mengambil peserta ujian:", error);
