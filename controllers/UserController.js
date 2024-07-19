@@ -295,6 +295,8 @@ export const EditUser = async (req, res) => {
 
 export const GetUserById = async (req, res) => {
     const { id, idPendaftar } = req.body;
+    console.log(id);
+    console.log(idPendaftar);
     try {
         const user = await User.findOne({
             where: { id },
@@ -378,12 +380,13 @@ export const GetUserByJenisPenggunaAndIdLabor = async (req, res) => {
         if (!users || users.length === 0) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "User Tidak Ditemukan" });
         }
-        const payload = users.map(user => ({
-            idUser: user.id,
-            nama: user.nama,
-        }));
-
-        console.log(payload);
+        const payload = await Promise.all(users.map(async asisten => {
+            const akunPeserta = await Akun.findByPk(asisten.idAkun);
+            return {
+                idUser: asisten.id,
+                nama: akunPeserta.nama,
+            }
+        }))
         return res.status(200).json({ code: 200, status: "success", message: "User Ditemukan", data: payload });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan jenis pengguna dan ID laboratorium:", error);

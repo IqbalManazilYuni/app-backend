@@ -4,6 +4,7 @@ import Kepengurusan from "../models/Model_Kepengurusan/Kepengurusan.js";
 import Labor from "../models/Model_Kepengurusan/Labor.js";
 import User from "../models/Model_User/Users.js";
 import Divisi from "../models/Model_Kepengurusan/Divisi.js";
+import Akun from "../models/Model_User/Akun.js";
 
 export const CreateKepengurusan = async (req, res) => {
     const { nama_kepengurusan, tahun, idLabor, generasi_kepengurusan, status } = req.body;
@@ -112,8 +113,6 @@ export const DeleteKepengurusan = async (req, res) => {
 export const CreateDetailKepengurusan = async (req, res) => {
     const { idKepengurusan, idUsers, idDivisi, jabatan } = req.body;
     try {
-
-        // Cek jika detail kepengurusan dengan idKepengurusan dan idUsers sudah ada
         const detailKepengurusan = await DetailKepengurusan.findOne({ where: { idKepengurusan, idUsers } });
         if (detailKepengurusan) {
             return res.status(400).json({
@@ -124,7 +123,6 @@ export const CreateDetailKepengurusan = async (req, res) => {
         }
         const checkDetailKepengurusan = await DetailKepengurusan.findAll({ where: { idKepengurusan } });
         if (checkDetailKepengurusan.length > 0) {
-            // Pengecekan untuk jabatan khusus
             if (jabatan === "Koordinator Asisten" || jabatan === "Bendahara" || jabatan === "Sekretaris") {
                 const failedJabatan = await DetailKepengurusan.findOne({ where: { idKepengurusan, jabatan } });
                 if (failedJabatan) {
@@ -179,11 +177,12 @@ export const DetailKepengurusanLab = async (req, res) => {
 
         const payload = await Promise.all(detailkepengurusan.map(async detail => {
             const detailKepengurusanLab = await User.findByPk(detail.idUsers);
+            const namaPengurus = await Akun.findByPk(detailKepengurusanLab.idAkun)
             const divisi = await Divisi.findByPk(detail.idDivisi);
 
             return {
                 ...detail.toJSON(),
-                nama: detailKepengurusanLab ? detailKepengurusanLab.nama : null,
+                nama: namaPengurus ? namaPengurus.nama : null,
                 nama_divisi: divisi ? divisi.nama_divisi : null
             };
         }));
@@ -199,7 +198,7 @@ export const DetailKepengurusanLab = async (req, res) => {
 export const GetDetailKepengurusanByID = async (req, res) => {
     const { id } = req.params;
     try {
-        console.log("ayam:",id);
+        console.log("ayam:", id);
         const detailKepengurusan = await DetailKepengurusan.findOne({ where: { id } });
         if (!detailKepengurusan) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Detail Kepengurusan Tidak ditemukan" });

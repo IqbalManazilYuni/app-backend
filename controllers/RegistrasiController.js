@@ -28,6 +28,7 @@ export const PreviewPDF = async (req, res) => {
                 break;
             case 'file_permohonan':
                 folderPath = '/file_permohonan';
+                console.log("ayam")
                 break;
             case 'nama_file':
                 folderPath = '/cv';

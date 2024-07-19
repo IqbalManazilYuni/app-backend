@@ -221,13 +221,13 @@ export const GetPendaftarLabByID = async (req, res) => {
 export const GetPendaftarByNIM = async (req, res) => {
     const { nim, idRecruitment } = req.body;
     try {
-        const idUser = await User.findOne({ where: { nim } });
+        const idUser = await Akun.findOne({ where: { nim } });
 
         if (!idUser) {
             return res.status(404).json({ code: 404, status: "failure", message: "User not found" });
         }
-
-        const pendaftar = await Pendaftar.findOne({ where: { idUsers: idUser.id, idRecruitment: idRecruitment } });
+        const mahasiswaId = await User.findOne({ where: { idAkun: idUser.id } })
+        const pendaftar = await Pendaftar.findOne({ where: { idUsers: mahasiswaId.id, idRecruitment: idRecruitment } });
 
         if (!pendaftar) {
             return res.status(404).json({ code: 404, status: "failure", message: "Pendaftar not found" });
@@ -242,7 +242,6 @@ export const GetPendaftarByNIM = async (req, res) => {
             note: pendaftar.note,
             Status_Pendaftar: pendaftar.Status_Pendaftar,
         };
-        console.log(payload);
         return res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });

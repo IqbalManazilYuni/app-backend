@@ -12,21 +12,18 @@ const DetailKepengurusan = db.define('DetailKepengurusan', {
     },
     idKepengurusan: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
     idUsers: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'
     },
     idDivisi: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
         allowNull: true,
         onDelete:'CASCADE',
         onUpdate:'CASCADE'

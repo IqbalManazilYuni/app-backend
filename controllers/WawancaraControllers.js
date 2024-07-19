@@ -71,9 +71,10 @@ export const GetPesertaWawancara = async (req, res) => {
             if (pendaftar) {
                 const user = await User.findOne({ where: { id: pendaftar.idUsers } });
                 if (user) {
+                    const userAkun = await Akun.findOne({ where: { id: user.idAkun } })
                     return {
                         ...pesertas.toJSON(),
-                        nama: user.nama,
+                        nama: userAkun.nama,
                     };
                 }
             }
@@ -132,26 +133,18 @@ export const CreatePesertaWawancara = async (req, res) => {
 export const GetPendaftarByIDWawancara = async (req, res) => {
     const { idWawancara } = req.params;
     try {
-        // Cari wawancara berdasarkan idWawancara
         const wawancara = await Wawancara.findOne({ where: { id: idWawancara } });
-
         if (!wawancara) {
             return res.status(404).json({ code: 404, status: "error", message: "Wawancara tidak ditemukan" });
         }
-        console.log("Tahapan: ", wawancara)
-
-        // Cari tahapan berdasarkan idTahapan dari wawancara
         const tahapan = await Tahapan.findOne({ where: { id: wawancara.idTahapan } });
-
         if (!tahapan) {
             return res.status(404).json({ code: 404, status: "error", message: "Tahapan tidak ditemukan" });
         }
-        // Cari pendaftar berdasarkan idRecruitment dari tahapan
         const pendaftarList = await Pendaftar.findAll({ where: { idRecruitment: tahapan.idRecruitment, verifikasi_berkas: "Terverifikasi" } });
         if (pendaftarList.length === 0) {
             return res.status(200).json({ code: 200, status: "success", message: "Tidak ada pendaftar", data: [] });
         }
-        // Ambil detail user berdasarkan idUsers dari pendaftar
         const payload = await Promise.all(pendaftarList.map(async (pendaftar) => {
             const user = await User.findOne({
                 where: {
@@ -161,17 +154,17 @@ export const GetPendaftarByIDWawancara = async (req, res) => {
                     }
                 }
             });
+            const akunUser = await Akun.findOne({ where: { id: user.idAkun } })
 
             if (user) {
                 return {
                     id: pendaftar.id,
-                    nama: user.nama,
+                    nama: akunUser.nama,
                 };
             }
             return null;
         }));
 
-        // Filter payload untuk menghapus nilai null
         const filteredPayload = payload.filter(item => item !== null);
 
         res.status(200).json({ code: 200, status: "success", message: "Pendaftar ditemukan", data: filteredPayload });
@@ -211,12 +204,12 @@ export const GetPesertaByID = async (req, res) => {
         const pendaftar = await Pendaftar.findOne({ where: { id: peserta.idPendaftar } });
 
         const DetailUser = await User.findOne({ where: { id: pendaftar.idUsers } });
-
+        const namaAkun = await Akun.findOne({ where: { id: DetailUser.idAkun } })
         const jadwalmulai = new Date(peserta.jadwal_mulai).toLocaleString();
         const jadwalselesai = new Date(peserta.jadwal_selesai).toLocaleString();
 
         const payload = {
-            nama: DetailUser.nama,
+            nama: namaAkun.nama,
             lokasi: peserta.lokasi,
             metode_wawancara: peserta.metode_wawancara,
             jadwal_mulai: jadwalmulai,
@@ -324,8 +317,9 @@ export const GetNilaiPewawancara = async (req, res) => {
         const payload = [];
         for (const nilai_wawancaras of nilai_wawancara) {
             const pewawancara = await User.findByPk(nilai_wawancaras.idUsers);
+            const namaPewawancara = await Akun.findByPk(pewawancara.idAkun)
             const payloads = nilai_wawancaras.toJSON();
-            payloads.nama = pewawancara ? pewawancara.nama : null;
+            payloads.nama = namaPewawancara ? namaPewawancara.nama : null;
             payload.push(payloads);
         }
         return res.status(200).json({ code: 200, status: "success", message: "Nilai Peserta Wawancara Ditemukan", data: payload });
