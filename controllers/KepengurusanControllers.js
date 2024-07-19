@@ -198,23 +198,37 @@ export const DetailKepengurusanLab = async (req, res) => {
 export const GetDetailKepengurusanByID = async (req, res) => {
     const { id } = req.params;
     try {
-        console.log("ayam:", id);
         const detailKepengurusan = await DetailKepengurusan.findOne({ where: { id } });
         if (!detailKepengurusan) {
             return res.status(404).json({ code: 404, status: "Not Found", message: "Detail Kepengurusan Tidak ditemukan" });
         }
-        const divisi = await Divisi.findByPk(detailKepengurusan.idDivisi);
-        divisi.setDataValue('divisi', divisi);
-        const detailKepengurusanLab = await User.findByPk(detailKepengurusan.idUsers);
-        detailKepengurusanLab.setDataValue('detailKepengurusanLab', detailKepengurusanLab);
+        if (detailKepengurusan && (detailKepengurusan.jabatan === "Kepala Divisi" || detailKepengurusan.jabatan === "Anggota")) {
+            const divisi = await Divisi.findByPk(detailKepengurusan.idDivisi);
+            divisi.setDataValue('divisi', divisi);
+            const detailKepengurusanLab = await User.findByPk(detailKepengurusan.idUsers);
+            detailKepengurusanLab.setDataValue('detailKepengurusanLab', detailKepengurusanLab);
 
-        const payload = {
-            idKepengurusan: detailKepengurusan.idKepengurusan,
-            idUsers: detailKepengurusan.idUsers,
-            idDivisi: detailKepengurusan.idDivisi,
-            jabatan: detailKepengurusan.jabatan,
+            const payload = {
+                idKepengurusan: detailKepengurusan.idKepengurusan,
+                idUsers: detailKepengurusan.idUsers,
+                idDivisi: detailKepengurusan.idDivisi,
+                jabatan: detailKepengurusan.jabatan,
+            }
+            return res.status(200).json({ code: 200, status: "success", message: "Detail Kepengurusan Ditemukan", data: payload });
         }
-        return res.status(200).json({ code: 200, status: "success", message: "Detail Kepengurusan Ditemukan", data: payload });
+        else {
+            const detailKepengurusanLab = await User.findByPk(detailKepengurusan.idUsers);
+            detailKepengurusanLab.setDataValue('detailKepengurusanLab', detailKepengurusanLab);
+
+            const payload = {
+                idKepengurusan: detailKepengurusan.idKepengurusan,
+                idUsers: detailKepengurusan.idUsers,
+                idDivisi: null,
+                jabatan: detailKepengurusan.jabatan,
+            }
+            return res.status(200).json({ code: 200, status: "success", message: "Detail Kepengurusan Ditemukan", data: payload });
+        }
+
     } catch (error) {
         console.error("Terjadi Kesalahan Dalam Mengambil Detail Kepengurusan:", error);
         return res.status(500).json({

@@ -421,13 +421,13 @@ export const GetWawancaraByIDLaborMobile = async (req, res) => {
                 const wawancaraList = await Wawancara.findOne({
                     where: { idTahapan: tahapan.id },
                 });
+                console.log(wawancaraList);
                 if (!wawancaraList) {
                     continue;
                 }
                 pendaftar.push({
                     id: wawancaraList.id,
                     nama_wawancara: wawancaraList.nama_wawancara,
-                    metode_wawancara: wawancaraList.metode_wawancara,
                 });
             }
             result.push({
@@ -436,6 +436,7 @@ export const GetWawancaraByIDLaborMobile = async (req, res) => {
                 wawancara: pendaftar
             });
         }
+        console.log(result);
         return res.status(200).json({ code: 200, status: "success", data: result });
     } catch (error) {
         console.error("Terjadi Kesalahan saat mengambil list wawancara:", error.message);
@@ -454,21 +455,23 @@ export const GetListPesertaWawancaraByIDMobile = async (req, res) => {
             const pendaftar = await Pendaftar.findByPk(peserta.idPendaftar);
             if (pendaftar) {
                 const user = await User.findOne({ where: { id: pendaftar.idUsers } });
+                const akunUser = await Akun.findOne({ where: { id: user.idAkun } })
                 const pewawancaraData = await NilaiWawancara.findAll({
                     where: { idPesertaWawancara: peserta.id },
                 });
                 const pewawancara = await Promise.all(pewawancaraData.map(async (nilai) => {
                     const pewawancaraUser = await User.findOne({ where: { id: nilai.idUsers } });
+                    const akunPewawancara = await Akun.findOne({ where: { id: pewawancaraUser.idAkun } })
                     return {
                         id: nilai.id,
                         idUsers: nilai.idUsers,
-                        nama_pewawancara: pewawancaraUser ? pewawancaraUser.nama : null,
+                        nama_pewawancara: akunPewawancara.nama,
                         nilai: nilai.nilai,
                         keterangan: nilai.keterangan,
                     };
                 }));
                 const { createdAt, updatedAt, ...pesertaData } = peserta.toJSON();
-                pesertaData.nama = user ? user.nama : null;
+                pesertaData.nama = akunUser ? akunUser.nama : null;
                 pesertaData.pewawancara = pewawancara;
                 payload.push(pesertaData);
             }
@@ -517,11 +520,12 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
 export const GetWawancaraTimeByNIM = async (req, res) => {
     const { nim } = req.params;
     try {
-        const userbynim = await User.findOne({ where: { nim } });
+        const userbynim = await Akun.findOne({ where: { nim } });
         if (!userbynim) {
             return res.status(404).json({ code: 404, status: "error", message: "User tidak ditemukan" });
         }
-        const pendaftarList = await Pendaftar.findAll({ where: { idUsers: userbynim.id } });
+        const akunUser = await User.findOne({ where: { idAkun: userbynim.id } })
+        const pendaftarList = await Pendaftar.findAll({ where: { idUsers: akunUser.id } });
         const wawancaraPromises = pendaftarList.map(async (pendaftar) => {
             const pesertaWawancaraList = await PesertaWawancara.findAll({
                 where: { idPendaftar: pendaftar.id }

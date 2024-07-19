@@ -185,21 +185,16 @@ export const DeleteLab = async (req, res) => {
 export const GetKepengurusanByIDLabor = async (req, res) => {
     const { idLabor } = req.params;
     try {
-        // Ambil data semua kepengurusan berdasarkan idLabor
         const kepengurusanLabor = await Kepengurusan.findAll({ where: { idLabor } });
-
-        // Siapkan array untuk menyimpan semua promises
         const detailKepengurusanPromises = kepengurusanLabor.map(async (kepengurusan) => {
             const detailKepengurusanList = await DetailKepengurusan.findAll({ where: { idKepengurusan: kepengurusan.id } });
             const payloads = kepengurusan.toJSON();
             payloads.details = [];
-
             if (detailKepengurusanList.length > 0) {
-                // Ambil detail divisi dan user untuk setiap detail kepengurusan
                 for (const detailKepengurusan of detailKepengurusanList) {
                     const divisi = await Divisi.findOne({ where: { id: detailKepengurusan.idDivisi } });
                     const user = await User.findOne({ where: { id: detailKepengurusan.idUsers } });
-
+                    const akunUser = await Akun.findOne({ where: { id: user.idAkun } })
                     const detailPayload = {
                         idUsers: detailKepengurusan.idUsers,
                         idDivisi: detailKepengurusan.idDivisi,
@@ -207,11 +202,10 @@ export const GetKepengurusanByIDLabor = async (req, res) => {
                         idDetail: detailKepengurusan.id,
                         nama_divisi: divisi ? divisi.nama_divisi : null,
                         deskripsi: divisi ? divisi.deskripsi : null,
-                        nama: user ? user.nama : null,
+                        nama: akunUser ? akunUser.nama : null,
                         nomor_asisten: user ? user.nomor_asisten : null,
                         JenisKelamin: user ? user.JenisKelamin : null
                     };
-
                     payloads.details.push(detailPayload);
                 }
             }
