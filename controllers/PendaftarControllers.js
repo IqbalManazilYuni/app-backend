@@ -197,12 +197,15 @@ export const GetPendaftarLabByID = async (req, res) => {
             for (const pend of pendaftarList) {
                 const user = await User.findOne({
                     where: { id: pend.idUsers },
-                    attributes: ['nama', 'nim', 'email', 'angkatan', 'status', 'nomor_asisten', 'jenisPengguna', 'nomor_hp', 'tempat_lahir', 'tanggal_lahir', 'JenisKelamin', 'alamat'],
+                    attributes: { exclude: ['createdAt', 'updatedAt'] }
                 });
-
+                const akunUser = await Akun.findByPk(user.idAkun)
                 pendaftar.push({
                     idUsers: pend.idUsers,
                     ...user.toJSON(),
+                    nama: akunUser.nama,
+                    nim: akunUser.nim,
+                    email: akunUser.email,
                     tanggal_daftar: pend.tanggal_daftar
                 });
             }

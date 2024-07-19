@@ -274,12 +274,12 @@ export const GetJadwalUjian = async (req, res) => {
 export const GetUjianTimeByNIM = async (req, res) => {
     const { nim } = req.params;
     try {
-        const userbynim = await User.findOne({ where: { nim } });
+        const userbynim = await Akun.findOne({ where: { nim } });
         if (!userbynim) {
             return res.status(404).json({ code: 404, status: "error", message: "User tidak ditemukan" });
         }
-
-        const pendaftarList = await Pendaftar.findAll({ where: { idUsers: userbynim.id } });
+        const mahasiswa = await User.findOne({ where: { idAkun: userbynim.id } })
+        const pendaftarList = await Pendaftar.findAll({ where: { idUsers: mahasiswa.id } });
         const ujianPromises = pendaftarList.map(async (pendaftar) => {
             const pesertaUjianList = await PesertaUjian.findAll({ where: { idPendaftar: pendaftar.id } });
             const tahapanPromises = pesertaUjianList.map(async (pesertaUjian) => {
@@ -310,7 +310,6 @@ export const GetUjianTimeByNIM = async (req, res) => {
         });
 
         const ujianData = (await Promise.all(ujianPromises)).flat().filter(item => item !== undefined);
-
         return res.status(200).json({ code: 200, status: "success", data: ujianData });
     } catch (error) {
         console.error("Terjadi Kesalahan saat Mengambil Jadwal Wawancara", error.message);
