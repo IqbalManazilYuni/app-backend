@@ -397,7 +397,7 @@ export const GetUserByJenisPenggunaAndIdLabor = async (req, res) => {
 export const GetUserByNIM = async (req, res) => {
     const { nim, email } = req.body;
     try {
-        const user = await User.findOne({ where: { nim, email } });
+        const user = await Akun.findOne({ where: { nim, email } });
 
         if (!user) {
             return res.status(404).json({ code: 404, status: "error", message: "Pengguna tidak ditemukan." });
@@ -446,7 +446,7 @@ export const GetUserByNIM = async (req, res) => {
 export const GetUserByKode = async (req, res) => {
     const { kode_verifikasi } = req.body;
     try {
-        const user = await User.findOne({ where: { kode_verifikasi } });
+        const user = await Akun.findOne({ where: { kode_verifikasi } });
 
         if (!user) {
             return res.status(404).json({ code: 404, status: "error", message: "Kode Verifikasi Anda Salah" });
@@ -469,7 +469,7 @@ export const GetUserByKode = async (req, res) => {
 export const ChangePassword = async (req, res) => {
     const { id, password } = req.body;
     try {
-        const user = await User.findOne({ where: { id } });
+        const user = await Akun.findOne({ where: { id } });
         const hashPassword = await argon2.hash(password);
         user.password = hashPassword
         await user.save();
