@@ -131,7 +131,7 @@ export const RegisterUser = async (req, res) => {
             alamat,
             nama_file,
         });
-        const link = `http://localhost:3000/verifikasi-akun/${token}`
+        const link = `http://10.44.10.12:3000/verifikasi-akun/${token}`
         if (jenisPengguna === "Calon Asisten") {
             let transporter = nodemailer.createTransport({
                 service: 'gmail',
