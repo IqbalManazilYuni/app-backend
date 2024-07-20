@@ -479,3 +479,17 @@ export const ChangePassword = async (req, res) => {
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
     }
 }
+
+export const DeleteKodeVerifikasiByNIM = async (req, res) => {
+    const { nim } = req.body;
+    try {
+        const akunUser = await Akun.findOne({ where: { nim: nim } });
+        akunUser.kode_verifikasi = null
+        await akunUser.save();
+        return res.status(200).json({ code: 200 })
+    } catch (error) {
+        console.error("Error saat mengupdate KodeVerifikasi: ", error);
+        return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat memproses permintaan." });
+    }
+};
+

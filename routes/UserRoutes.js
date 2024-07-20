@@ -1,5 +1,5 @@
 import express from 'express';
-import { ChangePassword, DeletUser, EditUser, GetCvById, GetUserById, GetUserByJenisPenggunaAndIdLabor, GetUserByKode, GetUserByNIM, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
+import { ChangePassword, DeleteKodeVerifikasiByNIM, DeletUser, EditUser, GetCvById, GetUserById, GetUserByJenisPenggunaAndIdLabor, GetUserByKode, GetUserByNIM, GetUserByToken, GetUsersByPengguna, LoginUser, LoginWeb } from '../controllers/UserController.js';
 import verifyToken from '../config/middleware.js';
 import { VerifikasiAkun } from '../controllers/RegistrasiController.js';
 
@@ -19,6 +19,7 @@ router.delete('/deleteuser/:id', verifyToken, DeletUser)
 router.post('/getuserbyNIM', verifyToken, GetUserByNIM);
 router.post('/getuserbynimwithouttoken', GetUserByNIM);
 router.post('/getuserbykode', GetUserByKode)
+router.post('/deletekodeverifikasi', DeleteKodeVerifikasiByNIM)
 router.post('/update-password', ChangePassword)
 
 export default router;
