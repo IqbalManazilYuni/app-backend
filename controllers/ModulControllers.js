@@ -55,7 +55,6 @@ export const GetModulById = async (req, res) => {
 export const EditModul = async (req, res) => {
     const { id, nama_modul, tahun } = req.body;
     const file = req.file
-
     try {
         const moodulLab = await Modul.findOne({ where: { id } });
         let modulFilename = moodulLab.nama_file
@@ -68,7 +67,6 @@ export const EditModul = async (req, res) => {
         moodulLab.nama_modul = nama_modul;
         moodulLab.tahun = tahun;
         moodulLab.nama_file = modulFilename
-
         await moodulLab.save();
         res.status(200).json({ code: 200, status: "success", message: 'Modul Berhasil Di Memperbarui' });
     } catch (error) {

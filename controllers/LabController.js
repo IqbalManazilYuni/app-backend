@@ -13,8 +13,7 @@ import Akun from "../models/Model_User/Akun.js";
 
 export const AddLab = async (req, res) => {
     const { nama_Labor, deskripsi, nama_pembina } = req.body;
-    const file = req.file;
-
+    const file = req.file
     try {
         let logoFileName = null;
         if (file) {
@@ -23,7 +22,6 @@ export const AddLab = async (req, res) => {
             const downloadURL = await getDownloadURL(snapshot.ref);
             logoFileName = file.originalname;
         }
-
         const newLab = await Labor.create({
             logo: logoFileName,
             nama_Labor,
@@ -41,7 +39,7 @@ export const GetLab = async (req, res) => {
     try {
         const allLab = await Labor.findAll();
         if (!allLab || allLab.length === 0) {
-            return res.status(404).json({ status: "error", code: 404, message: "Tidak ada Laboratorium yang ditemukan." });
+            return res.status(200).json({ status: "success", code: 200, message: "Tidak ada Laboratorium yang ditemukan." });
         }
         return res.status(200).json({ code: 200, status: "success", message: "Data Laboratorium ditemukan", data: allLab });
     } catch (error) {
@@ -90,7 +88,6 @@ export const GetInfoLab = async (req, res) => {
         const pesertaResults = await Promise.all(pesertaPromises);
         const peserta = pesertaResults.flat();
         const pesertaCount = peserta.length;
-
         return res.status(200).json({
             status: "success",
             code: 200,
@@ -182,6 +179,7 @@ export const DeleteLab = async (req, res) => {
         res.status(500).json({ code: 500, status: "error", message: 'Failed to delete Laboratorium' });
     }
 };
+
 export const GetKepengurusanByIDLabor = async (req, res) => {
     const { idLabor } = req.params;
     try {
@@ -225,13 +223,10 @@ export const GetAdminLabor = async (req, res) => {
             where: { AksesRole: "Admin" },
             attributes: ['id', 'nama', 'nim']
         });
-
         if (users.length === 0) {
             return res.status(404).json({ code: 404, message: "User Admin Belum Ada" });
         }
-
         const mahasiswaList = [];
-
         for (const user of users) {
             const mahasiswa = await User.findOne({
                 where: { idAkun: user.id },
@@ -246,7 +241,6 @@ export const GetAdminLabor = async (req, res) => {
                 });
             }
         }
-
         console.log(mahasiswaList);
         if (mahasiswaList.length === 0) {
             return res.status(404).json({ code: 404, message: "Mahasiswa Tidak Ditemukan" });

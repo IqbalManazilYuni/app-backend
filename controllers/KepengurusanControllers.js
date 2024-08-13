@@ -253,10 +253,8 @@ export const EditDetailKepengurusan = async (req, res) => {
                 });
             }
         }
-        // Cek jika sudah ada detail kepengurusan dengan idKepengurusan
         const checkDetailKepengurusan = await DetailKepengurusan.findAll({ where: { idKepengurusan } });
         if (checkDetailKepengurusan.length > 0) {
-            // Pengecekan untuk jabatan khusus
             if (jabatan === "Koordinator Asisten" || jabatan === "Bendahara" || jabatan === "Sekretaris") {
                 const failedJabatan = await DetailKepengurusan.findOne({ where: { idKepengurusan, jabatan } });
                 if (failedJabatan) {
@@ -267,7 +265,6 @@ export const EditDetailKepengurusan = async (req, res) => {
                     });
                 }
             }
-            // Pengecekan untuk jabatan Kepala Divisi
             if (jabatan === "Kepala Divisi") {
                 const kepalaDivisiFailed = await DetailKepengurusan.findOne({ where: { idKepengurusan, idDivisi } });
                 if (kepalaDivisiFailed && kepalaDivisiFailed.jabatan === "Kepala Divisi") {

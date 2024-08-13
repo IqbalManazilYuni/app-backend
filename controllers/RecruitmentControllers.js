@@ -10,22 +10,16 @@ export const CreateRecruitment = async (req, res) => {
         if (labor) {
             return res.status(404).json({ code: 404, status: "Found", message: "Labor Sudah Terdaftar Pada Kegiatan Recruitment Tahun ini" });
         }
-
         const tanggalbuka = new Date(tanggal_buka);
         const tanggaltutup = new Date(tanggal_tutup);
         const tanggalSekarang = new Date();
-
         if (tanggaltutup <= tanggalbuka) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Tutup Invalid karena mendahului tanggal buka" });
         }
         if (tanggalbuka < tanggalSekarang) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena mendahului tanggal sekarang" });
         }
-
-        // Fetch all existing recruitments for the given idLabor and idKegiatan
         const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
-
-        // Check for conflicting dates
         for (let recruitment of existingRecruitments) {
             const existingTanggalBuka = new Date(recruitment.tanggal_buka);
             const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
@@ -34,7 +28,6 @@ export const CreateRecruitment = async (req, res) => {
                 return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
             }
         }
-
         const newProses = await Recruitment.create({
             idLabor,
             idKegiatan,
@@ -43,7 +36,6 @@ export const CreateRecruitment = async (req, res) => {
             tanggal_tutup,
             nama_recruitment
         });
-
         return res.status(201).json({ code: 201, status: "success", message: "Recruitment berhasil didaftarkan.", data: newProses });
     } catch (error) {
         console.error("Error saat mendaftarkan Recruitment:", error);
@@ -57,7 +49,7 @@ export const GetRecruitmentByLabor = async (req, res) => {
         const proses = await Recruitment.findAll({ where: { idLabor: idLabor } });
         const payload = await Promise.all(proses.map(async recruitment => {
             const kegiatan = await Kegiatan.findByPk(recruitment.idKegiatan);
-            const jumlahPendaftar = await Pendaftar.count({ where: { idRecruitment: recruitment.id } }); // Count based on recruitment ID
+            const jumlahPendaftar = await Pendaftar.count({ where: { idRecruitment: recruitment.id } });
             const labor = await Labor.findByPk(recruitment.idLabor);
             return {
                 ...recruitment.toJSON(),
@@ -158,9 +150,6 @@ export const EditRecruitment = async (req, res) => {
         }
         const existingRecruitments = await Recruitment.findAll({ where: { idLabor } });
         const filterexistingRecruitments = existingRecruitments.filter(recruitment => recruitment.id !== id);
-        console.log(id)
-        console.log(JSON.stringify(filterexistingRecruitments))
-
         for (let recruitment of filterexistingRecruitments) {
             const existingTanggalBuka = new Date(recruitment.tanggal_buka);
             const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
@@ -169,14 +158,12 @@ export const EditRecruitment = async (req, res) => {
                 return res.status(400).json({ code: 400, status: "error", message: "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada." });
             }
         }
-
         recruitment.tanggal_buka = tanggal_buka
         recruitment.tanggal_tutup = tanggal_tutup
         recruitment.status = status;
         recruitment.limit_peserta = limit_peserta;
         await recruitment.save();
         return res.status(200).json({ status: "success", code: 200, message: "Berhasil Memperbarui Recruitment" });
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Recruitment" })
@@ -187,32 +174,25 @@ export const UpdateStatusRecruitment = async (req, res) => {
     const { date } = req.body;
     try {
         const recruitmentList = await Recruitment.findAll();
-
         const updatedRecruitmentList = await Promise.all(recruitmentList.map(async (recruitment) => {
             const jadwal_buka = new Date(recruitment.tanggal_buka);
             const jadwal_tutup = new Date(recruitment.tanggal_tutup);
             const jadwal = new Date(date);
             let status = recruitment.status;
-
             if (jadwal_buka <= jadwal && jadwal <= jadwal_tutup) {
                 status = "Open";
             } else if (jadwal > jadwal_tutup) {
                 status = "Close";
             }
-
-            // Memeriksa apakah status berubah
             if (status !== recruitment.status) {
-                // Jika status berubah, lakukan update pada tabel Recruitment
                 await Recruitment.update({ status }, { where: { id: recruitment.id } });
             }
-
             return {
                 ...recruitment,
                 jadwal_tutup,
                 status
             };
         }));
-
         return res.status(200).json({ code: 200, status: "success", message: "Recruitment telah diperbarui", data: updatedRecruitmentList });
     } catch (error) {
         console.log(error);

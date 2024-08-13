@@ -211,7 +211,6 @@ export const EditUser = async (req, res) => {
         angkatan,
         JenisKelamin,
         alamat,
-        status,
         note,
         verifikasi,
         idPendaftar,
@@ -220,30 +219,28 @@ export const EditUser = async (req, res) => {
     let encryptedToken, expiry;
     try {
         const user = await User.findOne({ where: { id } });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
         const mahasiswaAkun = await Akun.findOne({ where: { id: user.idAkun } })
-        if (jenisPengguna === "Calon Asisten") {
-            if (user.status !== status) {
-                if (status === "Lulus") {
-                    await Pendaftar.update({ Status_Pendaftar: 'Lulus' }, { where: { idUsers: user.id, id: idPendaftar } });
-                } else if (status === "Gagal") {
-                    await Pendaftar.update({ Status_Pendaftar: 'Gagal' }, { where: { idUsers: user.id, id: idPendaftar } });
-                } else {
-                    await Pendaftar.update({ Status_Pendaftar: 'OnProgress' }, { where: { idUsers: user.id, id: idPendaftar } });
-                }
-            }
-        }
+        //Dikomen Dulu Yaw
+        // if (jenisPengguna === "Calon Asisten") {
+        //     if (user.status !== status) {
+        //         if (status === "Lulus") {
+        //             await Pendaftar.update({ Status_Pendaftar: 'Lulus' }, { where: { idUsers: user.id, id: idPendaftar } });
+        //         } else if (status === "Gagal") {
+        //             await Pendaftar.update({ Status_Pendaftar: 'Gagal' }, { where: { idUsers: user.id, id: idPendaftar } });
+        //         } else {
+        //             await Pendaftar.update({ Status_Pendaftar: 'OnProgress' }, { where: { idUsers: user.id, id: idPendaftar } });
+        //         }
+        //     }
+        // }
         if (mahasiswaAkun.nim !== nim && mahasiswaAkun.AksesRole === "Admin") {
             const expiresIn = 3600;
             const jwtoken = jwt.sign({ nim: nim }, 'secret_key', { expiresIn: `${expiresIn}s` });
             encryptedToken = encryptToken(jwtoken, 'encryption_secret_key');
             expiry = Math.floor(Date.now() / 1000) + expiresIn;
         }
-        if (status !== "Lulus" && jenisPengguna === "Asisten") {
-            return res.status(400).json({ message: 'Calon Asisten harus lulus untuk menjadi Asisten' });
-        }
+        // if (status !== "Lulus" && jenisPengguna === "Asisten") {
+        //     return res.status(400).json({ message: 'Calon Asisten harus lulus untuk menjadi Asisten' });
+        // }
         const change = mahasiswaAkun.nim !== nim;
         if (change) {
             const existingUserWithNim = await Akun.findOne({ where: { nim } });
@@ -277,7 +274,6 @@ export const EditUser = async (req, res) => {
         user.nomor_asisten = nomor_asisten;
         user.idLabor = idLabor;
         user.jenisPengguna = jenisPengguna;
-        user.status = status;
         user.nomor_hp = nomor_hp;
         user.tempat_lahir = tempat_lahir;
         user.tanggal_lahir = tanggal_lahir;
@@ -295,16 +291,12 @@ export const EditUser = async (req, res) => {
 
 export const GetUserById = async (req, res) => {
     const { id, idPendaftar } = req.body;
-    console.log(id);
-    console.log(idPendaftar);
     try {
         const user = await User.findOne({
             where: { id },
             attributes: { exclude: ['createdAt', 'updatedAt'] }
         });
-
         const akunMahasiswa = await Akun.findOne({ where: { id: user.idAkun } })
-
         if (!user) {
             return res.status(404).json({ message: "User tidak ditemukan." });
         }
@@ -312,7 +304,6 @@ export const GetUserById = async (req, res) => {
         if (user.jenisPengguna === "Calon Asisten") {
             verifikasiberkas = await Pendaftar.findOne({ where: { id: idPendaftar, idUsers: id } })
         }
-
         const labor = await Labor.findByPk(user.idLabor);
         user.setDataValue('labor', labor);
         const formattedUser = {
@@ -329,7 +320,7 @@ export const GetUserById = async (req, res) => {
             tanggal_lahir: user.tanggal_lahir,
             JenisKelamin: user.JenisKelamin,
             alamat: user.alamat,
-            status: user.status,
+            // status: user.status,
             nama_file: user.nama_file,
             verifikasi_berkas: verifikasiberkas?.verifikasi_berkas,
             note: verifikasiberkas?.note,
@@ -346,7 +337,6 @@ export const GetUserById = async (req, res) => {
 export const GetCvById = async (req, res) => {
     const { id } = req.params;
     try {
-
         const user = await User.findOne({ where: { id } })
         if (!user) {
             res.status(404).json({ message: "User Tidak Ditemukan" });
@@ -447,18 +437,14 @@ export const GetUserByKode = async (req, res) => {
     const { kode_verifikasi } = req.body;
     try {
         const user = await Akun.findOne({ where: { kode_verifikasi } });
-
         if (!user) {
             return res.status(404).json({ code: 404, status: "error", message: "Kode Verifikasi Anda Salah" });
         }
-
         const payload = {
             id: user.id,
         };
-
         user.kode_verifikasi = null;
         await user.save();
-
         return res.status(200).json({ code: 200, status: "success", message: "Kode Verifikasi Anda Benar", data: payload })
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan Kode Verifikasi: ", error);

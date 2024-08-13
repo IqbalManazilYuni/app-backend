@@ -36,7 +36,6 @@ export const PreviewPDF = async (req, res) => {
             default:
                 return res.status(400).json({ message: 'Invalid file type' });
         }
-
         const fileRef = ref(storage, `${folderPath}/${nama_file}`);
         const url = await getDownloadURL(fileRef);
         return res.status(200).json({ code: 200, status: "success", URL: url });
@@ -62,7 +61,6 @@ export const RegisterUser = async (req, res) => {
         alamat,
         AksesRole,
         angkatan,
-        status,
         nama_file,
     } = req.body;
     const minLengthRegex = /^.{8,}$/;
@@ -107,7 +105,6 @@ export const RegisterUser = async (req, res) => {
         }
         const hashedPassword = await argon2.hash(password);
         const token = crypto.randomBytes(32).toString('hex');
-        console.log(token);
         const createAkun = await Akun.create({
             nama,
             nim,
@@ -120,7 +117,6 @@ export const RegisterUser = async (req, res) => {
         const newUser = await User.create({
             nomor_asisten,
             idAkun: createAkun.id,
-            status,
             idLabor,
             angkatan,
             jenisPengguna,
@@ -131,7 +127,7 @@ export const RegisterUser = async (req, res) => {
             alamat,
             nama_file,
         });
-        const link = `http://10.44.10.12:3000/verifikasi-akun/${token}`
+        const link = `http://10.44.10.18:3000/verifikasi-akun/${token}`
         if (jenisPengguna === "Calon Asisten") {
             let transporter = nodemailer.createTransport({
                 service: 'gmail',
@@ -210,7 +206,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             jenisPengguna: mahasiswa.jenisPengguna,
             nomor_hp: mahasiswa.nomor_hp,
             idLabor: mahasiswa.idLabor,
-            status: mahasiswa.status,
+            // status: mahasiswa.status,
             tempat_lahir: mahasiswa.tempat_lahir,
             tanggal_lahir: mahasiswa.tanggal_lahir,
             JenisKelamin: mahasiswa.JenisKelamin,
@@ -241,7 +237,7 @@ export const EditUserRegistrasi = async (req, res) => {
         tanggal_lahir,
         JenisKelamin,
         alamat,
-        status,
+        // status,
         nama_file,
     } = req.body;
     try {
@@ -273,7 +269,7 @@ export const EditUserRegistrasi = async (req, res) => {
             akunmahasiswa.email = email,
             user.angkatan = angkatan,
             user.nomor_asisten = nomor_asisten,
-            user.status = status,
+            // user.status = status,
             user.idLabor = idLabor,
             user.jenisPengguna = jenisPengguna,
             user.nomor_hp = nomor_hp,

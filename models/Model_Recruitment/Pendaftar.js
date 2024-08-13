@@ -29,9 +29,9 @@ const Pendaftar = db.define('Pendaftar', {
         onUpdate: 'CASCADE'
     },
     Status_Pendaftar: {
-        type: DataTypes.ENUM('OnProgress', 'Lulus', 'Gagal'),
-        defaultValue: "OnProgress",
-        allowNull: false,
+        type: DataTypes.ENUM('Pendaftar', 'Tahapan1', 'Tahapan2', 'Gagal', 'Lulus'),
+        allowNull: true,
+        defaultValue: 'Pendaftar',
     },
     verifikasi_berkas: {
         type: DataTypes.ENUM('OnSubmit', 'Terverifikasi', 'Tidak Terverifikasi'),

@@ -11,6 +11,7 @@ import SoalEssay from "../models/Model_Soal/SoalEssay.js"
 import JawabanUjian from "../models/Model_Recruitment/JawabanUjian.js"
 import { Op } from "sequelize";
 import Akun from "../models/Model_User/Akun.js";
+
 export const GetListUjianByIDLabor = async (req, res) => {
     const { idLabor } = req.params
     try {
@@ -151,9 +152,9 @@ export const GetPesertaUjianByIdTahapan = async (req, res) => {
             where: {
                 idRecruitment: tahapan.idRecruitment,
                 verifikasi_berkas: "Terverifikasi",
-                Status_Pendaftar: {
-                    [Op.notIn]: ["Gagal", "Lulus"]
-                }
+                // Status_Pendaftar: { configurasikan ini
+                //     [Op.notIn]: ["Gagal", "Lulus"]
+                // }
             }
         });
         const payload = await Promise.all(pendaftar.map(async data => {
@@ -215,7 +216,6 @@ export const CreatePesertaUjian = async (req, res) => {
         });
     }
 };
-
 
 export const DeletePesertaUjian = async (req, res) => {
     const { id } = req.params;
@@ -393,15 +393,12 @@ export const GetSoalUjianByIdUjian = async (req, res) => {
             }
             payload.push(banksoalData)
         }
-        console.log("ayam")
         return res.status(200).json({ code: 200, status: "success", data: payload })
     } catch (error) {
         console.error(error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi Kesalahan Dalam Memperbarui Soal" });
     }
 };
-
-
 
 export const CekKodeUjian = async (req, res) => {
     const { kode_ujian, idUjian, date, idPesertaUjian } = req.body;
@@ -617,8 +614,6 @@ export const GetUjianList = async (req, res) => {
         const idTahapanRecruitment = await Tahapan.findOne({ where: { id: idUjianTahapan.idTahapan } });
         const tahapanList = await Tahapan.findAll({ where: { idRecruitment: idTahapanRecruitment.idRecruitment } })
         const tahapanIds = tahapanList.map(tahapan => tahapan.id);
-
-        // Finding all Ujian records that match the tahapan IDs
         const ujianList = await Ujian.findAll({
             where: {
                 idTahapan: tahapanIds,
@@ -633,7 +628,6 @@ export const GetUjianList = async (req, res) => {
         else {
             return res.status(200).json({ code: 200, status: 'success', data: ujianList })
         }
-
     } catch (error) {
         console.error("Terjadi Kesalahan : ", error.message);
         return res.status(500).json({ code: 500, status: "error", message: 'Terjadi Kesalahan Pada Server' })

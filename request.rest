@@ -94,5 +94,4 @@ Content-Type: application/json
   "jenisPengguna":"Calon Asisten",
   "idLabor":"ff5d2c22-44d2-11ef-9689-5405db08f5fa",
   "angkatan":"2021",
-  "status":"Tahapan1"
 }

@@ -11,19 +11,17 @@ export const CreateKegiatan = async (req, res) => {
             nama_kegiatan,
             tahun,
         });
-        const listUser = UserList.map(async (user) => {
-            const tahunAngkatan = user.angkatan
-            if (user.status === "Pendaftar" || user.status === "Gagal") {
-                const tahunKegiatan = Number(tahun);
-                const tahunAngkatanUser = Number(tahunAngkatan);
-                const limitTahunDaftar = tahunKegiatan - tahunAngkatanUser;
-                let status = user.status
-                if (limitTahunDaftar >= 0 && limitTahunDaftar <= 1) {
-                    status = "Pendaftar"
-                    await User.update({ status }, { where: { id: user.id } });
-                }
-            }
-        })
+        // const listUser = UserList.map(async (user) => {
+        //     const tahunAngkatan = user.angkatan
+        //     const tahunKegiatan = Number(tahun);
+        //     const tahunAngkatanUser = Number(tahunAngkatan);
+        //     const limitTahunDaftar = tahunKegiatan - tahunAngkatanUser;
+        //     let status = user.status
+        //     if (limitTahunDaftar >= 0 && limitTahunDaftar <= 1) {
+        //         status = "Pendaftar"
+        //         await User.update({ status }, { where: { id: user.id } });
+        //     }
+        // })
         return res.status(201).json({ code: 201, status: "success", message: "Kegiatan Berhasil Dibuat" });
     } catch (error) {
         console.log(error);

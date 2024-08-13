@@ -34,11 +34,6 @@ const User = db.define('User', {
         type: DataTypes.ENUM('Asisten', 'Calon Asisten', 'Ex-Asisten'),
         allowNull: true,
     },
-    status: {
-        type: DataTypes.ENUM('Pendaftar', 'Tahapan1', 'Tahapan2', 'Gagal', 'Lulus'),
-        allowNull: true,
-        defaultValue: 'Pendaftar',
-    },
     nama_file: {
         type: DataTypes.TEXT,
         allowNull: true,
