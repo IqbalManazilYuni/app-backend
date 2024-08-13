@@ -2,18 +2,16 @@ import jwt from 'jsonwebtoken';
 import { decryptToken } from '../controllers/UserController.js';
 
 const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    const splittoken = token.split(' ')[1];
-    if (!splittoken) {
-        return res.status(403).json({ code: 403, status: "error", message: "Token tidak tersedia" });
-    }
-
     try {
-        
+        const token = req.headers['authorization'];
+        const splittoken = token.split(' ')[1];
+        if (!splittoken) {
+            return res.status(403).json({ code: 403, status: "error", message: "Token tidak tersedia" });
+        }
+
         const decryptedToken = decryptToken(splittoken, 'encryption_secret_key');
         const decoded = jwt.verify(decryptedToken, 'secret_key');
         req.user = decoded;
-        
         next();
     } catch (error) {
         console.error("Error saat verifikasi token:", error);

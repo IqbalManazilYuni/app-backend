@@ -227,13 +227,10 @@ export const GetPesertaByID = async (req, res) => {
 export const EditPesertaWawancara = async (req, res) => {
     const { id, jadwal_mulai, jadwal_selesai, lokasi, jadwalPengajuanTerakhir, metode_wawancara, status_pengajuan } = req.body;
     try {
-
         const pesertaWawancara = await PesertaWawancara.findOne({ where: { id } });
-
         const mulai = new Date(jadwal_mulai);
         const selesai = new Date(jadwal_selesai);
         const jadwalPengajuan = new Date(jadwalPengajuanTerakhir)
-
         const minimumMulai = new Date(jadwalPengajuan.getTime() + 24 * 60 * 60 * 1000);
         if (mulai < minimumMulai) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara harus setidaknya 24 jam setelah Jadwal Pengajuan" });
@@ -244,7 +241,6 @@ export const EditPesertaWawancara = async (req, res) => {
         if (selesai <= mulai) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Invalid" });
         }
-
         const existingJadwal = await PesertaWawancara.findAll({
             where: { idWawancara: pesertaWawancara.idWawancara, lokasi: pesertaWawancara.lokasi },
             order: [['jadwal_mulai', 'DESC']],
@@ -269,17 +265,16 @@ export const EditPesertaWawancara = async (req, res) => {
             const conflictingMessage = conflictingSlots.map(slot => `${slot.start} - ${slot.end}`).join(", ");
             return res.status(400).json({ code: 400, status: "error", message: `Jadwal bentrok dengan jadwal yang sudah ada: ${conflictingMessage}` });
         }
-
+        if (lokasi === "") {
+            return res.status(400).json({ code: 400, status: "error", message: `lokasi anda kosong` });
+        }
         pesertaWawancara.lokasi = lokasi;
         pesertaWawancara.jadwal_mulai = jadwal_mulai;
         pesertaWawancara.jadwal_selesai = jadwal_selesai;
         pesertaWawancara.metode_wawancara = metode_wawancara
         pesertaWawancara.status_pengajuan = status_pengajuan
-
         await pesertaWawancara.save();
-
         return res.status(200).json({ code: 200, status: "success", message: "Peserta Wawancara Berhasil Diperbarui" });
-
     } catch (error) {
         console.error("Terjadi Kesalahan Saat saat proses update tahapan:", error);
         return res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses memperbarui Peserta Wawancara." });

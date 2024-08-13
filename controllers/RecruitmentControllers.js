@@ -67,8 +67,17 @@ export const GetRecruitmentByLabor = async (req, res) => {
                 jumlahPendaftar,
             };
         }));
-        console.log(payload)
         return res.status(200).json({ status: "success", code: 200, message: "Labor Recruitment Found", data: payload });
+    } catch (error) {
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Mengambil Labor Recruitment", error });
+    }
+}
+
+export const GetRecruitmentByidLabor = async (req, res) => {
+    const { idLabor } = req.params;
+    try {
+        const proses = await Recruitment.findAll({ where: { idLabor: idLabor }, attributes: ['id', 'nama_recruitment'] });
+        return res.status(200).json({ status: "success", code: 200, message: "Recruitment Ditemukan", data: proses });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Mengambil Labor Recruitment", error });
     }

@@ -79,3 +79,20 @@ Content-Type: application/json
   "nama":"SuperAdmin",
   "password":"SuperAdmin123"
 }
+
+###
+
+POST http://localhost:3001/register
+Content-Type: application/json
+
+{
+  "nim":"233",
+  "email":"manazilyuni2@gmail.com",
+  "AksesRole":"User",
+  "nama":"Hendri Putra Tanjung",
+  "password":"Satu1234",
+  "jenisPengguna":"Calon Asisten",
+  "idLabor":"ff5d2c22-44d2-11ef-9689-5405db08f5fa",
+  "angkatan":"2021",
+  "status":"Tahapan1"
+}

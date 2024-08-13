@@ -1,5 +1,13 @@
 import express from 'express';
-import { CreatePendaftar, DeletePendaftar, EditPendaftarDokumen, GetListPendaftarByIdLabor, GetPendaftarByIdRecruitment, GetPendaftarByNIM, GetPendaftarLabByID } from '../controllers/PendaftarControllers.js';
+import {
+    CreatePendaftar,
+    DeletePendaftar,
+    EditPendaftarDokumen,
+    GetListPendaftarByIdLabor,
+    GetPendaftarByIdRecruitment,
+    GetPendaftarByNIM,
+    GetPendaftarLabByID
+} from '../controllers/PendaftarControllers.js';
 import verifyToken from '../config/middleware.js';
 
 const router = express.Router();

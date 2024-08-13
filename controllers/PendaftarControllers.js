@@ -269,4 +269,22 @@ export const EditPendaftarDokumen = async (req, res) => {
     }
 }
 
+export const CetakLaporan = async (req, res) => {
+    const { idLabor, idRecruitment, status } = req.body;
+    try {
+        const getLabor = await Labor.findOne({
+            where: { id: idLabor },
+            attributes: ['id', 'nama_Labor', 'nama_pembina', 'logo']
+        })
+        const getPendaftar = await Pendaftar.findAll({
+            where: {
+                idRecruitment: idRecruitment,
+                verifikasi_berkas:"Terverifikasi"
+            },
+            attributes:['idUsers']
+        })
+    } catch (error) {
+        return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Data Laporan", error });
+    }
+}
 

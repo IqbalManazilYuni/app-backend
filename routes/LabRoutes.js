@@ -2,6 +2,7 @@ import express from 'express';
 import { AddLab, GetLab, GetLabByID, EditLab, DeleteLab, GetKepengurusanByIDLabor, GetInfoLab, GetInfoLabWithoutIdlabor, GetAdminLabor, GetAdminByIdLabor, EditAdminLabor, AddAdminLabor, GetLabByIdLabor } from '../controllers/LabController.js';
 import multer from 'multer';
 import verifyToken from '../config/middleware.js';
+import { GetRecruitmentByidLabor } from '../controllers/RecruitmentControllers.js';
 
 const router = express.Router();
 
@@ -10,6 +11,7 @@ const upload = multer({ storage });
 
 router.get('/lab', verifyToken, GetLab);
 router.get('/lab_by_idlabor/:idLabor', verifyToken, GetLabByIdLabor);
+router.get('/recruitment_by_idlabor/:idLabor', verifyToken, GetRecruitmentByidLabor);
 router.get('/get-lab', GetLab);
 router.get('/adminlab', verifyToken, GetAdminLabor);
 router.get('/adminlabbyidLabor/:idLabor', verifyToken, GetAdminByIdLabor);

@@ -330,7 +330,10 @@ export const AddAdminLabor = async (req, res, next) => {
     try {
         const UserAdmin = await Akun.findOne({ where: { id: idUser } });
         if (!UserAdmin) {
-            throw new Error("User tidak ditemukan");
+            return res.status(400).json({ code: 400, status: "Error", message: "User Tidak ditemukan" })
+        }
+        if (idUser === "") {
+            return res.status(400).json({ code: 400, status: "Error", message: "data admin tidak boleh kosong" })
         }
         const userCekAdmin = await Akun.findAll({ where: { AksesRole: "Admin" } });
         for (const mahasiswa of userCekAdmin) {
