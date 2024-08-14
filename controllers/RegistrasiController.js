@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import { stat } from 'fs';
 import Akun from '../models/Model_User/Akun.js';
 import { where } from 'sequelize';
+import Pendaftar from '../models/Model_Recruitment/Pendaftar.js';
 
 dotenv.config();
 
@@ -186,15 +187,23 @@ export const VerifikasiAkun = async (req, res) => {
 }
 
 export const GetUserByNimRegistrasi = async (req, res) => {
-    const { nim } = req.body;
+    const { nim, } = req.body;
+
     try {
         const user = await Akun.findOne({
             where: { nim }
         });
-        if (!user) {
-            return res.status(404).json({ message: "User tidak ditemukan." });
-        }
         const mahasiswa = await User.findOne({ where: { idAkun: user.id } })
+        let status = null
+        if (mahasiswa.jenisPengguna === "Calon Asisten") {
+            const dataPendaftar = await Pendaftar.findAll({
+                where: { idUsers: mahasiswa.id },
+                order: [['tanggal_daftar', 'DESC']],
+                limit: 1,
+                attributes: { exclude: ['createdAt', 'updatedAt'] }
+            });
+            status = dataPendaftar.Status_Pendaftar;
+        }
         const labor = await Labor.findByPk(mahasiswa.idLabor);
         mahasiswa.setDataValue('labor', labor);
         const formattedUser = {
@@ -206,7 +215,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             jenisPengguna: mahasiswa.jenisPengguna,
             nomor_hp: mahasiswa.nomor_hp,
             idLabor: mahasiswa.idLabor,
-            // status: mahasiswa.status,
+            status: status,
             tempat_lahir: mahasiswa.tempat_lahir,
             tanggal_lahir: mahasiswa.tanggal_lahir,
             JenisKelamin: mahasiswa.JenisKelamin,

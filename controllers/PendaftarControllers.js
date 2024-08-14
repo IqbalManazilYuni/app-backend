@@ -5,9 +5,11 @@ import Labor from "../models/Model_Kepengurusan/Labor.js"
 import Kegiatan from "../models/Model_Recruitment/Kegiatan.js"
 import { Op, where } from "sequelize";
 import Akun from "../models/Model_User/Akun.js";
+import DetailKepengurusan from "../models/Model_Kepengurusan/DetailKepengurusan.js";
+import Kepengurusan from "../models/Model_Kepengurusan/Kepengurusan.js";
 
 export const CreatePendaftar = async (req, res) => {
-    const { idUsers, tanggal_daftar, idKegiatan, idRecruitment, alasan, Status_Pendaftar, file_permohonan, file_krs } = req.body;
+    const { idUsers, tanggal_daftar, idKegiatan, idRecruitment, alasan, file_permohonan, file_krs } = req.body;
     const transaction = await Pendaftar.sequelize.transaction();
     try {
         const recruitment = await Recruitment.findOne({ where: { id: idRecruitment }, transaction });
@@ -61,7 +63,6 @@ export const CreatePendaftar = async (req, res) => {
             alasan,
             file_permohonan,
             file_krs,
-            Status_Pendaftar,
         }, { transaction });
         await User.update({ status: 'Tahapan1' }, { where: { id: idUsers }, transaction });
         await transaction.commit();
@@ -105,49 +106,61 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
         });
 
         const payload = await Promise.all(mahasiswaList.map(async peserta => {
-            const pendaftar = await Pendaftar.findOne({
+            const pendaftarList = await Pendaftar.findAll({
                 where: { idUsers: peserta.id },
                 attributes: { exclude: ['createdAt', 'updatedAt'] }
             });
 
-            if (!pendaftar) {
+            if (pendaftarList.length === 0) {
                 return null;
             }
 
             const akunMahasiswa = await Akun.findByPk(peserta.idAkun);
-            const recruitment = await Recruitment.findByPk(pendaftar.idRecruitment, {
-                attributes: ['nama_recruitment']
-            });
 
-            return {
-                id: pendaftar.id,
-                alamat: peserta.alamat,
-                nama_file: peserta.nama_file,
-                nomor_hp: peserta.nomor_hp,
-                JenisKelamin: peserta.JenisKelamin,
-                nama: akunMahasiswa.nama,
-                nim: akunMahasiswa.nim,
-                tanggal_daftar: pendaftar.tanggal_daftar,
-                idKegiatan: pendaftar.idKegiatan,
-                idUsers: pendaftar.idUsers,
-                Status_Pendaftar: pendaftar.Status_Pendaftar,
-                verifikasi_berkas: pendaftar.verifikasi_berkas,
-                note: pendaftar.note,
-                file_krs: pendaftar.file_krs,
-                file_permohonan: pendaftar.file_permohonan,
-                idRecruitment: pendaftar.idRecruitment,
-                nama_recruitment: recruitment.nama_recruitment
-            };
+            return await Promise.all(pendaftarList.map(async pendaftar => {
+                const recruitment = await Recruitment.findByPk(pendaftar.idRecruitment, {
+                    attributes: ['nama_recruitment']
+                });
+
+                return {
+                    id: pendaftar.id,
+                    alamat: peserta.alamat,
+                    nama_file: peserta.nama_file,
+                    nomor_hp: peserta.nomor_hp,
+                    JenisKelamin: peserta.JenisKelamin,
+                    nama: akunMahasiswa.nama,
+                    nim: akunMahasiswa.nim,
+                    tanggal_daftar: pendaftar.tanggal_daftar,
+                    idKegiatan: pendaftar.idKegiatan,
+                    idUsers: pendaftar.idUsers,
+                    Status_Pendaftar: pendaftar.Status_Pendaftar,
+                    verifikasi_berkas: pendaftar.verifikasi_berkas,
+                    note: pendaftar.note,
+                    file_krs: pendaftar.file_krs,
+                    file_permohonan: pendaftar.file_permohonan,
+                    idRecruitment: pendaftar.idRecruitment,
+                    nama_recruitment: recruitment.nama_recruitment
+                };
+            }));
         }));
 
-        const filteredPayload = payload.filter(p => p !== null);
+        // Flatten the nested arrays and filter out any null values
+        const filteredPayload = payload.flat().filter(p => p !== null);
 
-        console.log(filteredPayload);
-        return res.status(200).json({ status: "success", code: 200, message: "Pendaftar Ditemukan", data: filteredPayload });
+        // Structure the response
+        const response = {
+            status: "success",
+            code: 200,
+            message: "Pendaftar Ditemukan",
+            data: filteredPayload
+        };
+
+        return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Pada Menggambil Pendaftar", error });
     }
 };
+
 
 export const DeletePendaftar = async (req, res) => {
     const { id } = req.params
@@ -208,15 +221,8 @@ export const GetPendaftarByNIM = async (req, res) => {
     const { nim, idRecruitment } = req.body;
     try {
         const idUser = await Akun.findOne({ where: { nim } });
-        if (!idUser) {
-            return res.status(404).json({ code: 404, status: "failure", message: "User not found" });
-        }
         const mahasiswaId = await User.findOne({ where: { idAkun: idUser.id } })
         const pendaftar = await Pendaftar.findOne({ where: { idUsers: mahasiswaId.id, idRecruitment: idRecruitment } });
-        if (!pendaftar) {
-            return res.status(404).json({ code: 404, status: "failure", message: "Pendaftar not found" });
-        }
-
         const payload = {
             id: pendaftar.id,
             file_krs: pendaftar.file_krs,
@@ -253,19 +259,54 @@ export const EditPendaftarDokumen = async (req, res) => {
 export const CetakLaporan = async (req, res) => {
     const { idLabor, idRecruitment, status } = req.body;
     try {
+        const getKepengurusan = await Kepengurusan.findOne({
+            where: { idLabor: idLabor, status: "aktif" }
+        });
+        const detailKepengurusan = await DetailKepengurusan.findOne({
+            where: { idKepengurusan: getKepengurusan?.id, jabatan: "Koordinator Asisten" }
+        });
+        const detailKepengurusanIdAsisten = await User.findOne({
+            where: { id: detailKepengurusan?.idUsers }
+        });
+        const akunAsisten = await Akun.findOne({
+            where: { id: detailKepengurusanIdAsisten?.idAkun },
+            attributes: ['nama', 'nim']
+        });
         const getLabor = await Labor.findOne({
             where: { id: idLabor },
             attributes: ['id', 'nama_Labor', 'nama_pembina', 'logo']
-        })
+        });
         const getPendaftar = await Pendaftar.findAll({
             where: {
                 idRecruitment: idRecruitment,
-                verifikasi_berkas: "Terverifikasi"
+                Status_Pendaftar: status
             },
             attributes: ['idUsers']
-        })
+        });
+        const pendaftarWithAkun = await Promise.all(getPendaftar.map(async pendaftar => {
+            const user = await User.findOne({
+                where: { id: pendaftar.idUsers },
+                attributes: ['idAkun']
+            });
+            const akun = await Akun.findOne({
+                where: { id: user.idAkun },
+                attributes: ['nama', 'nim']
+            });
+            return {
+                nama: akun?.nama || null,
+                nim: akun?.nim || null,
+            };
+        }));
+        const payload = {
+            akunAsisten,
+            getLabor,
+            pendaftarWithAkun
+        };
+        return res.status(200).json({ code: 200, status: "success", data: payload })
     } catch (error) {
+        console.error("Error:", error);
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Data Laporan", error });
     }
 }
+
 
