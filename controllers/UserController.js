@@ -273,7 +273,7 @@ export const EditUser = async (req, res) => {
         user.tanggal_lahir = tanggal_lahir;
         user.JenisKelamin = JenisKelamin;
         user.alamat = alamat;
-        user.status_akun = status_akun;
+        mahasiswaAkun.status_akun = status_akun;
         await user.save();
         await mahasiswaAkun.save();
         res.status(200).json({ code: 200, status: "success", message: 'User updated successfully', token: encryptedToken, expiry });
@@ -348,7 +348,9 @@ export const DeletUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ code: 404, status: "Not Found", message: 'User not found' });
         }
+        const userAkun = await Akun.findOne({ where: { id: user.idAkun } })
         await user.destroy();
+        await userAkun.destroy();
         res.status(200).json({ code: 200, status: "success", message: "User deleted successfully" });
     } catch (error) {
         console.error("Error saat menghapus pengguna berdasarkan id:", error);
@@ -447,6 +449,32 @@ export const GetUserByKode = async (req, res) => {
 
 export const ChangePassword = async (req, res) => {
     const { id, password } = req.body;
+    const minLengthRegex = /^.{8,}$/;
+    const uppercaseRegex = /[A-Z]/;
+    const lowercaseRegex = /[a-z]/;
+    const digitRegex = /\d/;
+
+    let errorMessage = "Password harus terdiri dari setidaknya 8 karakter";
+
+    if (!minLengthRegex.test(password)) {
+        errorMessage += ", memiliki panjang minimal 8 karakter";
+    }
+
+    if (!uppercaseRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu huruf besar";
+    }
+
+    if (!lowercaseRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu huruf kecil";
+    }
+
+    if (!digitRegex.test(password)) {
+        errorMessage += ", mengandung setidaknya satu angka";
+    }
+
+    if (errorMessage !== "Password harus terdiri dari setidaknya 8 karakter") {
+        return res.status(400).json({ message: errorMessage });
+    }
     try {
         const user = await Akun.findOne({ where: { id } });
         const hashPassword = await argon2.hash(password);

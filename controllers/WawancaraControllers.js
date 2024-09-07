@@ -475,7 +475,7 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
             return res.status(400).json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" })
         }
         if (change < 0) {
-            return res.status(400).json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 100" })
+            return res.status(400).json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" })
         }
 
         CariNilaiWawancara.nilai = change;

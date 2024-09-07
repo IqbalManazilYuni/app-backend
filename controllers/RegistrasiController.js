@@ -64,13 +64,18 @@ export const RegisterUser = async (req, res) => {
         angkatan,
         nama_file,
     } = req.body;
+    const minLengthRegexnim = /^.{10,}$/;
     const minLengthRegex = /^.{8,}$/;
     const uppercaseRegex = /[A-Z]/;
     const lowercaseRegex = /[a-z]/;
     const digitRegex = /\d/;
 
-    let errorMessage = "Password harus terdiri dari setidaknya 8 karakter";
+    let errorMessage = "Password harus terdiri dari 8 karakter";
+    let errorMessagenim = "Nim harus terdiri dari 10 karakter";
 
+    if (!minLengthRegexnim.test(nim)) {
+        return res.status(400).json({ message: errorMessagenim });
+    }
     if (!minLengthRegex.test(password)) {
         errorMessage += ", memiliki panjang minimal 8 karakter";
     }
@@ -87,7 +92,7 @@ export const RegisterUser = async (req, res) => {
         errorMessage += ", mengandung setidaknya satu angka";
     }
 
-    if (errorMessage !== "Password harus terdiri dari setidaknya 8 karakter") {
+    if (errorMessage !== "Password harus terdiri dari 8 karakter") {
         return res.status(400).json({ message: errorMessage });
     }
     try {
@@ -224,6 +229,8 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             angkatan: mahasiswa.angkatan,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
+        console.log(formattedUser);
+
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUser });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan nim:", error);

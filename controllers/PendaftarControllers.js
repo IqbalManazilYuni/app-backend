@@ -219,6 +219,8 @@ export const GetPendaftarLabByID = async (req, res) => {
 
 export const GetPendaftarByNIM = async (req, res) => {
     const { nim, idRecruitment } = req.body;
+    console.log(nim);
+
     try {
         const idUser = await Akun.findOne({ where: { nim } });
         const mahasiswaId = await User.findOne({ where: { idAkun: idUser.id } })
@@ -232,6 +234,8 @@ export const GetPendaftarByNIM = async (req, res) => {
             note: pendaftar.note,
             Status_Pendaftar: pendaftar.Status_Pendaftar,
         };
+        console.log(payload);
+
         return res.status(200).json({ code: 200, status: "success", data: payload });
     } catch (error) {
         return res.status(500).json({ status: "Error", code: 500, message: "Error Saat Mengambil Pendaftar", error });
