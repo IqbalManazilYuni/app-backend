@@ -37,11 +37,20 @@ export const GetWawancaraById = async (req, res) => {
     const { id } = req.params;
     try {
         const wawancara = await Wawancara.findOne({ where: { id } });
-        const payload = {
-            nama_wawancara: wawancara.nama_wawancara,
-            tanggal_terakhir_pengajuan: new Date(wawancara.tanggal_terakhir_pengajuan).toLocaleString(),
+        if(wawancara.tanggal_terakhir_pengajuan === null){
+            const payload = {
+                nama_wawancara: wawancara.nama_wawancara,
+                tanggal_terakhir_pengajuan: null,
+            }
+            return res.status(200).json({ code: 200, status: "success", message: "Wawancara Ditemukan", data: payload });
+        } else {
+            const payload = {
+                nama_wawancara: wawancara.nama_wawancara,
+                tanggal_terakhir_pengajuan: new Date(wawancara.tanggal_terakhir_pengajuan).toLocaleString(),
+            }
+            return res.status(200).json({ code: 200, status: "success", message: "Wawancara Ditemukan", data: payload });
         }
-        return res.status(200).json({ code: 200, status: "success", message: "Wawancara Ditemukan", data: payload });
+       
     } catch (error) {
         console.error("Terjadi Kesalahan Saat saat proses mengambil wawancara:", error);
         res.status(500).json({ code: 500, status: "error", message: "Terjadi kesalahan saat proses mengambil wawancara." });
@@ -81,19 +90,21 @@ export const CreatePesertaWawancara = async (req, res) => {
     const { idWawancara, idPendaftar, lokasi, jadwal_mulai, jadwal_selesai, metode_wawancara, jadwalPengajuanTerakhir } = req.body;
     try {
         const pendaftar = await PesertaWawancara.findOne({ where: { idPendaftar } });
+        const wawancaraid = await Wawancara.findOne({ where:{id: idWawancara}})
+        const tahapanid = await Tahapan.findOne({ where: { id: wawancaraid.idTahapan}})
+        const getwaktuclose = await Recruitment.findOne({ where: { id: tahapanid.idRecruitment}})
         if (pendaftar) {
             return res.status(404).json({ code: 404, status: "Found", message: "Pendaftar Sudah Terdaftar pada Peserta Wawancara" });
         }
         const mulai = new Date(jadwal_mulai);
         const selesai = new Date(jadwal_selesai);
         const tanggalSekarang = new Date();
-        const jadwalPengajuan = new Date(jadwalPengajuanTerakhir)
-        const minimumMulai = new Date(jadwalPengajuan.getTime() + 24 * 60 * 60 * 1000);
-        if (mulai < minimumMulai) {
-            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara harus setidaknya 24 jam setelah Jadwal Pengajuan" });
-        }
-        if (mulai < jadwalPengajuan) {
-            return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara tidak boleh sebelum Jadwal Pengajuan" });
+        const tutupRecruitment = new Date(getwaktuclose.tanggal_tutup);
+        if(wawancaraid.tanggal_terakhir_pengajuan === null){
+            const jadwalPengajuan = new Date(mulai);
+            jadwalPengajuan.setDate(mulai.getDate() - 1);
+            wawancaraid.tanggal_terakhir_pengajuan = jadwalPengajuan
+            await wawancaraid.save();
         }
         if (tanggalSekarang > mulai) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Mulai Wawancara tidak boleh di masa lalu" });
@@ -101,6 +112,13 @@ export const CreatePesertaWawancara = async (req, res) => {
         if (selesai <= mulai) {
             return res.status(400).json({ code: 400, status: "error", message: "Jadwal Selesai Wawancara harus setelah Jadwal Mulai Wawancara" });
         }
+        if (mulai < tutupRecruitment) {
+            return res.status(400).json({
+              code: 400,
+              status: "error",
+              message: "Jadwal Mulai Wawancara Invalid",
+            });
+          }
         await PesertaWawancara.create({
             idWawancara,
             idPendaftar,
@@ -109,6 +127,7 @@ export const CreatePesertaWawancara = async (req, res) => {
             jadwal_selesai,
             metode_wawancara,
         })
+
         res.status(201).json({ code: 201, status: "success", message: "Peserta Wawancara Berhasil ditambahkan" });
     } catch (error) {
         console.error("Terjadi Kesalahan Saat saat proses mendaftarkan peserta wawancara:", error);

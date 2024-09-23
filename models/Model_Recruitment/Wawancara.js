@@ -28,7 +28,7 @@ const Wawancara = db.define('Wawancara', {
     // }
     tanggal_terakhir_pengajuan: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
     },
     durasi_persesi: {
         type: DataTypes.INTEGER,

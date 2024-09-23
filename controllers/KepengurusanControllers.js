@@ -70,7 +70,7 @@ export const GetKepengurusanById = async (req, res) => {
 };
 
 export const EditKepengurusan = async (req, res) => {
-    const { id, nama_kepengurusan, tahun, idLabor, generasi_kepengurusan } = req.body;
+    const { id, nama_kepengurusan, tahun, idLabor, generasi_kepengurusan, status } = req.body;
     try {
         const kepengurusan = await Kepengurusan.findOne({ where: { id } });
         if (!kepengurusan) {
@@ -87,6 +87,7 @@ export const EditKepengurusan = async (req, res) => {
         kepengurusan.tahun = tahun;
         kepengurusan.idLabor = idLabor;
         kepengurusan.generasi_kepengurusan = generasi_kepengurusan;
+        kepengurusan.status = status;
         await kepengurusan.save();
         return res.status(200).json({ code: 200, status: "success", message: "Kepengurusan berhasil diperbarui" });
     } catch (error) {

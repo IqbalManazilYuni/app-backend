@@ -64,9 +64,10 @@ export const EditKegiatan = async (req, res) => {
     const { id, nama_kegiatan, status, tahun } = req.body;
     try {
         const kegiatan = await Kegiatan.findOne({ where: { id } });
-        kegiatan.nama_kegiatan = nama_kegiatan
-        kegiatan.status = status,
-            kegiatan.tahun = tahun,
+            kegiatan.nama_kegiatan = nama_kegiatan
+            kegiatan.status = status
+            kegiatan.tahun = tahun
+            kegiatan.status = status
             await kegiatan.save();
         return res.status(200).json({ code: 200, status: "success", message: "Kegiatan Berhasil Diperbarui" });
     } catch (error) {

@@ -308,7 +308,6 @@ export const GetUjianTimeByNIM = async (req, res) => {
             });
             return Promise.all(tahapanPromises);
         });
-
         const ujianData = (await Promise.all(ujianPromises)).flat().filter(item => item !== undefined);
         return res.status(200).json({ code: 200, status: "success", data: ujianData });
     } catch (error) {

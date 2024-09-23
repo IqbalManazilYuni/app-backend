@@ -144,7 +144,7 @@ export const LoginWeb = async (req, res) => {
         }
         if (user.AksesRole !== "Super Admin") {
             if (mahasiswa.jenisPengguna !== "Asisten") {
-                return res.status(404).json({ message: `${user.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
+                return res.status(404).json({ message: `${mahasiswa.jenisPengguna} Tidak Memiliki Akses Ke Dashboard Admin` });
             }
         }
         if (user.AksesRole !== "Super Admin") {

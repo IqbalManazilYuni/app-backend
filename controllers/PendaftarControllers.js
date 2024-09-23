@@ -304,7 +304,8 @@ export const CetakLaporan = async (req, res) => {
         const payload = {
             akunAsisten,
             getLabor,
-            pendaftarWithAkun
+            pendaftarWithAkun,
+            status
         };
         return res.status(200).json({ code: 200, status: "success", data: payload })
     } catch (error) {
