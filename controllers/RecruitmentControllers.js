@@ -376,7 +376,6 @@ export const GetAllDataRecruitment = async (req, res) => {
     );
     const dataTahapan = await Promise.all(
       recruitmentIds.map(async (idRecruitment) => {
-        // Mengambil semua data tahapan berdasarkan idRecruitment
         const tahapan = await Tahapan.findAll({
           where: {
             idRecruitment: idRecruitment,
@@ -415,7 +414,7 @@ export const GetAllDataRecruitment = async (req, res) => {
                     });
                     const userDetailForEssay = await User.findOne({
                       where: {
-                        id: peserta.idUsers, 
+                        id: peserta.idUsers,
                       },
                       attributes: ["idAkun"],
                     });
@@ -439,8 +438,8 @@ export const GetAllDataRecruitment = async (req, res) => {
                     });
                     return {
                       ...peserta.dataValues,
-                      namaAkun: akunDetail.nama, 
-                      penanggungJawabEssay: akunDetailForEssay.nama, 
+                      namaAkun: akunDetail.nama,
+                      penanggungJawabEssay: akunDetailForEssay.nama,
                     };
                   })
                 );
@@ -499,7 +498,15 @@ export const GetAllDataRecruitment = async (req, res) => {
                           where: {
                             idPesertaWawancara: peserta.id,
                           },
-                          attributes: ["idUsers", "nilai", "keterangan"],
+                          attributes: [
+                            "idUsers",
+                            "nilai_komitmen",
+                            "nilai_sikap",
+                            "nilai_percaya_diri",
+                            "nilai_kejelasan_jawaban",
+                            "nilai_konsisten_jawaban",
+                            "keterangan",
+                          ],
                         })
                       ).map(async (nilai) => {
                         const pewawancaraUserDetail = await User.findOne({
