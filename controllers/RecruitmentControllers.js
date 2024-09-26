@@ -398,6 +398,12 @@ export const GetAllDataRecruitment = async (req, res) => {
                 ],
               });
               if (ujianDetail) {
+                const formattedJadwalMulai = new Date(
+                  ujianDetail.jadwal_mulai
+                ).toLocaleString();
+                const formattedJadwalSelesai = new Date(
+                  ujianDetail.jadwal_selesai
+                ).toLocaleString();
                 const pesertaUjian = await PesertaUjian.findAll({
                   where: {
                     idUjian: ujianDetail.id,
@@ -410,7 +416,7 @@ export const GetAllDataRecruitment = async (req, res) => {
                       where: {
                         id: peserta.idPendaftar,
                       },
-                      attributes: ["idUsers"],
+                      attributes: ["idUsers", "Status_Pendaftar"],
                     });
                     const userDetailForEssay = await User.findOne({
                       where: {
@@ -440,11 +446,14 @@ export const GetAllDataRecruitment = async (req, res) => {
                       ...peserta.dataValues,
                       namaAkun: akunDetail.nama,
                       penanggungJawabEssay: akunDetailForEssay.nama,
+                      statusPendaftar:pendaftarDetail.Status_Pendaftar
                     };
                   })
                 );
                 detail = {
                   ...ujianDetail.dataValues,
+                  jadwal_mulai: formattedJadwalMulai,
+                  jadwal_selesai: formattedJadwalSelesai,
                   pesertaUjian: pesertaWithDetails,
                 };
               }
@@ -470,10 +479,8 @@ export const GetAllDataRecruitment = async (req, res) => {
                     "jadwal_selesai",
                   ],
                 });
-
                 const pesertaWithDetails = await Promise.all(
                   pesertaWawancara.map(async (peserta) => {
-                    // Ambil detail pendaftar
                     const pendaftarDetail = await Pendaftar.findOne({
                       where: {
                         id: peserta.idPendaftar,
@@ -552,7 +559,6 @@ export const GetAllDataRecruitment = async (req, res) => {
         };
       })
     );
-    console.log("ayam");
     const recruitmentWithDetailedTahapan = getAllRecruitment.map(
       (recruitment) => {
         const tahapanData = dataTahapan.find(
@@ -565,5 +571,13 @@ export const GetAllDataRecruitment = async (req, res) => {
       }
     );
     console.log(JSON.stringify(recruitmentWithDetailedTahapan));
-  } catch (error) {}
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      payload: recruitmentWithDetailedTahapan,
+    });
+  } catch (error) {
+    return res.status(500).json({ code: 500, status: "error", message: error });
+  }
 };

@@ -86,7 +86,7 @@ export const CreatePendaftar = async (req, res) => {
       });
     }
     const kegiatanOr = await Kegiatan.findOne({
-      where: { id: idKegiatan } ,
+      where: { id: idKegiatan },
       transaction,
     });
     const tahunkegiatan = Number(kegiatanOr.tahun);
@@ -462,5 +462,25 @@ export const CetakLaporan = async (req, res) => {
       message: "Error Saat Mengambil Data Laporan",
       error,
     });
+  }
+};
+
+export const UbahStatusPendaftar = async (req, res) => {
+  const { idPendaftar, Status_Pendaftar } = req.body;
+  try {
+    const dataPendaftar = await Pendaftar.findOne({
+      where: {
+        id: idPendaftar,
+      },
+    });
+    dataPendaftar.Status_Pendaftar = Status_Pendaftar;
+    await dataPendaftar.save();
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      message: "Status Pendaftar Berhasil Diperbarui",
+    });
+  } catch (error) {
+    return res.status(500).json({ code: 500, status: "error", message: error });
   }
 };
