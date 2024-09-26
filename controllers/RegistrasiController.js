@@ -208,7 +208,7 @@ export const GetUserByNimRegistrasi = async (req, res) => {
                 attributes: { exclude: ['createdAt', 'updatedAt'] }
             });
             if (dataPendaftar.length > 0) {
-                status = dataPendaftar[0].Status_Pendaftar; // Mengakses elemen pertama dari array
+                status = dataPendaftar[0].Status_Pendaftar; 
             }
         }
         const labor = await Labor.findByPk(mahasiswa.idLabor);
@@ -231,8 +231,8 @@ export const GetUserByNimRegistrasi = async (req, res) => {
             angkatan: mahasiswa.angkatan,
             nama_Labor: labor ? labor.nama_Labor : null,
         };
+        console.log("Ayam");
         console.log(formattedUser);
-        
         return res.status(200).json({ code: 200, status: "success", message: "Data Ditemukan", formattedUser });
     } catch (error) {
         console.error("Error saat mengambil pengguna berdasarkan nim:", error);
