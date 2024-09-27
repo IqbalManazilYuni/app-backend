@@ -40,7 +40,6 @@ export const CreateTahapan = async (req, res) => {
       kode_ujian,
       jadwal_mulai,
       jadwal_selesai,
-      tanggal_terakhir_pengajuan,
     } = req.body;
     try {
       const getWaktuRecruitment = await Recruitment.findOne({

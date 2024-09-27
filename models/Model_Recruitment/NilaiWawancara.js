@@ -41,12 +41,17 @@ const NilaiWawancara = db.define(
       allowNull: true,
       defaultValue: 0,
     },
-    nilai_kejelasan_jawaban: {
+    nilai_motivasi: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
     },
-    nilai_konsisten_jawaban: {
+    nilai_problem_solving: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    nilai_kemampuan_berbicara: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,

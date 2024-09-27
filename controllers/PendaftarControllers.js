@@ -189,6 +189,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
         "JenisKelamin",
         "idAkun",
         "nama_file",
+        "angkatan"
       ],
     });
 
@@ -219,6 +220,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
               alamat: peserta.alamat,
               nama_file: peserta.nama_file,
               nomor_hp: peserta.nomor_hp,
+              angkatan:peserta.angkatan,
               JenisKelamin: peserta.JenisKelamin,
               nama: akunMahasiswa.nama,
               nim: akunMahasiswa.nim,
@@ -297,7 +299,12 @@ export const GetPendaftarLabByID = async (req, res) => {
     for (const recruitment of recruitmentLab) {
       const pendaftarList = await Pendaftar.findAll({
         where: { idRecruitment: recruitment.id },
-        attributes: ["idRecruitment", "idUsers", "tanggal_daftar"],
+        attributes: [
+          "idRecruitment",
+          "idUsers",
+          "tanggal_daftar",
+          "Status_Pendaftar",
+        ],
       });
       const pendaftar = [];
       for (const pend of pendaftarList) {
@@ -313,6 +320,7 @@ export const GetPendaftarLabByID = async (req, res) => {
           nim: akunUser.nim,
           email: akunUser.email,
           tanggal_daftar: pend.tanggal_daftar,
+          Status_Pendaftar: pend.Status_Pendaftar,
         });
       }
       result.push({
@@ -321,6 +329,8 @@ export const GetPendaftarLabByID = async (req, res) => {
         pendaftar: pendaftar,
       });
     }
+    console.log(JSON.stringify(result));
+
     return res.status(200).json({ code: 200, status: "success", data: result });
   } catch (error) {
     return res.status(500).json({

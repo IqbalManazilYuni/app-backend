@@ -150,7 +150,6 @@ export const CreatePesertaWawancara = async (req, res) => {
     jadwal_mulai,
     jadwal_selesai,
     metode_wawancara,
-    jadwalPengajuanTerakhir,
   } = req.body;
   try {
     const pendaftar = await PesertaWawancara.findOne({
@@ -174,11 +173,20 @@ export const CreatePesertaWawancara = async (req, res) => {
     const selesai = new Date(jadwal_selesai);
     const tanggalSekarang = new Date();
     const tutupRecruitment = new Date(getwaktuclose.tanggal_tutup);
-    if (wawancaraid.tanggal_terakhir_pengajuan === null) {
-      const jadwalPengajuan = new Date(mulai);
-      jadwalPengajuan.setDate(mulai.getDate() - 1);
-      wawancaraid.tanggal_terakhir_pengajuan = jadwalPengajuan;
-      await wawancaraid.save();
+    const tanggalPengajuanTerakhir = new Date(
+      wawancaraid.tanggal_terakhir_pengajuan
+    );
+    const oneDayAfterPengajuan = new Date(tanggalPengajuanTerakhir);
+    oneDayAfterPengajuan.setDate(oneDayAfterPengajuan.getDate() + 1);
+    if (mulai >= oneDayAfterPengajuan) {
+      console.log("Mulai is at least one day after the last submission date.");
+    } else {
+      return res.status(400).json({
+        code: 400,
+        status: "Bad Request",
+        message:
+          "Mulai harus minimal 1 hari setelah tanggal pengajuan terakhir.",
+      });
     }
     if (tanggalSekarang > mulai) {
       return res.status(400).json({
@@ -774,8 +782,9 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
     nilai_komitmen,
     nilai_sikap,
     nilai_percaya_diri,
-    nilai_kejelasan_jawaban,
-    nilai_konsisten_jawaban,
+    nilai_motivasi,
+    nilai_problem_solving,
+    nilai_kemampuan_berbicara,
     keterangan,
   } = req.body;
   try {
@@ -792,45 +801,56 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
         .json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" });
     }
     const change1 = Number(nilai_sikap);
-    if (change > 100) {
+    if (change1 > 100) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" });
     }
-    if (change < 0) {
+    if (change1 < 0) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" });
     }
     const change2 = Number(nilai_percaya_diri);
-    if (change > 100) {
+    if (change2 > 100) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" });
     }
-    if (change < 0) {
+    if (change2 < 0) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" });
     }
-    const change3 = Number(nilai_kejelasan_jawaban);
-    if (change > 100) {
+    const change3 = Number(nilai_motivasi);
+    if (change3 > 100) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" });
     }
-    if (change < 0) {
+    if (change3 < 0) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" });
     }
-    const change4 = Number(nilai_konsisten_jawaban);
-    if (change > 100) {
+    const change4 = Number(nilai_problem_solving);
+    if (change4 > 100) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" });
     }
-    if (change < 0) {
+    if (change4 < 0) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" });
+    }
+    const change5 = Number(nilai_kemampuan_berbicara);
+    if (change5 > 100) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Nilai Tidak Boleh Lebih Dari 100" });
+    }
+    if (change5 < 0) {
       return res
         .status(400)
         .json({ code: 400, message: "Nilai Tidak Boleh Kurang Dari 0" });
@@ -838,8 +858,9 @@ export const UpdateNilaiWawancaraPeserta = async (req, res) => {
     CariNilaiWawancara.nilai_komitmen = change;
     CariNilaiWawancara.nilai_sikap = change1;
     CariNilaiWawancara.nilai_percaya_diri = change2;
-    CariNilaiWawancara.nilai_kejelasan_jawaban = change3;
-    CariNilaiWawancara.nilai_konsisten_jawaban= change4;
+    CariNilaiWawancara.nilai_motivasi = change3;
+    CariNilaiWawancara.nilai_problem_solving = change4;
+    CariNilaiWawancara.nilai_kemampuan_berbicara = change5;
     CariNilaiWawancara.keterangan = keterangan;
     await CariNilaiWawancara.save();
 

@@ -510,8 +510,9 @@ export const GetAllDataRecruitment = async (req, res) => {
                             "nilai_komitmen",
                             "nilai_sikap",
                             "nilai_percaya_diri",
-                            "nilai_kejelasan_jawaban",
-                            "nilai_konsisten_jawaban",
+                            "nilai_motivasi",
+                            "nilai_problem_solving",
+                            "nilai_kemampuan_berbicara",
                             "keterangan",
                           ],
                         })
