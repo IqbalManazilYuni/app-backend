@@ -214,7 +214,6 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
                 attributes: ["nama_recruitment"],
               }
             );
-
             return {
               id: pendaftar.id,
               alamat: peserta.alamat,
@@ -239,18 +238,13 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
         );
       })
     );
-
-    // Flatten the nested arrays and filter out any null values
     const filteredPayload = payload.flat().filter((p) => p !== null);
-
-    // Structure the response
     const response = {
       status: "success",
       code: 200,
       message: "Pendaftar Ditemukan",
       data: filteredPayload,
     };
-
     return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
