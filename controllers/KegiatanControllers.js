@@ -49,6 +49,7 @@ export const GetKegiatanByID = async (req, res) => {
     try {
         const kegiatan = await Kegiatan.findOne({ where: { id } });
         const payload = {
+            id:kegiatan.id,
             nama_kegiatan: kegiatan.nama_kegiatan,
             status: kegiatan.status,
             tahun: kegiatan.tahun,
