@@ -687,7 +687,7 @@ export const GetWawancaraByIDLaborMobile = async (req, res) => {
         wawancara: pendaftar,
       });
     }
-    console.log(result);
+    console.log(JSON.stringify(result));
     return res.status(200).json({ code: 200, status: "success", data: result });
   } catch (error) {
     console.error(
@@ -740,6 +740,8 @@ export const GetListPesertaWawancaraByIDMobile = async (req, res) => {
         payload.push(pesertaData);
       }
     }
+    console.log(JSON.stringify(payload));
+
     return res
       .status(200)
       .json({ code: 200, status: "success", data: payload });
