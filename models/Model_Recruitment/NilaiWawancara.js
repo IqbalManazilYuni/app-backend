@@ -57,7 +57,7 @@ const NilaiWawancara = db.define(
       defaultValue: 0,
     },
     keterangan: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT("long"),
       allowNull: true,
     },
   },
