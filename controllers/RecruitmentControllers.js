@@ -275,21 +275,26 @@ export const EditRecruitment = async (req, res) => {
     const filterexistingRecruitments = existingRecruitments.filter(
       (recruitment) => recruitment.id !== id
     );
-    for (let recruitment of filterexistingRecruitments) {
-      const existingTanggalBuka = new Date(recruitment.tanggal_buka);
-      const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
+    if (
+      recruitment.tanggal_buka.getTime() !== tanggalbuka.getTime() ||
+      recruitment.tanggal_tutup.getTime() !== tanggaltutup.getTime()
+    ) {
+      for (let recruitment of filterexistingRecruitments) {
+        const existingTanggalBuka = new Date(recruitment.tanggal_buka);
+        const existingTanggalTutup = new Date(recruitment.tanggal_tutup);
 
-      if (
-        (tanggalbuka >= existingTanggalBuka &&
-          tanggalbuka <= existingTanggalTutup) ||
-        tanggalbuka < existingTanggalBuka
-      ) {
-        return res.status(400).json({
-          code: 400,
-          status: "error",
-          message:
-            "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada.",
-        });
+        if (
+          (tanggalbuka >= existingTanggalBuka &&
+            tanggalbuka <= existingTanggalTutup) ||
+          tanggalbuka < existingTanggalBuka
+        ) {
+          return res.status(400).json({
+            code: 400,
+            status: "error",
+            message:
+              "Jadwal Buka Invalid karena bentrok dengan jadwal recruitment yang sudah ada.",
+          });
+        }
       }
     }
     recruitment.tanggal_buka = tanggal_buka;
@@ -446,7 +451,7 @@ export const GetAllDataRecruitment = async (req, res) => {
                       ...peserta.dataValues,
                       namaAkun: akunDetail.nama,
                       penanggungJawabEssay: akunDetailForEssay.nama,
-                      statusPendaftar:pendaftarDetail.Status_Pendaftar
+                      statusPendaftar: pendaftarDetail.Status_Pendaftar,
                     };
                   })
                 );

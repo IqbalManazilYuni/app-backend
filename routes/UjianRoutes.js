@@ -39,7 +39,7 @@ router.post('/edit-pesertaujian', verifyToken, UpdatePenganggungJawab);
 router.post('/update-status-ujian', verifyToken, UpdateStatusUjianRecruitment);
 router.post('/cekkodeujian', verifyToken, CekKodeUjian);
 router.post('/postnilaijawabanessay', verifyToken, EditNilaiJawabanEssay);
-router.get('/postambilnilaicalon/:idPendaftarString', verifyToken, GetNilaiUjianCalonAsisten)
+router.post('/postambilnilaicalon', verifyToken, GetNilaiUjianCalonAsisten)
 router.post('/create-jawaban-user', verifyToken, CreateJawabanUjian)
 router.delete('/delete-pesertaujian/:id', verifyToken, DeletePesertaUjian)
 router.post('/konfirmasikesedian', verifyToken, KirimPengajuanUjian);

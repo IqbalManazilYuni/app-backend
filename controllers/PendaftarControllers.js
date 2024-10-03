@@ -189,7 +189,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
         "JenisKelamin",
         "idAkun",
         "nama_file",
-        "angkatan"
+        "angkatan",
       ],
     });
 
@@ -197,7 +197,6 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
       mahasiswaList.map(async (peserta) => {
         const pendaftarList = await Pendaftar.findAll({
           where: { idUsers: peserta.id },
-          attributes: { exclude: ["createdAt", "updatedAt"] },
         });
 
         if (pendaftarList.length === 0) {
@@ -219,7 +218,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
               alamat: peserta.alamat,
               nama_file: peserta.nama_file,
               nomor_hp: peserta.nomor_hp,
-              angkatan:peserta.angkatan,
+              angkatan: peserta.angkatan,
               JenisKelamin: peserta.JenisKelamin,
               nama: akunMahasiswa.nama,
               nim: akunMahasiswa.nim,
@@ -298,6 +297,7 @@ export const GetPendaftarLabByID = async (req, res) => {
           "idUsers",
           "tanggal_daftar",
           "Status_Pendaftar",
+          "alasan",
         ],
       });
       const pendaftar = [];
@@ -315,6 +315,7 @@ export const GetPendaftarLabByID = async (req, res) => {
           email: akunUser.email,
           tanggal_daftar: pend.tanggal_daftar,
           Status_Pendaftar: pend.Status_Pendaftar,
+          alasan: pend.alasan,
         });
       }
       result.push({
