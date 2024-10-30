@@ -828,8 +828,6 @@ export const GetNilaiUjianCalonAsisten = async (req, res) => {
         nilai_multiple: rata_rata_multiple,
       });
     }
-    console.log(nilaiCalonAsisten);
-
     return res
       .status(200)
       .json({ code: 200, status: "success", payload: nilaiCalonAsisten });

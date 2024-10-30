@@ -10,6 +10,7 @@ import NilaiWawancara from "../models/Model_Recruitment/NilaiWawancara.js";
 import PesertaUjian from "../models/Model_Recruitment/PesertaUjian.js";
 import User from "../models/Model_User/Users.js";
 import Akun from "../models/Model_User/Akun.js";
+import JawabanUjian from "../models/Model_Recruitment/JawabanUjian.js";
 
 export const CreateRecruitment = async (req, res) => {
   const {
@@ -402,6 +403,7 @@ export const GetAllDataRecruitment = async (req, res) => {
                   "jadwal_selesai",
                 ],
               });
+
               if (ujianDetail) {
                 const formattedJadwalMulai = new Date(
                   ujianDetail.jadwal_mulai
@@ -409,52 +411,97 @@ export const GetAllDataRecruitment = async (req, res) => {
                 const formattedJadwalSelesai = new Date(
                   ujianDetail.jadwal_selesai
                 ).toLocaleString();
+
                 const pesertaUjian = await PesertaUjian.findAll({
-                  where: {
-                    idUjian: ujianDetail.id,
-                  },
-                  attributes: ["id", "idPendaftar", "nilaiUjian", "idUsers"],
+                  where: { idUjian: ujianDetail.id },
+                  attributes: ["id", "idPendaftar", "idUsers"],
                 });
-                const pesertaWithDetails = await Promise.all(
+
+                const pesertaWithJawaban = await Promise.all(
                   pesertaUjian.map(async (peserta) => {
-                    const pendaftarDetail = await Pendaftar.findOne({
-                      where: {
-                        id: peserta.idPendaftar,
-                      },
-                      attributes: ["idUsers", "Status_Pendaftar"],
+                    const jawabanPeserta = await JawabanUjian.findAll({
+                      where: { idPesertaUjian: peserta.id },
+                      attributes: ["id", "tipe_soal", "nilai"],
                     });
-                    const userDetailForEssay = await User.findOne({
-                      where: {
-                        id: peserta.idUsers,
-                      },
-                      attributes: ["idAkun"],
+
+                    // Inisialisasi variabel untuk perhitungan
+                    let nilai_multiple = 0,
+                      jumlah_multiple = 0;
+                    let nilai_essay = 0,
+                      jumlah_essay = 0;
+
+                    // Menghitung nilai dan jumlah tiap tipe soal
+                    jawabanPeserta.forEach((jawaban) => {
+                      if (jawaban.tipe_soal === "Multiple") {
+                        nilai_multiple += jawaban.nilai;
+                        jumlah_multiple++;
+                      } else if (jawaban.tipe_soal === "Essay") {
+                        nilai_essay += jawaban.nilai;
+                        jumlah_essay++;
+                      }
                     });
-                    const akunDetailForEssay = await Akun.findOne({
-                      where: {
-                        id: userDetailForEssay.idAkun,
-                      },
-                      attributes: ["nama"],
-                    });
-                    const userDetail = await User.findOne({
-                      where: {
-                        id: pendaftarDetail.idUsers,
-                      },
-                      attributes: ["idAkun"],
-                    });
-                    const akunDetail = await Akun.findOne({
-                      where: {
-                        id: userDetail.idAkun,
-                      },
-                      attributes: ["nama"],
-                    });
+
+                    // Menghitung rata-rata nilai untuk setiap tipe soal
+                    let rata_rata_essay =
+                      jumlah_essay > 0
+                        ? (nilai_essay / jumlah_essay).toFixed(2)
+                        : 0;
+                    let rata_rata_multiple =
+                      jumlah_multiple > 0
+                        ? ((nilai_multiple / jumlah_multiple) * 10).toFixed(2)
+                        : 0;
+
+                    // Menghitung total dan rata-rata gabungan
+                    let total =
+                      parseFloat(rata_rata_essay) +
+                      parseFloat(rata_rata_multiple);
+
+                    let rata = total !== 0 ? (total / 2).toFixed(2) : total;
+
                     return {
                       ...peserta.dataValues,
+                      nilaiUjian: rata, // Menyimpan nilai ujian
+                      jawaban: jawabanPeserta,
+                    };
+                  })
+                );
+
+                const pesertaWithDetails = await Promise.all(
+                  pesertaWithJawaban.map(async (peserta) => {
+                    const pendaftarDetail = await Pendaftar.findOne({
+                      where: { id: peserta.idPendaftar },
+                      attributes: ["idUsers", "Status_Pendaftar"],
+                    });
+
+                    const userDetailForEssay = await User.findOne({
+                      where: { id: peserta.idUsers },
+                      attributes: ["idAkun"],
+                    });
+
+                    const akunDetailForEssay = await Akun.findOne({
+                      where: { id: userDetailForEssay.idAkun },
+                      attributes: ["nama"],
+                    });
+
+                    const userDetail = await User.findOne({
+                      where: { id: pendaftarDetail.idUsers },
+                      attributes: ["idAkun"],
+                    });
+
+                    const akunDetail = await Akun.findOne({
+                      where: { id: userDetail.idAkun },
+                      attributes: ["nama"],
+                    });
+
+                    return {
+                      ...peserta,
                       namaAkun: akunDetail.nama,
                       penanggungJawabEssay: akunDetailForEssay.nama,
                       statusPendaftar: pendaftarDetail.Status_Pendaftar,
                     };
                   })
                 );
+
                 detail = {
                   ...ujianDetail.dataValues,
                   jadwal_mulai: formattedJadwalMulai,
@@ -576,8 +623,6 @@ export const GetAllDataRecruitment = async (req, res) => {
         };
       }
     );
-    console.log(JSON.stringify(recruitmentWithDetailedTahapan));
-
     return res.status(200).json({
       code: 200,
       status: "success",
