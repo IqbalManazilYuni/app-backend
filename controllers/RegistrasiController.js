@@ -3,7 +3,7 @@ import Labor from "../models/Model_Kepengurusan/Labor.js";
 import User from "../models/Model_User/Users.js";
 import dotenv from "dotenv";
 import storage from "../config/firebase.config.js";
-import { ref, getDownloadURL } from "firebase/storage";
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import nodemailer from "nodemailer";
 import "dotenv/config";
 import crypto from "crypto";
@@ -45,6 +45,21 @@ export const PreviewPDF = async (req, res) => {
     return res.status(500).json({ message: "Failed to download PDF" });
   }
 };
+const uploadToFirebase = async (file) => {
+  const fileName = `${file.originalname}`;
+  const storageRef = ref(storage, `cv/${fileName}`);
+  const metadata = {
+    contentType: file.mimetype,
+    contentDisposition: "inline",
+  };
+  try {
+    await uploadBytes(storageRef, file.buffer, metadata);
+    console.log("File uploaded successfully");
+  } catch (error) {
+    console.error("Failed to upload file:", error);
+    throw new Error("Gagal mengunggah file: " + error.message);
+  }
+};
 
 export const RegisterUser = async (req, res) => {
   const {
@@ -64,51 +79,6 @@ export const RegisterUser = async (req, res) => {
     angkatan,
     nama_file,
   } = req.body;
-  const minLengthRegexnim = /^.{10,}$/;
-  const minLengthPassword = /^.{8,}$/;
-  const minLengthAngkatan = /^.{4,}$/;
-  const uppercaseRegex = /[A-Z]/;
-  const lowercaseRegex = /[a-z]/;
-  const digitRegex = /\d/;
-  const numericRegex = /^\d+$/;
-
-  let errorMessage = "Password harus terdiri dari 8 karakter";
-  let errorMessagenim = "NIM harus terdiri dari 10 karakter";
-  // Validasi NIM
-  if (!minLengthRegexnim.test(nim)) {
-    return res.status(400).json({ message: errorMessagenim });
-  }
-
-  // Validasi Password
-  if (!minLengthPassword.test(password)) {
-    errorMessage += ", memiliki panjang minimal 8 karakter";
-  }
-  if (!uppercaseRegex.test(password)) {
-    errorMessage += ", mengandung setidaknya satu huruf besar";
-  }
-  if (!lowercaseRegex.test(password)) {
-    errorMessage += ", mengandung setidaknya satu huruf kecil";
-  }
-  if (!digitRegex.test(password)) {
-    errorMessage += ", mengandung setidaknya satu angka";
-  }
-
-  // Jika ada error terkait password, kembalikan respons
-  if (errorMessage !== "Password harus terdiri dari 8 karakter") {
-    return res.status(400).json({ message: errorMessage });
-  }
-
-  // Validasi Angkatan
-  if (!numericRegex.test(angkatan)) {
-    return res
-      .status(400)
-      .json({ message: "Angkatan hanya boleh berupa angka" });
-  }
-  if (!minLengthAngkatan.test(angkatan)) {
-    return res
-      .status(400)
-      .json({ message: "Angkatan harus terdiri dari minimal 4 angka" });
-  }
   try {
     const existingUser = await Akun.findOne({ where: { nim } });
     if (existingUser) {
@@ -132,6 +102,11 @@ export const RegisterUser = async (req, res) => {
       });
     }
     const hashedPassword = await argon2.hash(password);
+
+    if (req.file) {
+      await uploadToFirebase(req.file);
+    }
+
     const token = crypto.randomBytes(32).toString("hex");
     const createAkun = await Akun.create({
       nama,
