@@ -130,7 +130,7 @@ export const RegisterUser = async (req, res) => {
       alamat,
       nama_file,
     });
-    const link = `https://vwq2vz1x-3000.asse.devtunnels.ms/verifikasi-akun/${token}`;
+    const link = `https://app-admin-new-nine.vercel.app/verifikasi-akun/${token}`;
     if (jenisPengguna === "Calon Asisten") {
       let transporter = nodemailer.createTransport({
         service: "gmail",
