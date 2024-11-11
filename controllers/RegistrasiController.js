@@ -130,7 +130,7 @@ export const RegisterUser = async (req, res) => {
       alamat,
       nama_file,
     });
-    const link = `http://10.44.10.18:3000/verifikasi-akun/${token}`;
+    const link = `https://vwq2vz1x-3000.asse.devtunnels.ms/verifikasi-akun/${token}`;
     if (jenisPengguna === "Calon Asisten") {
       let transporter = nodemailer.createTransport({
         service: "gmail",
@@ -283,7 +283,6 @@ export const EditUserRegistrasi = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log(id);
     const akunmahasiswa = await Akun.findOne({ where: { id: user.idAkun } });
     const existingUserWithNim = await Akun.findOne({ where: { nim } });
     if (akunmahasiswa.nim !== nim) {
@@ -310,6 +309,10 @@ export const EditUserRegistrasi = async (req, res) => {
           .json({ message: "Email Sudah Digunakan Oleh User Lain" });
       }
     }
+    if (req.file) {
+      await uploadToFirebase(req.file);
+    }
+    
     (akunmahasiswa.nama = nama),
       (akunmahasiswa.nim = nim),
       (akunmahasiswa.email = email),

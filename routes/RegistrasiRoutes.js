@@ -22,7 +22,7 @@ router.post('/register/superadmin', RegisterSuperAdmin);
 router.post('/register/getuserbynim', GetUserByNimRegistrasi)
 router.post('/register/getuserbynimwithToken', verifyToken, GetUserByNimRegistrasi)
 router.post('/register/edituser', EditUserRegistrasi)
-router.post('/register/edituserwithtoken', EditUserRegistrasi)
+router.post('/register/edituserwithtoken', upload.single("file"), EditUserRegistrasi)
 router.post('/preview-pdf', verifyToken, PreviewPDF);
 
 export default router;
