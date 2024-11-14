@@ -229,6 +229,7 @@ export const GetListPendaftarByIdLabor = async (req, res) => {
               verifikasi_berkas: pendaftar.verifikasi_berkas,
               note: pendaftar.note,
               file_krs: pendaftar.file_krs,
+              alasan:pendaftar.alasan,
               file_permohonan: pendaftar.file_permohonan,
               idRecruitment: pendaftar.idRecruitment,
               nama_recruitment: recruitment.nama_recruitment,
